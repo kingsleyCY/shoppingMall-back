@@ -3,17 +3,12 @@ var userSchema = new mongoose.Schema({
   created_time: Number,
   weUserInfo: Object, // 绑定的微信信息{avatarUrl、city、country、gender、language、nickName、province}
   openId: String, // 绑定的微信openId
-  recommendId: String, // 推荐人的userId
+  recommendId: { type: String, default: '' }, // 推荐人的userId
+  defaultAddress: { type: String, default: '' },
 }, { collection: "userList" });
 var userModel = db.model("userList", userSchema);
 
-/*exports.creatUser = function (param, callback) {
-  userModel.create(param, function (err, doc) {
-    if (err) throw err
-    callback(doc)
-  })
-}*/
-exports.creatUser = async function (param, callback) {
+exports.creatUser = async function (param) {
   const user = await new Promise((resolve, reject) => {
     userModel.create(param, function (err, doc) {
       if (err) throw err
@@ -23,8 +18,16 @@ exports.creatUser = async function (param, callback) {
   return user
 }
 
-function findUserBykey(keys, value) {
-  return new Promise((resolve, reject) => {
-
+exports.findUser = async function (param) {
+  const user = await new Promise((resolve, reject) => {
+    userModel.findOne(param, function (err, doc) {
+      if (err) throw err
+      if (doc) {
+        resolve(doc)
+      } else {
+        resolve('')
+      }
+    })
   })
+  return user
 }

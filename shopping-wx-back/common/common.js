@@ -12,6 +12,24 @@ var baseCommon = {
     let num1 = Math.floor(Math.random() * 34 + 1);
     let num2 = Math.floor(Math.random() * 34 + 1);
     return (Math.random() * 10000000).toString(16).substr(0, 4) + (en_arr[num1] ? en_arr[num1] : '-') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : '-') + Math.random().toString().substr(2, 5);
+  },
+  /* 判断参数存在性 */
+  judgeParamExists(arr, body) {
+    let flag = true
+    for (let i = 0; i < arr.length; i++) {
+      if (!body[arr[i]]) {
+        flag = false
+      }
+    }
+    return flag
+  },
+  /* 删除对象指定key */
+  deleteKey(obj, arr) {
+    let newObj = JSON.parse(JSON.stringify(obj))
+    for (let i = 0; i < arr.length; i++) {
+      delete newObj[arr[i]]
+    }
+    return newObj
   }
 }
 
@@ -23,4 +41,5 @@ const codeObj = {
   1002: "查询数据库失败，无此项",
   1003: "参数错误",
   1004: "请求错误",
+  1005: "该操作已执行"
 }
