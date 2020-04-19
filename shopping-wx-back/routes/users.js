@@ -14,7 +14,7 @@ router.post('/bindUserInfo', async (ctx) => {
   var content = qs.stringify({
     appid: baseConfig.wx_appid,
     secret: baseConfig.wx_secret,
-    js_code: ctx.request.body.js_code,
+    js_code: ctx.request.body.code,
     grant_type: 'authorization_code'
   });
   const options = 'https://api.weixin.qq.com/sns/jscode2session?' + content;
@@ -36,9 +36,9 @@ router.post('/bindUserInfo', async (ctx) => {
       openId: openid,
       recommendId: ctx.request.body.recommendId || ""
     }
-    var oldUser = await userModel.findUser({ openId: openid })
+    let oldUser = await userModel.findUser({ openId: openid })
     if (!oldUser) {
-      var newUser = await userModel.creatUser(param)
+      let newUser = await userModel.creatUser(param)
       newUser = commons.deleteKey(newUser, ['openId'])
       ctx.body = commons.jsonBack(1, newUser, "");
     } else {

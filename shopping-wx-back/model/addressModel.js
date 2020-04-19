@@ -12,7 +12,8 @@ var addressSchema = new mongoose.Schema({
 }, { collection: "addressList" });
 var addressModel = db.model("addressList", addressSchema);
 
-exports.creatUser = async function (param) {
+exports.creatAddress = async function (param) {
+  await client.incr('addressId');
   const user = await new Promise((resolve, reject) => {
     addressModel.create(param, function (err, doc) {
       if (err) throw err
@@ -20,4 +21,40 @@ exports.creatUser = async function (param) {
     })
   })
   return user
+}
+
+exports.searchAddress = async function (param) {
+  return await new Promise((resolve, reject) => {
+    addressModel.find(param).sort({ '_id': -1 }).exec(function (err, docs) {
+      if (err) throw err
+      resolve(docs)
+    });
+  })
+}
+
+exports.countAll = async function (param) {
+  return await new Promise((resolve, reject) => {
+    addressModel.countDocuments({ userId: param.userId }).exec(function (err, docs) {
+      if (err) throw err
+      resolve(docs)
+    });
+  })
+}
+
+exports.deleAddress = async function (param) {
+  return await new Promise((resolve, reject) => {
+    addressModel.deleteOne(param).exec(function (err, docs) {
+      if (err) throw err
+      resolve(docs)
+    });
+  })
+}
+
+exports.updateAddress = async function (findObj, updateObj) {
+  return await new Promise((resolve, reject) => {
+    addressModel.findOneAndUpdate(findObj, updateObj, { new: true }).exec(function (err, docs) {
+      if (err) throw err
+      resolve(docs)
+    });
+  })
 }
