@@ -21,6 +21,9 @@ router.get('/getIndexData', async (ctx) => {
 })
 
 /* 获取单个商品详情 */
+/*
+* parama：id
+* */
 router.post('/getSingleDetail', async (ctx) => {
   const id = ctx.request.body.id
   var singleDetail = await shoppingModel.findOne({ id })
