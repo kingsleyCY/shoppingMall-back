@@ -1,8 +1,8 @@
 const router = require('koa-router')()
 const https = require('https');
 const qs = require('querystring');
-var baseConfig = require('../common/baseConfig')
-const userModel = require('../model/userModel');
+var baseConfig = require('../../common/baseConfig')
+const userModel = require('../../model/userModel');
 
 /* 绑定用户获取openID */
 /*

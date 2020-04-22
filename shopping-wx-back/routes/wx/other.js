@@ -1,5 +1,5 @@
 const router = require('koa-router')()
-const { suggestModel } = require('../model/suggestModel');
+const { suggestModel } = require('../../model/suggestModel');
 
 /* 获取商品分类配置数据 */
 router.post('/complaintSuggest', async (ctx) => {

@@ -1,5 +1,5 @@
 const router = require('koa-router')()
-const addressModel = require('../model/addressModel');
+const addressModel = require('../../model/addressModel');
 
 /* 添加地址 */
 /*

@@ -1,6 +1,6 @@
 const router = require('koa-router')()
-const { shoppingModel } = require('../model/commodityModel');
-const { baseConfigModel } = require('../model/baseConfigModel')
+const { shoppingModel } = require('../../model/commodityModel');
+const { baseConfigModel } = require('../../model/baseConfigModel')
 
 /* 获取商品分类配置数据 */
 router.get('/getBaseConfig', async (ctx) => {
