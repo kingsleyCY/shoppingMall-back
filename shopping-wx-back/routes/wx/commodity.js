@@ -2,11 +2,16 @@ const router = require('koa-router')()
 const { shoppingModel } = require('../../model/commodityModel');
 const { baseConfigModel } = require('../../model/baseConfigModel')
 
-/* 获取商品分类配置数据 */
-router.get('/getBaseConfig', async (ctx) => {
+/* 获取商品分类及列表 */
+router.get('/getBaseClassify', async (ctx) => {
   var classifyList = await baseConfigModel.findOne({ "classify": "shoppingClassify" })
+  var comClassify = classifyList.content
+  for (let i = 0; i < comClassify.length; i++) {
+    var list = await shoppingModel.find({ "classifyId": String(comClassify[i].id) })
+    comClassify[i].list = list
+  }
   ctx.body = commons.jsonBack(1, {
-    classifyList: classifyList.content
+    classifyList: comClassify
   }, "获取数据成功");
 })
 

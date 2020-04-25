@@ -3,7 +3,7 @@ var shoppingSchema = new mongoose.Schema({
   logo: String,
   detail: String,
   introduction: String,
-  classifyId: String,
+  classifyId: String, // 分类ID
   id: String,
   saleNum: Number,
   consultNum: Number,
