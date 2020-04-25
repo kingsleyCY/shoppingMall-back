@@ -39,10 +39,10 @@ router.post('/bindUserInfo', async (ctx) => {
     let oldUser = await userModel.findUser({ openId: openid })
     if (!oldUser) {
       let newUser = await userModel.creatUser(param)
-      newUser = commons.deleteKey(newUser, ['openId'])
+      // newUser = commons.deleteKey(newUser, ['openId'])
       ctx.body = commons.jsonBack(1, newUser, "");
     } else {
-      oldUser = commons.deleteKey(oldUser, ['openId'])
+      // oldUser = commons.deleteKey(oldUser, ['openId'])
       ctx.body = commons.jsonBack(1, oldUser, "该用户已绑定");
     }
   } else {
