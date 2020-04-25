@@ -1,8 +1,10 @@
 const router = require('koa-router')()
 const https = require('https');
 const qs = require('querystring');
-var baseConfig = require('../../common/baseConfig')
+var baseConfig = require('../../common/baseConfig');
 const userModel = require('../../model/userModel');
+const jwt = require('jsonwebtoken');
+const jwtScret = "jwt-token"
 
 /* 绑定用户获取openID */
 /*
@@ -39,10 +41,18 @@ router.post('/bindUserInfo', async (ctx) => {
     let oldUser = await userModel.findUser({ openId: openid })
     if (!oldUser) {
       let newUser = await userModel.creatUser(param)
-      // newUser = commons.deleteKey(newUser, ['openId'])
+      const token = jwt.sign({
+        openId: openid,
+        userId: newUser.userId
+      }, jwtScret, { expiresIn: "240h" });
+      ctx.set("toekn", token);
       ctx.body = commons.jsonBack(1, newUser, "");
     } else {
-      // oldUser = commons.deleteKey(oldUser, ['openId'])
+      const token = jwt.sign({
+        openId: openid,
+        userId: oldUser.userId
+      }, jwtScret, { expiresIn: "240h" });
+      ctx.set("toekn", token);
       ctx.body = commons.jsonBack(1, oldUser, "该用户已绑定");
     }
   } else {
