@@ -8,6 +8,8 @@ const logger = require('koa-logger')
 require("./common/connect-database")
 const router = require('./routes/index')
 var baseCommon = require('./common/common');
+var baseConfig = require('./common/baseConfig');
+const jwt = require('jsonwebtoken');
 
 /* 跨域设置 */
 app.use(async (ctx, next) => {
@@ -23,6 +25,17 @@ app.use(async (ctx, next) => {
 
 // error handler
 onerror(app)
+
+// 中间件对token进行验证
+/*app.use(async (ctx, next) => {
+  const token = ctx.header.authorization;
+  /!*var decoded = await jwt.verify(token, baseConfig.jwtScret);
+  console.log(decoded);*!/
+  if (token) {
+    console.log(jwt.verify(token, baseConfig.jwtScret));
+  }
+  await next();
+});*/
 
 // middlewares
 app.use(bodyparser({
