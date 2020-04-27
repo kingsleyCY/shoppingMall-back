@@ -13,7 +13,6 @@ const jwt = require('jsonwebtoken');
 * */
 router.post('/loginWx', async (ctx) => {
   var param = ctx.request.body
-  console.log(param);
   if (!commons.judgeParamExists(['code'], param)) {
     ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
   } else {
@@ -51,8 +50,7 @@ router.post('/loginWx', async (ctx) => {
       const token = jwt.sign({
         openId: openid,
         userId: userDeatil.userId
-      }, baseConfig.jwtScret, { expiresIn: "1h" });
-      console.log(token);
+      }, baseConfig.jwtScret);
       ctx.res.setHeader('authorization', token);
       ctx.body = commons.jsonBack(1, userDeatil, "用户登陆成功！");
     } else {

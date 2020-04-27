@@ -9,6 +9,7 @@ require("./common/connect-database")
 const router = require('./routes/index')
 var baseCommon = require('./common/common');
 var baseConfig = require('./common/baseConfig');
+const userModel = require('./model/userModel');
 const jwt = require('jsonwebtoken');
 
 /* 跨域设置 */
@@ -24,18 +25,50 @@ app.use(async (ctx, next) => {
 });
 
 // error handler
-onerror(app)
+// onerror(app)
+app.use(async (ctx, next) => {
+  return next().catch((err) => {
+    if (err.status === 200 && err.message === "OK") {
+      ctx.status = 200;
+      ctx.body = baseCommon.jsonBack(err.code, err.data, err.mess);
+    } else {
+      ctx.body = baseCommon.jsonBack(1009, {}, "服务器响应失败");
+    }
+  });
+})
 
 // 中间件对token进行验证
-/*app.use(async (ctx, next) => {
-  const token = ctx.header.authorization;
-  /!*var decoded = await jwt.verify(token, baseConfig.jwtScret);
-  console.log(decoded);*!/
-  if (token) {
-    console.log(jwt.verify(token, baseConfig.jwtScret));
+app.use(async (ctx, next) => {
+  var param = ctx.method === "GET" ? ctx.query : ctx.request.body;
+  var needValidUrl = baseConfig.needValidUrl
+  if (needValidUrl.indexOf(ctx.request.path) >= 0) {
+    const token = ctx.header.authorization;
+    if (token && param && param.userId) {
+      try {
+        var decoded = jwt.verify(token, baseConfig.jwtScret);
+        const user = await userModel.findUser({
+          openId: decoded.openId,
+          userId: decoded.userId
+        })
+        if (!user) {
+          ctx.body = commons.jsonBack(1006, {}, "token验证失效！");
+        } else {
+          if (param.userId === decoded.userId) {
+            await next();
+          } else {
+            ctx.body = commons.jsonBack(1006, {}, "当前Token不属于此用户！");
+          }
+        }
+      } catch (err) {
+        ctx.body = commons.jsonBack(1006, {}, "token验证失效！");
+      }
+    } else {
+      ctx.body = commons.jsonBack(1006, {}, "参数缺少token和useID");
+    }
+  } else {
+    await next();
   }
-  await next();
-});*/
+});
 
 // middlewares
 app.use(bodyparser({
@@ -62,8 +95,9 @@ app.use(async (ctx, next) => {
 app.use(router.routes()).use(router.allowedMethods());
 
 // error-handling
-app.on('error', (err, ctx) => {
-  console.error('server error', err, ctx)
-});
+/*app.on('error', (err, ctx) => {
+  console.log(err)
+  ctx.body = commons.jsonBack(1, {}, "");
+});*/
 
 module.exports = app
