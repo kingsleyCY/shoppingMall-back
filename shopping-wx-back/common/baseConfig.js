@@ -1,4 +1,4 @@
-exports.wx_appid = 'wxe5ba942f2278dbb1'
-exports.wx_secret = '1c51cddc7b1114336780409a2ae7aa6f'
+exports.wx_appid = 'wx1df98194ac20802e'
+exports.wx_secret = '4d2dc7fa52a9a80af446fc201e9d3cb4'
 exports.jwtScret = "jwt-token"
 exports.needValidUrl = []
