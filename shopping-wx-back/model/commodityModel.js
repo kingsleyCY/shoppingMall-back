@@ -5,10 +5,11 @@ var shoppingSchema = new mongoose.Schema({
   introduction: String,
   classifyId: String, // 分类ID
   id: String,
-  saleNum: Number,
-  consultNum: Number,
-  originPrice: Number,
-  presentPrice: Number,
+  saleNum: Number, // 销售量
+  consultNum: Number, // 查看量
+  originPrice: Number, // 原价
+  presentPrice: Number, // 优惠价
+  overOrice: Number, // 实际价格
   isHot: { type: Number, default: 0 }, // 是否热款
   hotIndex: { type: Number, default: 0 },
   isExplosive: { type: Number, default: 0 }, // 是否爆款

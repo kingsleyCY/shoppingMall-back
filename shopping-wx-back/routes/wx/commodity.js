@@ -67,7 +67,7 @@ router.post('/getNewCommodity', async (ctx) => {
 * */
 router.post('/getSingleDetail', async (ctx) => {
   const id = ctx.request.body.id
-  var singleDetail = await shoppingModel.findOne({ id })
+  var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
 
