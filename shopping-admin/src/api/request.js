@@ -75,3 +75,11 @@ export function commodityDetail(id) {
     params: { id }
   })
 }
+
+export function deleCommodity(param) {
+  return instance({
+    url: '/shop/deleCommodity',
+    method: 'POST',
+    data: param
+  })
+}

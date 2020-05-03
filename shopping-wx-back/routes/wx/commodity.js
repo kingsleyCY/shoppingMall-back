@@ -135,12 +135,22 @@ router.post('/addCommodity', async (ctx) => {
 
 router.get('/commodityDetail', async (ctx) => {
   var param = ctx.query;
-  console.log(param);
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   const item = await shoppingModel.findOne({ id: param.id })
   ctx.body = commons.jsonBack(1, item, "获取成功！");
+})
+
+router.post('/deleCommodity', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  console.log(param);
+  if (!commons.judgeParamExists(['id'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  // const item = await shoppingModel.deleteOne({ id: param.id })
+  const item = await shoppingModel.remove({ id: { $in: param.id } })
+  ctx.body = commons.jsonBack(1, item, "操作成功！");
 })
 
 module.exports = router

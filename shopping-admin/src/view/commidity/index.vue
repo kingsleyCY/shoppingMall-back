@@ -1,8 +1,10 @@
 <template>
   <div>
-    <el-button type="primary" @click="addCommodity">添加商品</el-button>
+    <el-button type="primary" @click="addCommodity" size="mini">添加商品</el-button>
+    <el-button type="primary" @click="deleCommodity" size="mini">删除选中</el-button>
     <ul class="list-box">
       <li v-for="(item, index) in commodityList" :key="index" class="item-commo" @click="editCommodity(item.id)">
+        <el-checkbox v-model="item.checked" @click.native.stop="checkedCommodity(item)" class="checkbox"></el-checkbox>
         <img :src="item.logo" alt="">
         <p>{{item.title}}</p>
         <div class="introduction">{{item.introduction}}</div>
@@ -26,7 +28,7 @@
 </template>
 
 <script>
-  import { getCommodityList } from '@/api/request'
+  import { getCommodityList, deleCommodity } from '@/api/request'
 
   export default {
     name: "commidity",
@@ -67,6 +69,27 @@
       },
       editCommodity(id) {
         this.$router.push('/admin/addcommidity?id=' + id)
+      },
+      checkedCommodity(item) {
+        item.checked = !item.checked
+      },
+      deleCommodity() {
+        var arr = []
+        this.commodityList.forEach(v => {
+          if (v.checked) {
+            arr.push(v.id)
+          }
+        })
+        if (arr.length > 0) {
+          deleCommodity({ id: arr }).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.getList()
+            } else {
+              this.$message.error(res.mess)
+            }
+          })
+        }
       }
     }
   }
@@ -84,6 +107,12 @@
       margin: 10px 15px;
       border: 1px solid #d7d7d7;
       cursor: pointer;
+      position: relative;
+      .checkbox {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
       img {
         width: 100%;
         height: 150px;
