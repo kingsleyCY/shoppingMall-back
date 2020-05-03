@@ -8,6 +8,13 @@ const mainRouter = [
     component: resolve => require(['@/view/commidity'], resolve),
   },
   {
+    path: 'addcommidity',
+    name: 'addcommidity',
+    tilte: '添加管理',
+    component: resolve => require(['@/view/commidity/add'], resolve),
+    hidden: true
+  },
+  {
     path: 'classify',
     name: 'classify',
     tilte: '分类管理',

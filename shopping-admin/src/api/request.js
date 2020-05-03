@@ -59,3 +59,19 @@ export function deleteClassify(param) {
     data: param
   })
 }
+
+export function addCommodity(param) {
+  return instance({
+    url: '/shop/addCommodity',
+    method: 'POST',
+    data: param
+  })
+}
+
+export function commodityDetail(id) {
+  return instance({
+    url: '/shop/commodityDetail',
+    method: 'GET',
+    params: { id }
+  })
+}

@@ -1,7 +1,8 @@
 <template>
   <div>
+    <el-button type="primary" @click="addCommodity">添加商品</el-button>
     <ul class="list-box">
-      <li v-for="(item, index) in commodityList" :key="index" class="item-commo">
+      <li v-for="(item, index) in commodityList" :key="index" class="item-commo" @click="editCommodity(item.id)">
         <img :src="item.logo" alt="">
         <p>{{item.title}}</p>
         <div class="introduction">{{item.introduction}}</div>
@@ -60,6 +61,12 @@
       },
       handleCurrentChange() {
         this.getList()
+      },
+      addCommodity() {
+        this.$router.push('/admin/addcommidity')
+      },
+      editCommodity(id) {
+        this.$router.push('/admin/addcommidity?id=' + id)
       }
     }
   }
@@ -76,6 +83,7 @@
       display: inline-block;
       margin: 10px 15px;
       border: 1px solid #d7d7d7;
+      cursor: pointer;
       img {
         width: 100%;
         height: 150px;

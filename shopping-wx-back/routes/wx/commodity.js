@@ -99,8 +99,48 @@ router.post('/commodityList', async (ctx) => {
 })
 
 /* 添加商品-admin */
+/*
+* param: title、logo、introduction、classifyId、imgList、originPrice、presentPrice、overPrice
+* opparam：id、isHot、isExplosive、isNews
+* await client.incr('addressId');
+* */
 router.post('/addCommodity', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  const id = param.id
+  delete param['id']
+  if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  param.isHot ? param.isHot = 1 : param.isHot = 0
+  param.isExplosive ? param.isExplosive = 1 : param.isExplosive = 0
+  param.isNews ? param.isNews = 1 : param.isNews = 0
+  if (id) {
+    console.log(id);
+    param.update_time = Date.parse(new Date())
+    await shoppingModel.findOneAndUpdate({ id }, param)
+    var item = await shoppingModel.findOne({ id })
+    ctx.body = commons.jsonBack(1, item, "修改成功！");
+  } else {
+    await client.incr('commodityId');
+    param.id = await new Promise((resolve, reject) => {
+      client.get("commodityId", function (err, data) {
+        resolve(data);
+      })
+    })
+    param.created_time = Date.parse(new Date())
+    var item = await shoppingModel.create(param)
+    ctx.body = commons.jsonBack(1, item, "添加成功！");
+  }
+})
 
+router.get('/commodityDetail', async (ctx) => {
+  var param = ctx.query;
+  console.log(param);
+  if (!commons.judgeParamExists(['id'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  const item = await shoppingModel.findOne({ id: param.id })
+  ctx.body = commons.jsonBack(1, item, "获取成功！");
 })
 
 module.exports = router
