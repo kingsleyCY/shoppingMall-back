@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "ali-oss": "^6.7.0",
     "debug": "^4.1.1",
     "ejs": "~2.3.3",
     "jsonwebtoken": "^8.5.1",

@@ -1,5 +1,6 @@
 const router = require('koa-router')()
 const { suggestModel } = require('../../model/suggestModel');
+const { shoppingModel } = require('../../model/commodityModel');
 
 /* 提交建议投诉 */
 /*

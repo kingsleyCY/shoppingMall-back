@@ -1,15 +1,17 @@
 var shoppingSchema = new mongoose.Schema({
-  created_time: Number,
+  created_time: Number, // 创建时间
+  update_time: Number, // 更新时间
   logo: String,
-  detail: String,
+  title: String,
   introduction: String,
   classifyId: String, // 分类ID
   id: String,
-  saleNum: Number, // 销售量
-  consultNum: Number, // 查看量
-  originPrice: Number, // 原价
-  presentPrice: Number, // 优惠价
-  overOrice: Number, // 实际价格
+  imgList: { type: Array, default: [] },
+  saleNum: { type: Number, default: 0 }, // 销售量
+  consultNum: { type: Number, default: 0 }, // 查看量
+  originPrice: { type: Number, default: 0 }, // 原价
+  presentPrice: { type: Number, default: 0 }, // 优惠价
+  overPrice: { type: Number, default: 0 }, // 实际价格
   isHot: { type: Number, default: 0 }, // 是否热款
   hotIndex: { type: Number, default: 0 },
   isExplosive: { type: Number, default: 0 }, // 是否爆款

@@ -35,7 +35,7 @@ router.get('/getIndexData', async (ctx) => {
   }, "获取数据成功");
 })
 
-/* 获取首页数据 */
+/* 获取新品数据 */
 /*
 * page、pageSize
 *
@@ -69,6 +69,38 @@ router.post('/getSingleDetail', async (ctx) => {
   const id = ctx.request.body.id
   var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
+})
+
+/* 商品列表-admin */
+/*
+* param: page、pageSize
+* opparam: title、classifyId
+* */
+router.post('/commodityList', async (ctx) => {
+  var param = ctx.request.body;
+  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  const reg = new RegExp(param.title, 'i') //不区分大小写
+  var search = {
+    $or: [
+      { title: { '$regex': reg } }
+    ],
+  }
+  param.classifyId ? search.classifyId = param.classifyId : ""
+  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
+  var total = await shoppingModel.find(search)
+  ctx.body = commons.jsonBack(1, {
+    list,
+    total: total.length,
+    page: param.page,
+    pageSize: param.pageSize,
+  }, "获取数据成功");
+})
+
+/* 添加商品-admin */
+router.post('/addCommodity', async (ctx) => {
+
 })
 
 module.exports = router
