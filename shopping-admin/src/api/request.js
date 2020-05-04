@@ -1,7 +1,6 @@
 import axios from 'axios'
 // import { Message } from 'element-ui'
 
-console.log(process.env.NODE_ENV);
 var instance
 if (axios) {
   instance = axios.create({
@@ -103,6 +102,22 @@ export function getNewCommodity(param) {
 export function updateIndexList(param) {
   return instance({
     url: '/shop/updateIndexList',
+    method: 'post',
+    data: param
+  })
+}
+
+export function getCustomer(param) {
+  return instance({
+    url: '/shop/getCustomer',
+    method: 'post',
+    data: param
+  })
+}
+
+export function setQrcode(param) {
+  return instance({
+    url: '/shop/setQrcode',
     method: 'post',
     data: param
   })

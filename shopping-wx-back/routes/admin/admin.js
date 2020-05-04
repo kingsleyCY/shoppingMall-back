@@ -1,6 +1,11 @@
 /* admin端主要接口 */
+const qs = require('querystring');
+const url = require('url');
+const https = require('https');
+const baseConfig = require('../../common/baseConfig');
 const router = require('koa-router')()
 const { classifyModel } = require('../../model/admin/classifyModel');
+const { userModel } = require('../../model/userModel');
 
 /* 添加商品分类 */
 /* param: title
@@ -101,5 +106,93 @@ router.post('/editClassify', async (ctx) => {
   await classifyModel.findOneAndUpdate({ id: param.id }, { title: param.title, update_time: Date.parse(new Date()) })
   ctx.body = commons.jsonBack(1, {}, "操作成功");
 })
+
+/* 获取用户列表 */
+router.post('/getCustomer', async (ctx) => {
+  var param = ctx.request.body;
+  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  const list = await userModel.find({}).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
+  var total = await userModel.find({})
+  ctx.body = commons.jsonBack(1, {
+    list,
+    total: total.length,
+    page: param.page,
+    pageSize: param.pageSize,
+  }, "获取数据成功");
+})
+
+/* 获取用户列表 */
+/*
+* param:id
+* */
+router.post('/setQrcode', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['id'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var access_token = await getAccesstoken();
+  var qrCode = await setQrcode(access_token.access_token, param.id);
+  await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url });
+  ctx.body = commons.jsonBack(1, { url: qrCode.url }, "获取数据成功");
+})
+
+async function getAccesstoken() {
+  var content = qs.stringify({
+    appid: baseConfig.wx_appid,
+    secret: baseConfig.wx_secret,
+    grant_type: 'client_credential'
+  });
+  const options = 'https://api.weixin.qq.com/cgi-bin/token?' + content;
+  let access_token = await new Promise((resolve, reject) => {
+    https.get(options, (result) => {
+      result.setEncoding('utf8');
+      result.on('data', (d) => {
+        resolve(JSON.parse(d));
+      });
+    }).on('error', (e) => {
+      reject("")
+    });
+  })
+  return access_token
+}
+
+async function setQrcode(token, scene) {
+  const post_data = JSON.stringify({
+    scene: String(scene),
+  });
+  let options = url.parse(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${token}`);
+  options = Object.assign(options, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': post_data.length,
+    }
+  });
+  const imgBuffer = await new Promise((resolve, reject) => {
+    let req = https.request(options, (res) => {
+      let resData = '';
+      res.setEncoding("binary");
+      res.on('data', data => {
+        resData += data;
+      });
+      res.on('end', () => {
+        const imgBuffer = Buffer.from(resData, 'binary');
+        var fileName = 'shop/proxylist/' + (Date.parse(new Date()) / 1000) + '-' + scene + '.jpg'
+        ossClient.put(fileName, imgBuffer).then(res => {
+          resolve(res)
+        })
+      });
+    });
+    req.on('error', (e) => {
+      reject("")
+    });
+    req.write(post_data);
+    req.end();
+  })
+  return imgBuffer
+}
+
 
 module.exports = router

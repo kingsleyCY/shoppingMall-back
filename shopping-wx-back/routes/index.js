@@ -2,7 +2,7 @@ const users = require('./wx/users')
 const commodity = require('./wx/commodity')
 const address = require('./wx/address')
 const other = require('./wx/other')
-const admin = require('./wx/admin')
+const admin = require('./admin/admin')
 const router = require('koa-router')()
 
 router.use('/shop', users.routes(), users.allowedMethods());

@@ -6,9 +6,12 @@ var userSchema = new mongoose.Schema({
   recommendId: { type: String, default: '' }, // 推荐人的userId
   defaultAddress: { type: String, default: '' },
   phone: { type: String, default: '' }, // 手机号
+  qrCode: { type: String, default: '' }, // 推荐二维码地址
+  idProxy: Number, // 推荐二维码地址
 }, { collection: "userList" });
 var userModel = db.model("userList", userSchema);
 
+exports.userModel = userModel
 exports.creatUser = async function (param) {
   const user = await new Promise((resolve, reject) => {
     userModel.create(param, function (err, doc) {

@@ -26,6 +26,12 @@ const mainRouter = [
     tilte: '首页管理',
     component: resolve => require(['@/view/indexManage'], resolve),
   },
+  {
+    path: 'proxyList',
+    name: 'proxyList',
+    tilte: '代理管理',
+    component: resolve => require(['@/view/proxyList'], resolve),
+  },
 ]
 
 
