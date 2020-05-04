@@ -1,10 +1,11 @@
 import axios from 'axios'
 // import { Message } from 'element-ui'
 
+console.log(process.env.NODE_ENV);
 var instance
 if (axios) {
   instance = axios.create({
-    baseURL: "",
+    baseURL: process.env.NODE_ENV === "development" ? "" : "119.3.77.140:3000",
     timeout: 15000
   });
 }
