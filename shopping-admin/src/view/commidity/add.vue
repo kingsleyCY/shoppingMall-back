@@ -63,12 +63,12 @@
         <input ref="fileInput" type="file" class="upload-file-btn" @change="uploadImg($event,1)">
       </div>
       <div v-show="partIndex == 2">
-        <vueCropper
+        <VueCropper
           ref="cropper" :img="option.img" :output-size="option.size" :output-type="option.outputType"
           :info="true" :full="option.full" :can-move="option.canMove" :can-move-box="option.canMoveBox"
           :fixed-box="option.fixedBox" :original="option.original" :auto-crop="option.autoCrop"
           :auto-crop-width="option.autoCropWidth" :auto-crop-height="option.autoCropHeight"
-          :center-box="option.centerBox" :high="option.high"></vueCropper>
+          :center-box="option.centerBox" :high="option.high"></VueCropper>
       </div>
       <span slot="footer" class="dialog-footer">
     <el-button @click="dialogVisible = false">取 消</el-button>
@@ -80,7 +80,6 @@
 </template>
 
 <script>
-  import { VueCropper } from 'vue-cropper'
   import { getClassifyList, addCommodity, commodityDetail } from '@/api/request'
 
   const OSS = require('ali-oss');
@@ -258,10 +257,7 @@
         this.ruleForm.isExplosive = detail.isExplosive ? true : false
         this.ruleForm.isNews = detail.isNews ? true : false
       }
-    },
-    components: {
-      VueCropper,
-    },
+    }
   }
 </script>
 
