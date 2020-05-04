@@ -5,7 +5,7 @@ console.log(process.env.NODE_ENV);
 var instance
 if (axios) {
   instance = axios.create({
-    baseURL: process.env.NODE_ENV === "development" ? "" : "119.3.77.140:3000",
+    baseURL: process.env.NODE_ENV === "development" ? "" : "http://119.3.77.140:3000",
     timeout: 15000
   });
 }
