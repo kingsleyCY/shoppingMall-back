@@ -1,6 +1,7 @@
 const router = require('koa-router')()
 const { shoppingModel } = require('../../model/commodityModel');
 const { baseConfigModel } = require('../../model/baseConfigModel')
+const { classifyModel } = require('../../model/admin/classifyModel');
 
 /* 获取商品分类及列表 */
 router.get('/getBaseClassify', async (ctx) => {
@@ -114,8 +115,11 @@ router.post('/addCommodity', async (ctx) => {
   param.isHot ? param.isHot = 1 : param.isHot = 0
   param.isExplosive ? param.isExplosive = 1 : param.isExplosive = 0
   param.isNews ? param.isNews = 1 : param.isNews = 0
+  if (param.classifyId) {
+    var classifyItem = await classifyModel.findOne({ id: param.classifyId })
+    classifyItem ? param.classifyName = classifyItem.title : ""
+  }
   if (id) {
-    console.log(id);
     param.update_time = Date.parse(new Date())
     await shoppingModel.findOneAndUpdate({ id }, param)
     var item = await shoppingModel.findOne({ id })
@@ -144,13 +148,44 @@ router.get('/commodityDetail', async (ctx) => {
 
 router.post('/deleCommodity', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
-  console.log(param);
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   // const item = await shoppingModel.deleteOne({ id: param.id })
   const item = await shoppingModel.remove({ id: { $in: param.id } })
   ctx.body = commons.jsonBack(1, item, "操作成功！");
+})
+
+/* 更新首页数据 */
+/*
+* param：type、ids:[{id,index}]
+* */
+router.post('/updateIndexList', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['type', 'ids'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  if (param.ids.length <= 0) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  let idArr = param.ids.map(v => {
+    return v.id
+  })
+  let key = ""
+  if (param.type === 'banner') {
+    key = "isBanner"
+  } else if (param.type === 'hot') {
+    key = "isHot"
+  } else if (param.type === 'explosive') {
+    key = "isExplosive"
+  } else if (param.type === 'news') {
+    key = "isNews"
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  await shoppingModel.updateMany({ [key]: 1 }, { $set: { [key]: 0 } })
+  await shoppingModel.updateMany({ id: { $in: idArr } }, { $set: { [key]: 1 } })
+  ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 
 module.exports = router

@@ -20,6 +20,12 @@ const mainRouter = [
     tilte: '分类管理',
     component: resolve => require(['@/view/classify'], resolve),
   },
+  {
+    path: 'indexManage',
+    name: 'indexManage',
+    tilte: '首页管理',
+    component: resolve => require(['@/view/indexManage'], resolve),
+  },
 ]
 
 

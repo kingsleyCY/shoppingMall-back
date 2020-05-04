@@ -83,3 +83,26 @@ export function deleCommodity(param) {
     data: param
   })
 }
+
+export function getIndexData() {
+  return instance({
+    url: '/shop/getIndexData',
+    method: 'get',
+  })
+}
+
+export function getNewCommodity(param) {
+  return instance({
+    url: '/shop/getNewCommodity',
+    method: 'post',
+    data: param
+  })
+}
+
+export function updateIndexList(param) {
+  return instance({
+    url: '/shop/updateIndexList',
+    method: 'post',
+    data: param
+  })
+}

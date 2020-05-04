@@ -5,6 +5,7 @@ var shoppingSchema = new mongoose.Schema({
   title: String,
   introduction: String,
   classifyId: String, // 分类ID
+  classifyName: { type: String, default: "" }, // 分类ID
   id: String,
   imgList: { type: Array, default: [] },
   saleNum: { type: Number, default: 0 }, // 销售量

@@ -1,7 +1,19 @@
 <template>
   <div>
+    <div>
+      <el-form :model="search" ref="ruleForm" label-width="60px" class="demo-ruleForm" size="mini" :inline="true">
+        <el-form-item label="名称：">
+          <el-input size="mini" v-model="search.title" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="分类：">
+          <el-cascader size="mini" :props="cascaderProps" v-model="search.classifyId" :options="treeData" clearable></el-cascader>
+        </el-form-item>
+      </el-form>
+
+    </div>
     <el-button type="primary" @click="addCommodity" size="mini">添加商品</el-button>
     <el-button type="primary" @click="deleCommodity" size="mini">删除选中</el-button>
+    <el-button type="primary" @click="searchList" size="mini">搜索</el-button>
     <ul class="list-box">
       <li v-for="(item, index) in commodityList" :key="index" class="item-commo" @click="editCommodity(item.id)">
         <el-checkbox v-model="item.checked" @click.native.stop="checkedCommodity(item)" class="checkbox"></el-checkbox>
@@ -28,7 +40,7 @@
 </template>
 
 <script>
-  import { getCommodityList, deleCommodity } from '@/api/request'
+  import { getCommodityList, deleCommodity, getClassifyList } from '@/api/request'
 
   export default {
     name: "commidity",
@@ -39,18 +51,35 @@
           pageSize: 10,
           total: 0,
         },
-        commodityList: []
+        search: {
+          classifyId: [],
+          title: ""
+        },
+        commodityList: [],
+        treeData: [],
+        cascaderProps: {
+          value: "id",
+          label: "title",
+        }
       }
     },
     mounted() {
       this.getList()
+      this.getClassifyList()
     },
     methods: {
+      searchList() {
+        this.getList()
+      },
       getList() {
         var param = {
           page: this.pageData.page,
           pageSize: this.pageData.pageSize,
         }
+        if (this.search.classifyId.length > 0) {
+          param.classifyId = this.search.classifyId[this.search.classifyId.length - 1]
+        }
+        param.title = this.search.title.trim()
         getCommodityList(param).then(res => {
           this.commodityList = res.data.list
           this.pageData.total = res.data.total
@@ -58,10 +87,18 @@
 
         })
       },
-      handleSizeChange() {
+      getClassifyList() {
+        getClassifyList().then(res => {
+          this.treeData = res.data
+        })
+      },
+      handleSizeChange(val) {
+        this.pageData.pageSize = val
+        this.pageData.page = 1
         this.getList()
       },
-      handleCurrentChange() {
+      handleCurrentChange(val) {
+        this.pageData.page = val
         this.getList()
       },
       addCommodity() {
