@@ -28,7 +28,7 @@ db.on('error', function () {
 });
 db.once('open', function () {
   // we're connected!
-  console.log('connected success');
+  console.log('mongodb connected success');
 });
 
 global.mongoose = mongoose

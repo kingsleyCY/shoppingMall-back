@@ -21,6 +21,9 @@ var shoppingSchema = new mongoose.Schema({
   bannerIndex: { type: Number, default: 0 },
   isNews: { type: Number, default: 0 }, // 是否为新品
   newsIndex: { type: Number, default: 0 },
+  isRebate: { type: Number, default: 0 }, // 是否为折扣
+  rebateIndex: { type: Number, default: 0 },
+  sizeCollet: { type: Object, default: {} }, // 商品码数集合
 }, { collection: "shoppingList" });
 var shoppingModel = db.model("shoppingList", shoppingSchema);
 

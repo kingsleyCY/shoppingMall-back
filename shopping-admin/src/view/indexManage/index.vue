@@ -5,6 +5,7 @@
       <el-tab-pane label="热款" name="hot"></el-tab-pane>
       <el-tab-pane label="爆款" name="explosive"></el-tab-pane>
       <el-tab-pane label="新品" name="news"></el-tab-pane>
+      <el-tab-pane label="折扣款" name="rebate"></el-tab-pane>
     </el-tabs>
     <div>
       <el-select v-model="selectArr" multiple filterable collapse-tags placeholder="请选择">
@@ -50,7 +51,8 @@
         hotList: [],
         explosiveList: [],
         newList: [],
-        activeList: []
+        rebateList: [],
+        activeList: [],
       }
     },
     created() {
@@ -73,6 +75,7 @@
             this.bannerList = res.data.bannerList
             this.hotList = res.data.hotList
             this.explosiveList = res.data.explosiveList
+            this.rebateList = res.data.rebateList
             resolve()
           })
         })
@@ -95,6 +98,8 @@
           this.activeList = JSON.parse(JSON.stringify(this.explosiveList))
         } else if (this.activeName === "news") {
           this.activeList = JSON.parse(JSON.stringify(this.newList))
+        } else if (this.activeName === "rebate") {
+          this.activeList = JSON.parse(JSON.stringify(this.rebateList))
         }
         this.commodityList.forEach(v => {
           var item = that.activeList.filter(vs => {

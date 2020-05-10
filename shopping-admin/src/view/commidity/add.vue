@@ -34,6 +34,7 @@
         <el-checkbox v-model="ruleForm.isHot">是否热款</el-checkbox>
         <el-checkbox v-model="ruleForm.isExplosive">是否爆款</el-checkbox>
         <el-checkbox v-model="ruleForm.isNews">是否为新品</el-checkbox>
+        <el-checkbox v-model="ruleForm.isRebate">是否为折扣款</el-checkbox>
       </el-form-item>
       <el-form-item label="图片合集：">
         <div>
@@ -44,12 +45,21 @@
           <div class="cover"><i class="el-icon-delete" @click="deleimgList(index)"></i></div>
         </div>
       </el-form-item>
+      <el-form-item label="尺码：" class="size-box">
+        <i class="el-icon-circle-plus-outline" @click="addSize"></i>
+        <div v-for="(item, index) in ruleForm.sizeCollet" :key="index">
+          尺码：
+          <el-input v-model="item[0]" placeholder="请输入尺码" type="number"></el-input>
+          数量：
+          <el-input v-model="item[1]" placeholder="请输入数量" type="number"></el-input>
+          <i class="el-icon-remove-outline" @click="deleteSize(index)"></i>
+        </div>
+      </el-form-item>
       <el-form-item>
         <el-button @click="cancel">取消</el-button>
         <el-button type="primary" @click="submitForm">确认</el-button>
       </el-form-item>
     </el-form>
-
 
     <el-dialog
       title="图片剪裁"
@@ -70,12 +80,11 @@
           :auto-crop-width="option.autoCropWidth" :auto-crop-height="option.autoCropHeight"
           :center-box="option.centerBox" :high="option.high"></VueCropper>
       </div>
-      <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button v-show="partIndex == 2" type="primary" @click="submitUploadFile">确 定</el-button>
-  </span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button v-show="partIndex == 2" type="primary" @click="submitUploadFile">确 定</el-button>
+      </div>
     </el-dialog>
-
   </div>
 </template>
 
@@ -118,6 +127,8 @@
           isHot: "",
           isExplosive: "",
           isNews: "",
+          isRebate: "",
+          sizeCollet: [[]]
         },
         rules: {
           title: ""
@@ -189,11 +200,7 @@
             data = e.target.result
           }
           that.partIndex = 2
-          if (num === 1) {
-            that.option.img = data
-          } else if (num === 2) {
-            that.example2.img = data
-          }
+          that.option.img = data
         }
         // 转化为base64
         reader.readAsDataURL(file)
@@ -227,8 +234,35 @@
           this.$message.info("未填写完整")
           return
         }
+        if (this.ruleForm.sizeCollet.length <= 0) {
+          this.$message.info("未填写尺码数据")
+          return
+        }
+        let sizeFlag = false
+        let sizeCollet = {}
+        for (let i = 0; i < this.ruleForm.sizeCollet.length; i++) {
+          let item = this.ruleForm.sizeCollet[i];
+          if (!item[0] || !item[1]) {
+            sizeFlag = true
+            break;
+          }
+          if (item[1] % 1 !== 0 || item[1] <= 0) {
+            sizeFlag = true
+            break;
+          }
+          if (item[0] % 0.5 !== 0 || item[0] <= 0) {
+            sizeFlag = true
+            break;
+          }
+          sizeCollet[item[0]] = item[1];
+        }
+        if (sizeFlag) {
+          this.$message.info("尺码数据填写数据有误！")
+          return
+        }
         var param = JSON.parse(JSON.stringify(this.ruleForm));
         param.classifyId = this.ruleForm.classifyId[this.ruleForm.classifyId.length - 1]
+        param.sizeCollet = sizeCollet
         if (this.editId) {
           param.id = this.editId
         }
@@ -256,6 +290,22 @@
         this.ruleForm.isHot = detail.isHot ? true : false
         this.ruleForm.isExplosive = detail.isExplosive ? true : false
         this.ruleForm.isNews = detail.isNews ? true : false
+        this.ruleForm.isRebate = detail.isRebate ? true : false
+        var sizeCollet = detail.sizeCollet ? detail.sizeCollet : [[]];
+        let newsizeCollet = []
+        for (var key in sizeCollet) {
+          newsizeCollet.push([key, sizeCollet[key]])
+        }
+        this.ruleForm.sizeCollet = newsizeCollet
+      },
+      deleteSize(index) {
+        if (this.ruleForm.sizeCollet.length <= 1) {
+          return
+        }
+        this.ruleForm.sizeCollet.splice(index, 1)
+      },
+      addSize() {
+        this.ruleForm.sizeCollet.push([])
       }
     }
   }
@@ -297,6 +347,15 @@
       img {
         display: block;
         height: 100%;
+      }
+    }
+    .size-box {
+      .el-input {
+        width: 100px;
+      }
+      i {
+        font-size: 16px;
+        cursor: pointer;
       }
     }
   }

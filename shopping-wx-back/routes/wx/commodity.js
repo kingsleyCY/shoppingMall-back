@@ -31,8 +31,9 @@ router.get('/getIndexData', async (ctx) => {
   var bannerList = await shoppingModel.find({ "isBanner": 1 }).sort({ 'bannerIndex': -1 })
   var hotList = await shoppingModel.find({ "isHot": 1 }).sort({ 'bannerIndex': -1 })
   var explosiveList = await shoppingModel.find({ "isExplosive": 1 }).sort({ 'bannerIndex': -1 })
+  var rebateList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
   ctx.body = commons.jsonBack(1, {
-    bannerList, hotList, explosiveList
+    bannerList, hotList, explosiveList, rebateList
   }, "获取数据成功");
 })
 
@@ -101,20 +102,24 @@ router.post('/commodityList', async (ctx) => {
 
 /* 添加商品-admin */
 /*
-* param: title、logo、introduction、classifyId、imgList、originPrice、presentPrice、overPrice
-* opparam：id、isHot、isExplosive、isNews
+* param: title、logo、introduction、classifyId、imgList、originPrice、presentPrice、overPrice、sizeCollet
+* opparam：id、isHot、isExplosive、isNews、isRebate
 * await client.incr('addressId');
 * */
 router.post('/addCommodity', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
   const id = param.id
   delete param['id']
-  if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice'], param)) {
+  if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice', 'sizeCollet'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  if (Object.keys(param.sizeCollet).length === 0) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "商品码数集合不能为空！"))
   }
   param.isHot ? param.isHot = 1 : param.isHot = 0
   param.isExplosive ? param.isExplosive = 1 : param.isExplosive = 0
   param.isNews ? param.isNews = 1 : param.isNews = 0
+  param.isRebate ? param.isRebate = 1 : param.isRebate = 0
   if (param.classifyId) {
     var classifyItem = await classifyModel.findOne({ id: param.classifyId })
     classifyItem ? param.classifyName = classifyItem.title : ""
@@ -180,6 +185,8 @@ router.post('/updateIndexList', async (ctx) => {
     key = "isExplosive"
   } else if (param.type === 'news') {
     key = "isNews"
+  } else if (param.type === 'rebate') {
+    key = "isRebate"
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }

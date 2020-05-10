@@ -96,15 +96,22 @@ router.post('/deleteClassify', async (ctx) => {
 
 /* 修改商品分类 */
 /*
-* param:title、id
+* param:title/logo、id
 * */
 router.post('/editClassify', async (ctx) => {
   var param = ctx.request.body;
-  if (!commons.judgeParamExists(['title', 'id'], param)) {
+  if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  await classifyModel.findOneAndUpdate({ id: param.id }, { title: param.title, update_time: Date.parse(new Date()) })
-  ctx.body = commons.jsonBack(1, {}, "操作成功");
+  if (param.title) {
+    await classifyModel.findOneAndUpdate({ id: param.id }, { title: param.title, update_time: Date.parse(new Date()) })
+    ctx.body = commons.jsonBack(1, {}, "操作成功");
+  } else if (param.logo) {
+    await classifyModel.findOneAndUpdate({ id: param.id }, { logo: param.logo, update_time: Date.parse(new Date()) })
+    ctx.body = commons.jsonBack(1, {}, "操作成功");
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
 })
 
 /* 获取用户列表 */
