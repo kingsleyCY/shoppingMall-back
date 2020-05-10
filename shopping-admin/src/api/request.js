@@ -122,3 +122,27 @@ export function setQrcode(param) {
     data: param
   })
 }
+
+export function getProxyOrder(param) {
+  return instance({
+    url: '/shop/getProxyOrder',
+    method: 'post',
+    data: param
+  })
+}
+
+export function creatActivity(param) {
+  return instance({
+    url: '/shop/creatActivity',
+    method: 'post',
+    data: param
+  })
+}
+
+export function getActiList(param) {
+  return instance({
+    url: '/shop/getActiList',
+    method: 'post',
+    data: param
+  })
+}

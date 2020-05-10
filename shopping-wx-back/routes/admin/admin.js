@@ -6,6 +6,7 @@ const baseConfig = require('../../common/baseConfig');
 const router = require('koa-router')()
 const { classifyModel } = require('../../model/admin/classifyModel');
 const { userModel } = require('../../model/userModel');
+const { orderModel } = require('../../model/admin/orderModel');
 
 /* 添加商品分类 */
 /* param: title
@@ -115,13 +116,24 @@ router.post('/editClassify', async (ctx) => {
 })
 
 /* 获取用户列表 */
+/* listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表 */
 router.post('/getCustomer', async (ctx) => {
-  var param = ctx.request.body;
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  var params = {
+    page: param.page,
+    pageSize: param.pageSize
+  }
   if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  const list = await userModel.find({}).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
-  var total = await userModel.find({})
+  let obj = {}
+  if (param.listType === "proxy") {
+    obj.isProxy = 1
+  } else if (param.listType === "recommend") {
+    obj.recommendId = param.id
+  }
+  const list = await userModel.find(obj).skip((params.page - 1) * params.pageSize).limit(Number(params.pageSize)).sort({ '_id': -1 })
+  var total = await userModel.find(obj)
   ctx.body = commons.jsonBack(1, {
     list,
     total: total.length,
@@ -130,7 +142,7 @@ router.post('/getCustomer', async (ctx) => {
   }, "获取数据成功");
 })
 
-/* 获取用户列表 */
+/* 生成代理人二维码 */
 /*
 * param:id
 * */
@@ -141,8 +153,31 @@ router.post('/setQrcode', async (ctx) => {
   }
   var access_token = await getAccesstoken();
   var qrCode = await setQrcode(access_token.access_token, param.id);
-  await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url });
+  await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url, isProxy: 1 });
   ctx.body = commons.jsonBack(1, { url: qrCode.url }, "获取数据成功");
+})
+
+/* 查看代理人下订单 */
+/*
+* param:id、page、pageSize
+* */
+router.post('/getProxyOrder', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['id', 'page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var proxyList = await userModel.find({ recommendId: param.id })
+  var list = proxyList.map(v => {
+    return v.userId
+  })
+  var orderList = await orderModel.find({ userId: { $in: list } }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var total = await orderModel.find({ userId: { $in: list } })
+  ctx.body = commons.jsonBack(1, {
+    list: orderList,
+    total: total.length,
+    page: param.page,
+    pageSize: param.pageSize,
+  }, "");
 })
 
 async function getAccesstoken() {
