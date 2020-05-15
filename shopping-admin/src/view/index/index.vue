@@ -5,7 +5,7 @@
         default-active="2"
         class="el-menu-vertical-demo">
         <el-menu-item v-for="(item, index) in mainRouter" :key="index" v-if="!item.hidden">
-          <router-link :to="{ path: '/admin/' + item.path }">{{item.tilte}}</router-link>
+          <router-link :to="{ path: '/admin_html/' + item.path }">{{item.tilte}}</router-link>
         </el-menu-item>
       </el-menu>
     </div>

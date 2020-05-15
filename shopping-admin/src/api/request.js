@@ -23,7 +23,7 @@ instance.interceptors.response.use(function (response) {
 /* 获取基本配置参数 */
 export function getCommodityList(param) {
   return instance({
-    url: '/shop/commodityList',
+    url: '/admin/commodity/commodityList',
     method: 'POST',
     data: param
   })
@@ -31,14 +31,14 @@ export function getCommodityList(param) {
 
 export function getClassifyList() {
   return instance({
-    url: '/shop/getClassify',
+    url: '/admin/classify/getClassify',
     method: 'GET'
   })
 }
 
 export function addClassify(param) {
   return instance({
-    url: '/shop/addClassify',
+    url: '/admin/classify/addClassify',
     method: 'POST',
     data: param
   })
@@ -46,7 +46,7 @@ export function addClassify(param) {
 
 export function editClassify(param) {
   return instance({
-    url: '/shop/editClassify',
+    url: '/admin/classify/editClassify',
     method: 'POST',
     data: param
   })
@@ -54,7 +54,7 @@ export function editClassify(param) {
 
 export function deleteClassify(param) {
   return instance({
-    url: '/shop/deleteClassify',
+    url: '/admin/classify/deleteClassify',
     method: 'POST',
     data: param
   })
@@ -62,7 +62,7 @@ export function deleteClassify(param) {
 
 export function addCommodity(param) {
   return instance({
-    url: '/shop/addCommodity',
+    url: '/admin/commodity/addCommodity',
     method: 'POST',
     data: param
   })
@@ -70,20 +70,21 @@ export function addCommodity(param) {
 
 export function commodityDetail(id) {
   return instance({
-    url: '/shop/commodityDetail',
+    url: '/admin/commodity/commodityDetail',
     method: 'GET',
-    params: { id }
+    params: {id}
   })
 }
 
 export function deleCommodity(param) {
   return instance({
-    url: '/shop/deleCommodity',
+    url: '/admin/commodity/deleCommodity',
     method: 'POST',
     data: param
   })
 }
 
+/* 获取首页数据 */
 export function getIndexData() {
   return instance({
     url: '/shop/getIndexData',
@@ -91,6 +92,7 @@ export function getIndexData() {
   })
 }
 
+/* 获取新品数据 */
 export function getNewCommodity(param) {
   return instance({
     url: '/shop/getNewCommodity',
@@ -101,7 +103,7 @@ export function getNewCommodity(param) {
 
 export function updateIndexList(param) {
   return instance({
-    url: '/shop/updateIndexList',
+    url: '/admin/commodity/updateIndexList',
     method: 'post',
     data: param
   })
@@ -109,7 +111,7 @@ export function updateIndexList(param) {
 
 export function getCustomer(param) {
   return instance({
-    url: '/shop/getCustomer',
+    url: '/admin/userList/getCustomer',
     method: 'post',
     data: param
   })
@@ -117,7 +119,7 @@ export function getCustomer(param) {
 
 export function setQrcode(param) {
   return instance({
-    url: '/shop/setQrcode',
+    url: '/admin/userList/setQrcode',
     method: 'post',
     data: param
   })
@@ -125,7 +127,7 @@ export function setQrcode(param) {
 
 export function getProxyOrder(param) {
   return instance({
-    url: '/shop/getProxyOrder',
+    url: '/admin/userList/getProxyOrder',
     method: 'post',
     data: param
   })
@@ -133,7 +135,7 @@ export function getProxyOrder(param) {
 
 export function creatActivity(param) {
   return instance({
-    url: '/shop/creatActivity',
+    url: '/admin/activity/creatActivity',
     method: 'post',
     data: param
   })
@@ -141,7 +143,7 @@ export function creatActivity(param) {
 
 export function getActiList(param) {
   return instance({
-    url: '/shop/getActiList',
+    url: '/admin/activity/getActiList',
     method: 'post',
     data: param
   })
@@ -149,7 +151,7 @@ export function getActiList(param) {
 
 export function getOrderList(param) {
   return instance({
-    url: '/shop/orderList',
+    url: '/admin/order/orderList',
     method: 'post',
     data: param
   })

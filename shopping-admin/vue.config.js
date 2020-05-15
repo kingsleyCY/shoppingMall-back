@@ -4,6 +4,10 @@ module.exports = {
       '/shop': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+      },
+      '/admin/': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
       }
     },
     overlay: {

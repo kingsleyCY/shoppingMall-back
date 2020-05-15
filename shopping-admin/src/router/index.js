@@ -53,11 +53,11 @@ const router = new Router({
     {
       path: '/',
       name: 'index',
-      redirect: '/admin/commidity',
+      redirect: '/admin_html/commidity',
       hidden: true
     },
     {
-      path: '/admin',
+      path: '/admin_html',
       name: 'admin',
       tilte: '',
       component: resolve => require(['@/view/index'], resolve),
