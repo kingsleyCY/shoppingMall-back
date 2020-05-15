@@ -2,7 +2,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/shop': {
-        target: 'http://192.168.1.102:3000',
+        target: 'http://localhost:3000',
         changeOrigin: true,
       }
     },

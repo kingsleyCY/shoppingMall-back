@@ -1,6 +1,6 @@
-const router = require('koa-router')()
+const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
-const { baseConfigModel } = require('../../model/baseConfigModel')
+const { baseConfigModel } = require('../../model/baseConfigModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
 
 /* 获取商品分类及列表 */

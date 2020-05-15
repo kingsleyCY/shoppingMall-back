@@ -9,6 +9,7 @@ var userSchema = new mongoose.Schema({
   qrCode: { type: String, default: '' }, // 推荐二维码地址
   idProxy: Number, // 推荐二维码地址
   isProxy: { type: Number, default: 0 }, // 是否为代理
+  activityList: { type: Object, default: {} }
 }, { collection: "userList" });
 var userModel = db.model("userList", userSchema);
 

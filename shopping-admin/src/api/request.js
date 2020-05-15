@@ -146,3 +146,11 @@ export function getActiList(param) {
     data: param
   })
 }
+
+export function getOrderList(param) {
+  return instance({
+    url: '/shop/orderList',
+    method: 'post',
+    data: param
+  })
+}
