@@ -4,10 +4,30 @@ const url = require('url');
 const https = require('https');
 const baseConfig = require('../../common/baseConfig');
 const router = require('koa-router')();
+const jwt = require('jsonwebtoken');
 const { userModel } = require('../../model/userModel');
 const { orderModel } = require('../../model/admin/orderModel');
 
-
+/* 登录 admin */
+/*
+* param： username、password
+* */
+router.post('/loginAdmin', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['username', 'password'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  if (param.username === "admin" && param.password === "12345") {
+    const token = jwt.sign({
+        username: param.username,
+        password: param.password,
+      }, baseConfig.jwtScret, { expiresIn: '1h' }
+    )
+    ctx.body = commons.jsonBack(1, { token }, "登录成功！");
+  } else {
+    ctx.body = commons.jsonBack(1003, {}, "登录失败，账号密码错误");
+  }
+})
 
 /* 获取用户列表 */
 /* listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表 */

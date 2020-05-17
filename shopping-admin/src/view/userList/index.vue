@@ -160,7 +160,7 @@
         let param = {
           page: this.orderPage.page,
           pageSize: this.orderPage.pageSize,
-          id: this.detailItem.userId
+          userId: this.detailItem.userId
         }
         getOrderList(param).then(res => {
           this.orderTable = res.data.list;

@@ -28,6 +28,7 @@ app.use(async (ctx, next) => {
 // onerror(app)
 app.use(async (ctx, next) => {
   return next().catch((err) => {
+    console.log(err);
     if (err.status === 200 && err.message === "OK") {
       ctx.status = 200;
       ctx.body = baseCommon.jsonBack(err.code, err.data, err.mess);
@@ -64,6 +65,14 @@ app.use(async (ctx, next) => {
       }
     } else {
       ctx.body = commons.jsonBack(1006, {}, "参数缺少token和useID");
+    }
+  } else if (ctx.url.indexOf("/admin/") === 0 && ctx.url !== "/admin/userList/loginAdmin") {
+    try {
+      var decoded = jwt.verify(ctx.header.authorization, baseConfig.jwtScret);
+      console.log(decoded);
+      await next();
+    } catch (err) {
+      ctx.throw(200, commons.jsonBack(1006, {}, "token验证失效"))
     }
   } else {
     await next();

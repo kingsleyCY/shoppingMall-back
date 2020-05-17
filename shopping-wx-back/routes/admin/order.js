@@ -3,15 +3,18 @@ const { orderModel } = require('../../model/admin/orderModel');
 
 /* 查询订单 */
 /*
-* param: page、pageSize、id
+* param: page、pageSize
+* opparam：userId
 * */
 router.post('/orderList', async (ctx) => {
   var param = ctx.request.body;
-  if (!commons.judgeParamExists(['page', 'pageSize', 'id'], param)) {
+  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  const list = await orderModel.find({}).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
-  var total = await orderModel.find({})
+  let search = {}
+  param.userId ? search.userId = param.userId : "";
+  const list = await orderModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var total = await orderModel.find(search);
   ctx.body = commons.jsonBack(1, {
     list,
     total: total.length,

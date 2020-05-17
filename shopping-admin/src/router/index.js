@@ -44,6 +44,12 @@ const mainRouter = [
     tilte: '活动列表',
     component: resolve => require(['@/view/activityList'], resolve),
   },
+  {
+    path: 'orderList',
+    name: 'orderList',
+    tilte: '订单列表',
+    component: resolve => require(['@/view/orderList'], resolve),
+  },
 ]
 
 
@@ -53,8 +59,14 @@ const router = new Router({
     {
       path: '/',
       name: 'index',
-      redirect: '/admin_html/commidity',
+      redirect: '/login',
       hidden: true
+    },
+    {
+      path: '/login',
+      name: 'login',
+      hidden: true,
+      component: resolve => require(['@/view/login'], resolve),
     },
     {
       path: '/admin_html',

@@ -1,5 +1,6 @@
 import axios from 'axios'
-// import { Message } from 'element-ui'
+import { router } from './../router/index'
+import { Message } from 'element-ui'
 
 var instance
 if (axios) {
@@ -8,9 +9,20 @@ if (axios) {
     timeout: 15000
   });
 }
+instance.interceptors.request.use(config => {
+  if (sessionStorage.getItem("token")) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
+    config.headers.Authorization = sessionStorage.getItem("token");
+  }
+  return config;
+}, err => {
+  return Promise.reject(err);
+});
 instance.interceptors.response.use(function (response) {
   if (response.data.code === 1) {
     return response.data
+  } else if (response.data.code === 1006) {
+    Message.error("登录已过期");
+    router.push("/login");
   } else {
     return response.data
   }
@@ -18,6 +30,14 @@ instance.interceptors.response.use(function (response) {
   // Do something with response error
   return Promise.reject(error)
 })
+
+export function loginAdmin(param) {
+  return instance({
+    url: '/admin/userList/loginAdmin',
+    method: 'post',
+    data: param
+  })
+}
 
 
 /* 获取基本配置参数 */
