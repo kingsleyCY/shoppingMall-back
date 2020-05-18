@@ -103,6 +103,13 @@ app.use(async (ctx, next) => {
 // routes
 app.use(router.routes()).use(router.allowedMethods());
 
+/*const schedule = require("node-schedule");
+var date = new Date(2020, 4, 17, 23, 27, 0);
+console.log(date);
+schedule.scheduleJob(date, function () {
+  console.log("执行任务");
+});*/
+
 // error-handling
 /*app.on('error', (err, ctx) => {
   console.log(err)
