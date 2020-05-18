@@ -49,7 +49,7 @@ app.use(async (ctx, next) => {
     const token = ctx.header.authorization;
     if (token && param && param.userId) {
       try {
-        var decoded = jwt.verify(token, baseConfig.jwtScret);
+        var decoded = jwt.verify(token, commons.jwtScret);
         const user = await userModel.findUser({
           openId: decoded.openId,
           userId: decoded.userId
@@ -71,7 +71,7 @@ app.use(async (ctx, next) => {
     }
   } else if (ctx.url.indexOf("/admin/") === 0 && ctx.url !== "/admin/userList/loginAdmin") {
     try {
-      var decoded = jwt.verify(ctx.header.authorization, baseConfig.jwtScret);
+      var decoded = jwt.verify(ctx.header.authorization, commons.jwtScret);
       console.log(decoded);
       await next();
     } catch (err) {
