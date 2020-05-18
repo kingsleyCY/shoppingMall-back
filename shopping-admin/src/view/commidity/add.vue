@@ -276,7 +276,7 @@
         })
       },
       cancel() {
-        this.$router.push("/admin/commidity")
+        this.$router.push("/admin_html/commidity")
       },
       fillForm(detail) {
         this.ruleForm.title = detail.title

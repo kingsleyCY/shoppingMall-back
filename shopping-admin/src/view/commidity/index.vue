@@ -102,10 +102,10 @@
         this.getList()
       },
       addCommodity() {
-        this.$router.push('/admin/addcommidity')
+        this.$router.push('/admin_html/addcommidity')
       },
       editCommodity(id) {
-        this.$router.push('/admin/addcommidity?id=' + id)
+        this.$router.push('/admin_html/addcommidity?id=' + id)
       },
       checkedCommodity(item) {
         item.checked = !item.checked
