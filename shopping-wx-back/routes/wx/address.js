@@ -11,7 +11,8 @@ router.post('/addAddress', async (ctx) => {
   if (!commons.judgeParamExists(['userName', 'provinceName', 'cityName', 'countyName', 'detailInfo', 'telNumber', 'userId'], param)) {
     ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
   } else {
-    if (await addressModel.countAll(param) >= 10) {
+    var count = await addressModel.countAll(param)
+    if (count >= 10) {
       ctx.body = commons.jsonBack(1004, {}, "该用户添加地址数已超过10个！");
     } else {
       param.created_time = Date.parse(new Date())
@@ -20,6 +21,7 @@ router.post('/addAddress', async (ctx) => {
           resolve(data);
         })
       })
+      count === 0 ? param.isDefault = 1 : param.isDefault = 0;
       let address = await addressModel.creatAddress(param)
       ctx.body = commons.jsonBack(1, address, "添加地址成功");
     }
@@ -64,7 +66,7 @@ router.post('/deleAddress', async (ctx) => {
 /* 修改地址 */
 /*
 * param：userId、addressId
-* params：userName、provinceName、cityName、countyName、detailInfo、telNumber、postalCode
+* params：userName、provinceName、cityName、countyName、detailInfo、telNumber、postalCode、isDefault
 * */
 router.post('/updateAddress', async (ctx) => {
   let param = ctx.request.body
@@ -77,8 +79,29 @@ router.post('/updateAddress', async (ctx) => {
     }
     let updateObj = JSON.parse(JSON.stringify(param))
     delete updateObj.userId
-    delete updateObj.id
+    delete updateObj.addressId
     let newAdr = await addressModel.updateAddress(findObj, updateObj)
+    ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！")
+  }
+})
+
+/* 设为默认地址 */
+/*
+* param：userId、addressId
+* */
+router.post('/setDefaultAddress', async (ctx) => {
+  let param = ctx.request.body
+  if (!commons.judgeParamExists(['addressId', 'userId'], param)) {
+    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+  } else {
+    let findObj = {
+      userId: param.userId
+    }
+    await addressModel.model.updateMany(findObj, { $set: { "isDefault": 0 } })
+    let newAdr = await addressModel.model.findOneAndUpdate({
+      userId: param.userId,
+      id: param.addressId,
+    }, { $set: { "isDefault": 1 } }, { new: true })
     ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！")
   }
 })
