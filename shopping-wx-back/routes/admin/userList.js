@@ -21,7 +21,7 @@ router.post('/loginAdmin', async (ctx) => {
     const token = jwt.sign({
         username: param.username,
         password: param.password,
-      }, baseConfig.jwtScret, { expiresIn: '1h' }
+      }, commons.jwtScret, { expiresIn: '1h' }
     )
     ctx.body = commons.jsonBack(1, { token }, "登录成功！");
   } else {
