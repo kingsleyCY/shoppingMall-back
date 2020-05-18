@@ -96,8 +96,8 @@ router.post('/getProxyOrder', async (ctx) => {
 
 async function getAccesstoken() {
   var content = qs.stringify({
-    appid: baseConfig.wx_appid,
-    secret: baseConfig.wx_secret,
+    appid: commons.wx_appid,
+    secret: commons.wx_secret,
     grant_type: 'client_credential'
   });
   const options = 'https://api.weixin.qq.com/cgi-bin/token?' + content;

@@ -17,8 +17,8 @@ router.post('/loginWx', async (ctx) => {
     ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
   } else {
     var content = qs.stringify({
-      appid: baseConfig.wx_appid,
-      secret: baseConfig.wx_secret,
+      appid: commons.wx_appid,
+      secret: commons.wx_secret,
       js_code: param.code,
       grant_type: 'authorization_code'
     });
@@ -50,7 +50,7 @@ router.post('/loginWx', async (ctx) => {
       const token = jwt.sign({
         openId: openid,
         userId: userDeatil.userId
-      }, baseConfig.jwtScret);
+      }, commons.jwtScret);
       ctx.res.setHeader('authorization', token);
       ctx.body = commons.jsonBack(1, userDeatil, "用户登陆成功！");
     } else {

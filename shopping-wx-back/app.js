@@ -5,10 +5,13 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+var baseCommon = require('./common/common');
+global.commons = baseCommon;
+
+var baseConfig = require('./common/baseConfig');
+/* 连接数据库 */
 require("./common/connect-database")
 const router = require('./routes/index')
-var baseCommon = require('./common/common');
-var baseConfig = require('./common/baseConfig');
 const userModel = require('./model/userModel');
 const jwt = require('jsonwebtoken');
 
@@ -90,7 +93,6 @@ app.use(require('koa-static')(__dirname + '/public'))
 /*app.use(views(__dirname + '/views', {
   extension: 'ejs'
 }))*/
-global.commons = baseCommon;
 
 // logger
 app.use(async (ctx, next) => {
