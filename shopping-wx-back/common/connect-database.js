@@ -37,16 +37,8 @@ global.db = db
 global.client = client
 
 async function setOss() {
-  const accessKeyId = await new Promise((resolve, reject) => {
-    client.get("accessKeyId", function (err, data) {
-      resolve(data);
-    })
-  })
-  const accessKeySecret = await new Promise((resolve, reject) => {
-    client.get("accessKeySecret", function (err, data) {
-      resolve(data);
-    })
-  })
+  const accessKeyId = commons.accessKeyId;
+  const accessKeySecret = commons.accessKeySecret;
   global.ossClient = new OSS({
     region: "oss-cn-beijing",
     accessKeyId: accessKeyId,

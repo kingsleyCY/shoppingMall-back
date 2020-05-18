@@ -1,3 +1,7 @@
+var fs = require("fs");
+
+var localData = fs.readFileSync("./common/data.json", 'utf-8');
+localData = JSON.parse(localData)
 var baseCommon = {
   jsonBack(code, date, mess) {
     return {
@@ -30,8 +34,10 @@ var baseCommon = {
       delete newObj[arr[i]]
     }
     return newObj
-  }
+  },
 }
+Object.assign(baseCommon, localData)
+console.log(baseCommon);
 
 module.exports = baseCommon
 /* code 说明 */
