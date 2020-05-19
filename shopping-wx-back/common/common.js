@@ -37,7 +37,6 @@ var baseCommon = {
   },
 }
 Object.assign(baseCommon, localData)
-console.log(baseCommon);
 
 module.exports = baseCommon
 /* code 说明 */

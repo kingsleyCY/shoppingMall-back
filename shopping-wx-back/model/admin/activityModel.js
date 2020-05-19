@@ -8,7 +8,8 @@ var activitySchema = new mongoose.Schema({
   prizeId: String, //
   prizeDeatil: Object,
   isDelete: { type: Number, default: 0 },
-  status: Number, // 1未开始 2已开始 3已过期 4已作废/删除
+  status: Number, // 0初始化 1未开始 2已开始 3已过期 4已作废/删除
+  scheduleModel: Object,
 }, { collection: "activityList" });
 var activityModel = db.model("activityList", activitySchema);
 

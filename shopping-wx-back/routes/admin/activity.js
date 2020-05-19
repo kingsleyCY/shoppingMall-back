@@ -26,25 +26,9 @@ router.post('/creatActivity', async (ctx) => {
   obj.prizeDeatil = prizeItem
   if (param.id) {
     obj.id = param.id
-    var oldItem = await activityModel.findOne({ id: param.id })
-    if (oldItem.status === 1 || oldItem.status === 2) {
-      var item = await activityModel.findOneAndUpdate({ id: param.id }, obj, { new: true })
-      var status = item.status;
-      var nowData = Date.parse(new Date())
-      if (item.isDelete === 4) {
-        status = item.status;
-      } else if (nowData < item.sTime) {
-        status = 1
-      } else if (nowData > item.sTime && nowData < item.eTime) {
-        status = 2
-      } else if (nowData > item.eTime) {
-        status = 3
-      }
-      var items = await activityModel.findOneAndUpdate({ id: param.id }, { status }, { new: true })
-      ctx.body = commons.jsonBack(1, items, "创建修改成功");
-    } else {
-      ctx.throw(200, commons.jsonBack(1004, {}, "该活动已过期"))
-    }
+    var item = await activityModel.findOneAndUpdate({ id: param.id }, obj, { new: true });
+    const statusItem = await setActitvtyStatus(item.id)
+    ctx.body = commons.jsonBack(1, statusItem, "修改活动成功！");
   } else {
     await client.incr('activityId');
     obj.id = await new Promise((resolve, reject) => {
@@ -52,10 +36,11 @@ router.post('/creatActivity', async (ctx) => {
         resolve(data);
       })
     })
-    obj.created_time = Date.parse(new Date())
-    obj.status = 1
-    var item = await activityModel.create(obj)
-    ctx.body = commons.jsonBack(1, item, "创建活动成功");
+    obj.created_time = Date.parse(new Date());
+    obj.status = 0;
+    var item = await activityModel.create(obj);
+    const statusItem = await setActitvtyStatus(item.id)
+    ctx.body = commons.jsonBack(1, statusItem, "创建活动成功！");
   }
 })
 
@@ -81,6 +66,31 @@ router.post('/getActiList', async (ctx) => {
   const list = await activityModel.find(obj).sort({ '_id': -1 })
   ctx.body = commons.jsonBack(1, list, "获取数据成功");
 })
+
+
+/* 修改状态，添加定时任务 */
+async function setActitvtyStatus(id) {
+  let item = await shoppingModel.findOne({ id });
+  const nowTime = Date.parse(new Date());
+  let status = 0;
+  if (nowTime < item.sTime) { // 未开始
+    status = 1;
+    createdStartSchedule(item)
+  } else if (nowTime >= item.sTime && nowTime < item.eTime) { // 已开始
+    status = 2;
+  } else if (nowTime > item.eTime) { // 已结束
+    status = 3;
+  }
+
+  async function createdStartSchedule(item) {
+    var date = new Date(2020, 4, 17, 23, 27, 0);
+    const scheduleModel = schedule.scheduleJob(date, function () {
+      console.log("执行任务");
+    });
+    await activityModel.findOneAndUpdate({ id: item.id }, { scheduleModel: scheduleModel }, { new: true });
+
+  }
+}
 
 
 module.exports = router

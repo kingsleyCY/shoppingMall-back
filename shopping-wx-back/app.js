@@ -72,7 +72,7 @@ app.use(async (ctx, next) => {
   } else if (ctx.url.indexOf("/admin/") === 0 && ctx.url !== "/admin/userList/loginAdmin") {
     try {
       var decoded = jwt.verify(ctx.header.authorization, commons.jwtScret);
-      console.log(decoded);
+      // console.log(decoded);
       await next();
     } catch (err) {
       ctx.throw(200, commons.jsonBack(1006, {}, "token验证失效"))
