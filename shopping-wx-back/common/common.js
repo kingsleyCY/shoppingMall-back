@@ -54,11 +54,11 @@ var baseCommon = {
     })
     return access_token
   },
-  async setQrcode(token, scene, catalog) {
+  async setQrcode(access_token, scene, catalog) {
     const post_data = JSON.stringify({
       scene: String(scene)
     });
-    let options = url.parse(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${token}`);
+    let options = url.parse(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${access_token}`);
     options = Object.assign(options, {
       method: 'POST',
       headers: {
@@ -75,7 +75,7 @@ var baseCommon = {
         });
         res.on('end', () => {
           const imgBuffer = Buffer.from(resData, 'binary')
-          var fileName = 'shop/' + catalog + '/' + (Date.parse(new Date()) / 1000) + '-' + scene + '.jpg';
+          var fileName = catalog + (Date.parse(new Date()) / 1000) + '-' + scene + '.jpg';
           ossClient.put(fileName, imgBuffer).then(res => {
             resolve(res)
           })
@@ -88,7 +88,24 @@ var baseCommon = {
       req.end();
     })
     return imgBuffer
-  }
+  },
+  timeTransfer(data, arr) {
+    function add0(m) {
+      return m < 10 ? '0' + m : m
+    }
+    var time = new Date(data);
+    var y = time.getFullYear();
+    var m = time.getMonth() + 1;
+    var d = time.getDate();
+    var h = time.getHours();
+    var mm = time.getMinutes();
+    var s = time.getSeconds();
+    if (arr) {
+      return [y, add0(m), add0(d), add0(h), add0(mm), add0(s)]
+    } else {
+      return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
+    }
+  },
 }
 Object.assign(baseCommon, localData)
 

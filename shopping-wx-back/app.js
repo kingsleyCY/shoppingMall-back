@@ -46,7 +46,7 @@ app.use(async (ctx, next) => {
   var param = ctx.method === "GET" ? ctx.query : ctx.request.body;
   var needValidUrl = baseConfig.needValidUrl
   if (needValidUrl.indexOf(ctx.request.path) >= 0) {
-    const token = ctx.header.authorization;
+    const token = ctx.header.Authorization;
     if (token && param && param.userId) {
       try {
         var decoded = jwt.verify(token, commons.jwtScret);
@@ -71,7 +71,7 @@ app.use(async (ctx, next) => {
     }
   } else if (ctx.url.indexOf("/admin/") === 0 && ctx.url !== "/admin/userList/loginAdmin") {
     try {
-      var decoded = jwt.verify(ctx.header.authorization, commons.jwtScret);
+      var decoded = jwt.verify(ctx.header.Authorization, commons.jwtScret);
       // console.log(decoded);
       await next();
     } catch (err) {

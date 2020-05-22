@@ -6,10 +6,12 @@ var activitySchema = new mongoose.Schema({
   sTime: Number, //
   eTime: Number, //
   prizeId: String, //
-  prizeDeatil: Object,
+  prizeDeatil: Object, // 奖品详情
   isDelete: { type: Number, default: 0 },
-  status: Number, // 0初始化 1未开始 2已开始 3已过期 4已作废/删除
-  scheduleModel: Object,
+  status: Number, // 0初始化 1未开始 2已开始 3已结束
+  scheduleStartModel: Object, // 定时任务
+  scheduleEndModel: Object, // 定时任务
+  resultId: { type: String, default: "" }
 }, { collection: "activityList" });
 var activityModel = db.model("activityList", activitySchema);
 

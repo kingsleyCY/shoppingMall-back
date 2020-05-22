@@ -4,8 +4,10 @@
       <div class="header">
         <el-tabs v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="所有活动" name="first"></el-tab-pane>
-          <el-tab-pane label="进行中" name="second"></el-tab-pane>
-          <el-tab-pane label="已过期" name="third"></el-tab-pane>
+          <el-tab-pane label="未开始" name="second"></el-tab-pane>
+          <el-tab-pane label="进行中" name="third"></el-tab-pane>
+          <el-tab-pane label="已结束" name="fourth"></el-tab-pane>
+          <el-tab-pane label="已删除" name="five"></el-tab-pane>
         </el-tabs>
         <el-button type="text" @click="toAdd" class="add-btn">+添加活动</el-button>
         <el-table
@@ -51,10 +53,10 @@
             label="操作"
             width="120">
             <template slot-scope="scope">
-              <el-button type="text" size="small" v-if="scope.row.status === 1 || scope.row.status === 2"
+              <el-button type="text" size="small" v-if="scope.row.isDelete === 0"
                          @click="editActivity(scope.row)">编辑
               </el-button>
-              <el-button type="text" size="small"
+              <el-button type="text" size="small" v-if="scope.row.isDelete === 0"
                          @click="deleActivity(scope.row)">删除
               </el-button>
             </template>
@@ -118,7 +120,7 @@
         activityList: [],
         pickeroptions: {
           disabledDate: time => {
-            return time.getTime() < (Date.now() - 24 * 60 * 60 * 1000) // 返回所有时间小于当前时间的值
+            return time.getTime() < (Date.now() - 24 * 60 * 60 * 1000)
           }
         }
       }
@@ -155,9 +157,13 @@
         if (this.activeName === "first") {
           this.getActiListMethods("all")
         } else if (this.activeName === "second") {
-          this.getActiListMethods("ing")
+          this.getActiListMethods("ready")
         } else if (this.activeName === "third") {
+          this.getActiListMethods("ing")
+        } else if (this.activeName === "fourth") {
           this.getActiListMethods("over")
+        } else if (this.activeName === "five") {
+          this.getActiListMethods("delete")
         }
       },
       toAdd() {
