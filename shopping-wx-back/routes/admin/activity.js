@@ -44,6 +44,19 @@ router.post('/creatActivity', async (ctx) => {
   }
 })
 
+/* 删除活动 */
+/*
+* param:id
+* */
+router.post('/deleActivity', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['id'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var item = await activityModel.findOneAndUpdate({ id: param.id }, { isDelete: 1 }, { new: true });
+  ctx.body = commons.jsonBack(1, item, "删除成功");
+})
+
 /* 获取活动列表 */
 /*
 * param: type(all , ing, over)
@@ -63,6 +76,7 @@ router.post('/getActiList', async (ctx) => {
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
+  obj.isDelete = 0
   const list = await activityModel.find(obj).sort({ '_id': -1 })
   ctx.body = commons.jsonBack(1, list, "获取数据成功");
 })
@@ -71,25 +85,27 @@ router.post('/getActiList', async (ctx) => {
 /* 修改状态，添加定时任务 */
 async function setActitvtyStatus(id) {
   let item = await shoppingModel.findOne({ id });
+  console.log(item);
   const nowTime = Date.parse(new Date());
   let status = 0;
   if (nowTime < item.sTime) { // 未开始
     status = 1;
-    createdStartSchedule(item)
+    // createdStartSchedule(item)
   } else if (nowTime >= item.sTime && nowTime < item.eTime) { // 已开始
     status = 2;
   } else if (nowTime > item.eTime) { // 已结束
     status = 3;
   }
-
-  async function createdStartSchedule(item) {
+  var statusItem = await activityModel.findOneAndUpdate({ id }, { status }, { new: true });
+  return statusItem
+  /*async function createdStartSchedule(item) {
     var date = new Date(2020, 4, 17, 23, 27, 0);
     const scheduleModel = schedule.scheduleJob(date, function () {
       console.log("执行任务");
     });
     await activityModel.findOneAndUpdate({ id: item.id }, { scheduleModel: scheduleModel }, { new: true });
 
-  }
+  }*/
 }
 
 

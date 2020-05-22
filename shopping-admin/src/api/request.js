@@ -169,6 +169,14 @@ export function getActiList(param) {
   })
 }
 
+export function deleActivity(param) {
+  return instance({
+    url: '/admin/activity/deleActivity',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getOrderList(param) {
   return instance({
     url: '/admin/order/orderList',

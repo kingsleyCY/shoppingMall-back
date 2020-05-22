@@ -1,6 +1,7 @@
 // var commons = require('./common/baseCommon');
 var ip = "119.3.77.140"
 var mongoose = require('mongoose');
+mongoose.set('useFindAndModify', false)
 var redis = require("redis");
 var client = redis.createClient(8002, ip, {});
 const OSS = require('ali-oss');
@@ -39,6 +40,8 @@ global.client = client
 async function setOss() {
   const accessKeyId = commons.accessKeyId;
   const accessKeySecret = commons.accessKeySecret;
+  console.log(accessKeyId);
+  console.log(accessKeySecret);
   global.ossClient = new OSS({
     region: "oss-cn-beijing",
     accessKeyId: accessKeyId,

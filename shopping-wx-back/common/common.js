@@ -35,6 +35,60 @@ var baseCommon = {
     }
     return newObj
   },
+  async getAccesstoken() {
+    var content = qs.stringify({
+      appid: commons.wx_appid,
+      secret: commons.wx_secret,
+      grant_type: 'client_credential'
+    });
+    const options = 'https://api.weixin.qq.com/cgi-bin/token?' + content;
+    let access_token = await new Promise((resolve, reject) => {
+      https.get(options, (result) => {
+        result.setEncoding('utf8');
+        result.on('data', (d) => {
+          resolve(JSON.parse(d));
+        });
+      }).on('error', (e) => {
+        reject("")
+      });
+    })
+    return access_token
+  },
+  async setQrcode(token, scene, catalog) {
+    const post_data = JSON.stringify({
+      scene: String(scene)
+    });
+    let options = url.parse(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${token}`);
+    options = Object.assign(options, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'Content-Length': post_data.length,
+      }
+    });
+    const imgBuffer = await new Promise((resolve, reject) => {
+      let req = https.request(options, (res) => {
+        let resData = '';
+        res.setEncoding("binary");
+        res.on('data', data => {
+          resData += data;
+        });
+        res.on('end', () => {
+          const imgBuffer = Buffer.from(resData, 'binary')
+          var fileName = 'shop/' + catalog + '/' + (Date.parse(new Date()) / 1000) + '-' + scene + '.jpg';
+          ossClient.put(fileName, imgBuffer).then(res => {
+            resolve(res)
+          })
+        });
+      });
+      req.on('error', (e) => {
+        reject("")
+      });
+      req.write(post_data);
+      req.end();
+    })
+    return imgBuffer
+  }
 }
 Object.assign(baseCommon, localData)
 
