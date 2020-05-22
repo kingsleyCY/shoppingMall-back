@@ -1,12 +1,13 @@
 const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
-const { baseConfigModel } = require('../../model/baseConfigModel');
+const { classifyModel } = require('../../model/admin/classifyModel');
 
 /* 获取商品分类及列表 */
 router.get('/getBaseClassify', async (ctx) => {
-  var classifyList = await baseConfigModel.findOne({ "classify": "shoppingClassify" })
-  var comClassify = classifyList.content
-  var commidityList = await shoppingModel.find()
+  /*var classifyList = await classifyModel.find();
+  console.log(classifyList);*/
+  var comClassify = JSON.parse(JSON.stringify(await classifyModel.find()));
+  var commidityList = await shoppingModel.find();
   for (let i = 0; i < commidityList.length; i++) {
     for (let j = 0; j < comClassify.length; j++) {
       if (String(comClassify[j].id) === String(commidityList[i].classifyId)) {
@@ -71,7 +72,6 @@ router.post('/getSingleDetail', async (ctx) => {
   var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
-
 
 
 module.exports = router
