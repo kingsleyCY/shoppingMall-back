@@ -45,4 +45,21 @@ router.post('/joinActivity', async (ctx) => {
   }
 })
 
+/* 获取参与的活动 */
+/*
+* param:userId
+* */
+router.post('/activited', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var userItem = await userModel.findOne({ "userId": param.userId })
+  if (userItem) {
+    ctx.body = commons.jsonBack(1, { activityList: userItem.activityList }, "获取成功");
+  } else {
+    ctx.throw(200, commons.jsonBack(1001, {}, "此用户不存在"))
+  }
+})
+
 module.exports = router
