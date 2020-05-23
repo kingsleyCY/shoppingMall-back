@@ -23,24 +23,30 @@ router.post('/loginWx', async (ctx) => {
       grant_type: 'authorization_code'
     });
     const options = 'https://api.weixin.qq.com/sns/jscode2session?' + content;
-    let openid = await new Promise((resolve, reject) => {
+    let { openid, session_key } = await new Promise((resolve, reject) => {
       https.get(options, (result) => {
         result.setEncoding('utf8');
         result.on('data', (d) => {
-          resolve(JSON.parse(d).openid);
+          console.log(JSON.parse(d));
+          resolve({
+            openid: JSON.parse(d).openid,
+            session_key: JSON.parse(d).session_key
+          });
         });
       }).on('error', (e) => {
         reject("")
       });
     })
-    if (openid) {
+    if (openid && session_key) {
+      const phoneNumber = commons.decryptData(session_key, param.iv, param.encryptedData)
       let user = {
         userId: commons.generateId(),
         created_time: Date.parse(new Date()),
         openId: openid,
+        phoneNumber: phoneNumber,
         recommendId: (param.recommendId || "")
       }
-      var oldUser = await userModel.findUser({ openId: openid })
+      var oldUser = await userModel.findUser({ openId: openid, phoneNumber })
       var userDeatil = null
       if (!oldUser) {
         userDeatil = await userModel.creatUser(user)
@@ -49,6 +55,7 @@ router.post('/loginWx', async (ctx) => {
       }
       const token = jwt.sign({
         openId: openid,
+        phoneNumber: phoneNumber,
         userId: userDeatil.userId
       }, commons.jwtScret);
       ctx.res.setHeader('Authorization', token);

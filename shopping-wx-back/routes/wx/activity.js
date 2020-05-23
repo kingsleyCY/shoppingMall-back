@@ -35,7 +35,8 @@ router.post('/joinActivity', async (ctx) => {
     activityList[actitvtyItem.id] = {
       code,
       joinStatus: 1,
-      isWins: 0
+      isWins: 0,
+      actitvtyItem: JSON.stringify(actitvtyItem)
     }
     var newVal = await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList }, { new: true })
     ctx.body = commons.jsonBack(1, { code }, "参与成功");

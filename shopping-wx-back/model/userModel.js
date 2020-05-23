@@ -5,7 +5,7 @@ var userSchema = new mongoose.Schema({
   openId: String, // 绑定的微信openId
   recommendId: { type: String, default: '' }, // 推荐人的userId
   defaultAddress: { type: String, default: '' },
-  phone: { type: String, default: '' }, // 手机号
+  phoneNumber: { type: String, default: '' }, // 手机号
   qrCode: { type: String, default: '' }, // 推荐二维码地址
   idProxy: Number, // 推荐二维码地址
   isProxy: { type: Number, default: 0 }, // 是否为代理

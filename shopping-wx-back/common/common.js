@@ -1,22 +1,31 @@
 var fs = require("fs");
+const schedule = require("node-schedule");
 
 var localData = fs.readFileSync("./common/data.json", 'utf-8');
 localData = JSON.parse(localData)
-var baseCommon = {
+
+var wx = require("./module/wx")
+
+class baseCommon {
+  constructor() {
+    for (let key in localData) {
+      this[key] = localData[key]
+    }
+  }
   jsonBack(code, date, mess) {
     return {
       code: code,
       data: date,
       mess: mess
     }
-  },
+  }
   /* 生成随机用户ID */
   generateId() {
     const en_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'w', 'v', 'u', 'x', 'y', 'z']
     let num1 = Math.floor(Math.random() * en_arr.length + 1);
     let num2 = Math.floor(Math.random() * en_arr.length + 1);
     return (Math.random() * 10000000).toString(16).substr(0, 4) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 5);
-  },
+  }
   /* 生成活动码 */
   activityCode() {
     const en_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'w', 'v', 'u', 'x', 'y', 'z']
@@ -29,7 +38,7 @@ var baseCommon = {
     let num7 = Math.floor(Math.random() * en_arr.length + 1);
     let num8 = Math.floor(Math.random() * en_arr.length + 1);
     return (en_arr[num1] ? en_arr[num1] : 'a') + (en_arr[num2] ? en_arr[num2] : 'a') + (en_arr[num3] ? en_arr[num3] : 'a') + (en_arr[num4] ? en_arr[num4] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num5] ? en_arr[num5] : 'a') + (en_arr[num6] ? en_arr[num6] : 'a') + (en_arr[num7] ? en_arr[num7] : 'a') + (en_arr[num8] ? en_arr[num8] : 'a')
-  },
+  }
   /* 判断参数存在性 */
   judgeParamExists(arr, body) {
     let flag = true
@@ -39,7 +48,7 @@ var baseCommon = {
       }
     }
     return flag
-  },
+  }
   /* 删除对象指定key */
   deleteKey(obj, arr) {
     let newObj = JSON.parse(JSON.stringify(obj))
@@ -47,7 +56,7 @@ var baseCommon = {
       delete newObj[arr[i]]
     }
     return newObj
-  },
+  }
   async getAccesstoken() {
     var content = qs.stringify({
       appid: commons.wx_appid,
@@ -66,7 +75,7 @@ var baseCommon = {
       });
     })
     return access_token
-  },
+  }
   async setQrcode(access_token, scene, catalog) {
     const post_data = JSON.stringify({
       scene: String(scene)
@@ -101,7 +110,7 @@ var baseCommon = {
       req.end();
     })
     return imgBuffer
-  },
+  }
   timeTransfer(data, arr) {
     function add0(m) {
       return m < 10 ? '0' + m : m
@@ -118,11 +127,72 @@ var baseCommon = {
     } else {
       return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
     }
-  },
+  }
+  /* 定时任务-活动 */
+  async setSchedule() {
+    const { activityModel } = require('../model/admin/activityModel');
+    const list = await activityModel.find({ isDelete: 0 }).sort({ '_id': -1 });
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].status === 1) {
+        this.createdStartSchedule(list[i])
+        this.createdEndSchedule(list[i])
+      } else if (list[i].status === 2) {
+        this.createdEndSchedule(list[i])
+      }
+    }
+  }
+  async createdStartSchedule(item) {
+    const { activityModel } = require('../model/admin/activityModel');
+    if (item.scheduleStartModel) {
+      this.repeatSchedule(item.scheduleStartModel)
+    }
+    var stimeArr = this.timeTransfer(item.sTime, true)
+    var sdate = new Date(stimeArr[0], stimeArr[1] - 1, stimeArr[2], stimeArr[3], stimeArr[4], stimeArr[5]);
+    var jobId = "start" + item.id;
+    schedule.scheduleJob(jobId, sdate, async function () {
+      console.log("开始执行。。。");
+      var a = await activityModel.findOneAndUpdate({ id: item.id }, {
+        update_time: Date.parse(new Date()),
+        status: 2
+      }, { new: true })
+    }, function () {
+      console.log("开始执行1。。。");
+    });
+    await activityModel.findOneAndUpdate({ id: item.id }, {
+      status: 1,
+      scheduleStartModel: jobId
+    })
+  }
+  async createdEndSchedule(item) {
+    const { activityModel } = require('../model/admin/activityModel');
+    if (item.scheduleEndModel) {
+      this.repeatSchedule(item.scheduleEndModel)
+    }
+    var etimeArr = this.timeTransfer(item.eTime, true)
+    var edate = new Date(etimeArr[0], etimeArr[1] - 1, etimeArr[2], etimeArr[3], etimeArr[4], etimeArr[5]);
+    var jobId = "end" + item.id;
+    schedule.scheduleJob(jobId, edate, async function () {
+      console.log("结束执行。。。");
+      var a = await activityModel.findOneAndUpdate({ id: item.id }, {
+        update_time: Date.parse(new Date()),
+        status: 3
+      })
+    }, function () {
+      console.log("结束执行1。。。");
+    });
+    await activityModel.findOneAndUpdate({ id: item.id }, {
+      scheduleEndModel: jobId
+    })
+  }
+  repeatSchedule(str) {
+    schedule.scheduledJobs[str] ? schedule.scheduledJobs[str].cancel() : ""
+  }
 }
-Object.assign(baseCommon, localData)
+for (let key in wx) {
+  baseCommon.prototype[key] = wx[key]
+}
 
-module.exports = baseCommon
+module.exports = new baseCommon()
 /* code 说明 */
 const codeObj = {
   1: "操作成功",

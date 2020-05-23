@@ -1,13 +1,10 @@
-// var commons = require('./common/baseCommon');
 var ip = "119.3.77.140"
 var mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false)
 var redis = require("redis");
 var client = redis.createClient(8002, ip, {});
 const OSS = require('ali-oss');
-client.auth('12345', function () {
-  // console.log('通过认证');
-});
+client.auth('12345', function () {});
 /* 连接redis */
 client.on('connect', function () {
   console.log('Redis client connected');
@@ -40,8 +37,6 @@ global.client = client
 async function setOss() {
   const accessKeyId = commons.accessKeyId;
   const accessKeySecret = commons.accessKeySecret;
-  console.log(accessKeyId);
-  console.log(accessKeySecret);
   global.ossClient = new OSS({
     region: "oss-cn-beijing",
     accessKeyId: accessKeyId,

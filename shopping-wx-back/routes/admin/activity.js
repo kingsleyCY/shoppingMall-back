@@ -122,14 +122,13 @@ async function setActitvtyStatus(data) {
     await createdEndSchedule(data)
   } else if (nowTime >= data.sTime && nowTime < data.eTime) { // 已开始
     if (data.scheduleStartModel) {
-      data.scheduleStartModel.cancel()
+      repeatSchedule(data.scheduleStartModel)
     }
     await createdEndSchedule(data)
   }
   var statusItem = await activityModel.findOne({ id: data.id });
   statusItem = commons.judgeParamExists(statusItem, ["scheduleStartModel", "scheduleEndModel"])
   return statusItem
-
 }
 async function createdStartSchedule(item) {
   if (item.scheduleStartModel) {
@@ -172,7 +171,6 @@ async function createdEndSchedule(item) {
     scheduleEndModel: jobId
   })
 }
-
 function repeatSchedule(str) {
   schedule.scheduledJobs[str] ? schedule.scheduledJobs[str].cancel() : ""
 }
