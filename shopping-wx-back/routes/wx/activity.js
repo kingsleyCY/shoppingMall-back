@@ -31,6 +31,9 @@ router.post('/joinActivity', async (ctx) => {
       ctx.throw(200, commons.jsonBack(1001, {}, "此用户不存在"))
     }
     var activityList = userItem.activityList;
+    if (activityList && activityList[actitvtyItem.id] && activityList[actitvtyItem.id]['joinStatus'] && activityList[actitvtyItem.id]['code']) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "已参加过此活动"))
+    }
     var code = commons.activityCode()
     !activityList ? activityList = {} : ""
     activityList[actitvtyItem.id] = {
