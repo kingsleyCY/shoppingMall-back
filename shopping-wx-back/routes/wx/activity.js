@@ -7,10 +7,6 @@ const { userModel } = require('../../model/userModel');
 * param:userId
 * */
 router.post('/getActivity', async (ctx) => {
-  var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['userId'], param)) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
-  }
   const list = await activityModel.find({ "status": 2, "isDelete": 0 }).sort({ '_id': -1 })
   ctx.body = commons.jsonBack(1, list, "获取数据成功");
 })
