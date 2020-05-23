@@ -45,7 +45,7 @@
             label="状态"
             min-width="50">
             <template slot-scope="scope">
-              {{statusClassify(scope.row.status)}}
+              {{statusClassify(scope.row.status,scope.row.isDelete)}}
             </template>
           </el-table-column>
           <el-table-column
@@ -205,7 +205,10 @@
 
         })
       },
-      statusClassify(type) {
+      statusClassify(type, isDelete) {
+        if (isDelete === 1) {
+          return "已删除"
+        }
         switch (type) {
           case 1:
             return "未开始";
@@ -223,7 +226,7 @@
         deleActivity({id: row.id}).then(res => {
           if (res.code === 1) {
             this.$message.success("操作成功")
-            this.getActiListMethods()
+            this.handleClick()
           } else {
             this.$message.error(res.mess)
           }

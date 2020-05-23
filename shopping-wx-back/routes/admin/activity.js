@@ -14,7 +14,7 @@ router.post('/creatActivity', async (ctx) => {
   if (param.sTime > param.eTime) {
     ctx.throw(200, commons.jsonBack(1003, {}, "开始时间不能大于结束时间"))
   } else if (param.eTime - param.sTime < 24 * 60 * 60 * 1000) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "时间段必须大于一天"))
+    // ctx.throw(200, commons.jsonBack(1003, {}, "时间段必须大于一天"))
   }
   if (param.id) {
     var activityItem = await activityModel.findOne({ id: param.id })
@@ -34,8 +34,10 @@ router.post('/creatActivity', async (ctx) => {
       prizeId: param.prizeId,
       prizeDeatil: prizeItem,
       update_time: Date.parse(new Date()),
+      sTime: param.sTime,
+      eTime: param.eTime,
     }, { new: true })));
-    // newItem = await setActitvtyStatus(newItem)
+    newItem = await setActitvtyStatus(newItem)
     ctx.body = commons.jsonBack(1, newItem, "修改活动成功！");
   } else {
     if (param.eTime < Date.parse(new Date())) {
@@ -62,7 +64,7 @@ router.post('/creatActivity', async (ctx) => {
     obj.update_time = Date.parse(new Date());
     obj.created_time = Date.parse(new Date());
     var newItem = JSON.parse(JSON.stringify(await activityModel.create(obj)));
-    // item = await setActitvtyStatus(newItem)
+    newItem = await setActitvtyStatus(newItem)
     ctx.body = commons.jsonBack(1, newItem, "创建活动成功！");
   }
 })
@@ -106,7 +108,7 @@ router.post('/getActiList', async (ctx) => {
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  const list = await activityModel.find(obj).sort({ '_id': -1 });
+  var list = await activityModel.find(obj).sort({ '_id': -1 });
   ctx.body = commons.jsonBack(1, list, "获取数据成功");
 })
 
@@ -115,28 +117,64 @@ router.post('/getActiList', async (ctx) => {
 /* 创建定时任务条件：初始化/未开始 */
 async function setActitvtyStatus(data) {
   const nowTime = Date.parse(new Date());
-  let status = 0;
   if (nowTime < data.sTime) { // 未开始
-    status = 1;
-    createdStartSchedule(data)
+    await createdStartSchedule(data)
+    await createdEndSchedule(data)
   } else if (nowTime >= data.sTime && nowTime < data.eTime) { // 已开始
-    status = 2;
+    if (data.scheduleStartModel) {
+      data.scheduleStartModel.cancel()
+    }
+    await createdEndSchedule(data)
   }
-  var statusItem = await activityModel.findOneAndUpdate({ id }, { status }, { new: true });
+  var statusItem = await activityModel.findOne({ id: data.id });
+  statusItem = commons.judgeParamExists(statusItem, ["scheduleStartModel", "scheduleEndModel"])
   return statusItem
 
-
-  async function createdStartSchedule(item) {
-    var timeArr = commons.timeTransfer(item.sTime, true)
-    console.log(timeArr);
-    var date = new Date(timeArr[0], timeArr[1], timeArr[2], timeArr[3], timeArr[4], timeArr[5]);
-    const scheduleModel = schedule.scheduleJob(date, function () {
-      console.log("执行任务");
-    }.bind(null, item));
-    await activityModel.findOneAndUpdate({ id: item.id }, { scheduleModel: scheduleModel }, { new: true });
-
+}
+async function createdStartSchedule(item) {
+  if (item.scheduleStartModel) {
+    repeatSchedule(item.scheduleStartModel)
   }
+  var stimeArr = commons.timeTransfer(item.sTime, true)
+  var sdate = new Date(stimeArr[0], stimeArr[1] - 1, stimeArr[2], stimeArr[3], stimeArr[4], stimeArr[5]);
+  var jobId = "start" + item.id;
+  schedule.scheduleJob(jobId, sdate, async function () {
+    console.log("开始执行。。。");
+    var a = await activityModel.findOneAndUpdate({ id: item.id }, {
+      update_time: Date.parse(new Date()),
+      status: 2
+    }, { new: true })
+  }, function () {
+    console.log("开始执行1。。。");
+  });
+  await activityModel.findOneAndUpdate({ id: item.id }, {
+    status: 1,
+    scheduleStartModel: jobId
+  })
+}
+async function createdEndSchedule(item) {
+  if (item.scheduleEndModel) {
+    repeatSchedule(item.scheduleEndModel)
+  }
+  var etimeArr = commons.timeTransfer(item.eTime, true)
+  var edate = new Date(etimeArr[0], etimeArr[1] - 1, etimeArr[2], etimeArr[3], etimeArr[4], etimeArr[5]);
+  var jobId = "end" + item.id;
+  schedule.scheduleJob(jobId, edate, async function () {
+    console.log("结束执行。。。");
+    var a = await activityModel.findOneAndUpdate({ id: item.id }, {
+      update_time: Date.parse(new Date()),
+      status: 3
+    })
+  }, function () {
+    console.log("结束执行1。。。");
+  });
+  await activityModel.findOneAndUpdate({ id: item.id }, {
+    scheduleEndModel: jobId
+  })
 }
 
+function repeatSchedule(str) {
+  schedule.scheduledJobs[str] ? schedule.scheduledJobs[str].cancel() : ""
+}
 
 module.exports = router

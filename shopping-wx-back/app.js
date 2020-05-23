@@ -31,11 +31,11 @@ app.use(async (ctx, next) => {
 // onerror(app)
 app.use(async (ctx, next) => {
   return next().catch((err) => {
-    console.log(err);
     if (err.status === 200 && err.message === "OK") {
       ctx.status = 200;
       ctx.body = baseCommon.jsonBack(err.code, err.data, err.mess);
     } else {
+      console.log(err);
       ctx.body = baseCommon.jsonBack(1009, {}, "服务器响应失败");
     }
   });
@@ -71,12 +71,17 @@ app.use(async (ctx, next) => {
     }
   } else if (ctx.url.indexOf("/admin/") === 0 && ctx.url !== "/admin/userList/loginAdmin") {
     try {
-      var decoded = jwt.verify(ctx.header.Authorization, commons.jwtScret);
-      // console.log(decoded);
-      await next();
+      var token = ctx.header.authorization;
+      var decoded = jwt.verify(token, commons.jwtScret);
     } catch (err) {
-      ctx.throw(200, commons.jsonBack(1006, {}, "token验证失效"))
+      console.log(err);
+      if (err.status === 200 && err.message === "OK") {
+        ctx.throw(200, commons.jsonBack(err.code, {}, err.mess))
+      } else {
+        ctx.throw(200, commons.jsonBack(1006, {}, "token验证失效"))
+      }
     }
+    await next();
   } else {
     await next();
   }

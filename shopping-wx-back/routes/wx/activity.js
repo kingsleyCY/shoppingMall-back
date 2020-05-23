@@ -1,5 +1,6 @@
 const router = require('koa-router')();
 const { activityModel } = require('../../model/admin/activityModel');
+const { userModel } = require('../../model/userModel');
 
 /* 获取当前活动列表 */
 /*
@@ -23,12 +24,24 @@ router.post('/joinActivity', async (ctx) => {
   if (!commons.judgeParamExists(['activityId', 'userId'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  const actitvtyItem = await activityModel.find({ "status": 2, "id": param.activityId }).sort({ '_id': -1 })
-  if (actitvtyItem.length >= 0) {
-
-    ctx.body = commons.jsonBack(1, {}, "参与成功");
+  const actitvtyItem = await activityModel.findOne({ "status": 2, "id": param.activityId })
+  if (actitvtyItem) {
+    var userItem = await userModel.findOne({ "userId": param.userId })
+    if (!userItem) {
+      ctx.throw(200, commons.jsonBack(1001, {}, "此用户不存在"))
+    }
+    var activityList = userItem.activityList;
+    var code = commons.activityCode()
+    !activityList ? activityList = {} : ""
+    activityList[actitvtyItem.id] = {
+      code,
+      joinStatus: 1,
+      isWins: 0
+    }
+    var newVal = await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList }, { new: true })
+    ctx.body = commons.jsonBack(1, { code }, "参与成功");
   } else {
-    ctx.body = commons.jsonBack(1003, {}, "该活动未开始");
+    ctx.throw(200, commons.jsonBack(1003, {}, "此活动不存在"))
   }
 })
 

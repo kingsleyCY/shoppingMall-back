@@ -17,6 +17,19 @@ var baseCommon = {
     let num2 = Math.floor(Math.random() * en_arr.length + 1);
     return (Math.random() * 10000000).toString(16).substr(0, 4) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 5);
   },
+  /* 生成活动码 */
+  activityCode() {
+    const en_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'w', 'v', 'u', 'x', 'y', 'z']
+    let num1 = Math.floor(Math.random() * en_arr.length + 1);
+    let num2 = Math.floor(Math.random() * en_arr.length + 1);
+    let num3 = Math.floor(Math.random() * en_arr.length + 1);
+    let num4 = Math.floor(Math.random() * en_arr.length + 1);
+    let num5 = Math.floor(Math.random() * en_arr.length + 1);
+    let num6 = Math.floor(Math.random() * en_arr.length + 1);
+    let num7 = Math.floor(Math.random() * en_arr.length + 1);
+    let num8 = Math.floor(Math.random() * en_arr.length + 1);
+    return (en_arr[num1] ? en_arr[num1] : 'a') + (en_arr[num2] ? en_arr[num2] : 'a') + (en_arr[num3] ? en_arr[num3] : 'a') + (en_arr[num4] ? en_arr[num4] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num5] ? en_arr[num5] : 'a') + (en_arr[num6] ? en_arr[num6] : 'a') + (en_arr[num7] ? en_arr[num7] : 'a') + (en_arr[num8] ? en_arr[num8] : 'a')
+  },
   /* 判断参数存在性 */
   judgeParamExists(arr, body) {
     let flag = true
@@ -101,7 +114,7 @@ var baseCommon = {
     var mm = time.getMinutes();
     var s = time.getSeconds();
     if (arr) {
-      return [y, add0(m), add0(d), add0(h), add0(mm), add0(s)]
+      return [y, Number(add0(m)), Number(add0(d)), Number(add0(h)), Number(add0(mm)), Number(add0(s))]
     } else {
       return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
     }
