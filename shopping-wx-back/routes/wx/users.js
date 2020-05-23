@@ -7,13 +7,13 @@ const jwt = require('jsonwebtoken');
 
 /* 绑定用户获取openID */
 /*
-* params: code: 小程序登录时获取的 code
+* params: code: 小程序登录时获取的 code、iv、encryptedData
 * recommendId
 *
 * */
 router.post('/loginWx', async (ctx) => {
   var param = ctx.request.body
-  if (!commons.judgeParamExists(['code'], param)) {
+  if (!commons.judgeParamExists(['code', 'iv', 'encryptedData'], param)) {
     ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
   } else {
     var content = qs.stringify({
