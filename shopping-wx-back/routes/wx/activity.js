@@ -4,11 +4,11 @@ const { userModel } = require('../../model/userModel');
 
 /* 获取当前活动列表 */
 /*
-* param:activityId、userId
+* param:userId
 * */
 router.post('/getActivity', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['activityId', 'userId'], param)) {
+  if (!commons.judgeParamExists(['userId'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   const list = await activityModel.find({ "status": 2, "isDelete": 0 }).sort({ '_id': -1 })
