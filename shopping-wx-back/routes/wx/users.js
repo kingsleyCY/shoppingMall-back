@@ -83,7 +83,7 @@ router.post("/payment", async (ctx) => {
   }
   const userItem = await userModel.findOne({ userId: param.userId });
   const commodItem = await shoppingModel.findOne({ id: param.commodityId });
-  const addressItem = await addressModel.model.findOne({ id: param.commodityId });
+  const addressItem = await addressModel.model.findOne({ id: param.addressId });
   if (!userItem || !commodItem || !addressItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
