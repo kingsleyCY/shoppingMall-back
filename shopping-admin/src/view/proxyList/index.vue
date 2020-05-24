@@ -87,7 +87,7 @@
                 label="qrCode"
                 min-width="100">
                 <template slot-scope="scope">
-                  <img :src="scope.row.qrCode" alt="">
+                  <img :src="scope.row.qrCode" v-image>
                 </template>
               </el-table-column>
             </el-table>

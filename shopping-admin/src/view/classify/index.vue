@@ -5,7 +5,7 @@
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span class="left">
           <div class="img">
-            <img :src="data.logo" alt="">
+            <img :src="data.logo" v-image>
           </div>
           <span class="text">{{ data.title }}</span>
         </span>

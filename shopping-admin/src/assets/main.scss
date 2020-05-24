@@ -13,3 +13,21 @@ ul, li, p {
 * {
   box-sizing: border-box;
 }
+.image-box {
+  padding-bottom: 0px !important;
+  cursor: pointer;
+  .el-message-box__header {
+    display: none;
+  }
+  .el-message-box__btns {
+    display: none;
+  }
+  .el-message-box__content {
+    padding: 0 !important;
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}
