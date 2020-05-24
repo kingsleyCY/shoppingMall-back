@@ -10,7 +10,7 @@ const { userModel } = require('../../model/userModel');
 router.post('/addAddress', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
   if (!commons.judgeParamExists(['userName', 'provinceName', 'cityName', 'countyName', 'detailInfo', 'telNumber', 'userId'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     var count = await addressModel.countAll({ userId: param.userId })
     var userItem = await userModel.findOne({ userId: param.userId })
@@ -39,7 +39,7 @@ router.post('/addAddress', async (ctx) => {
 router.post('/searchAddressList', async (ctx) => {
   let param = ctx.request.body
   if (!commons.judgeParamExists(['userId'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     var userItem = await userModel.findOne({ userId: param.userId })
     if (!userItem) {
@@ -57,7 +57,7 @@ router.post('/searchAddressList', async (ctx) => {
 router.post('/deleAddress', async (ctx) => {
   let param = ctx.request.body
   if (!commons.judgeParamExists(['addressId', 'userId'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     var userItem = await userModel.findOne({ userId: param.userId })
     if (!userItem) {
@@ -83,7 +83,7 @@ router.post('/deleAddress', async (ctx) => {
 router.post('/updateAddress', async (ctx) => {
   let param = ctx.request.body
   if (!commons.judgeParamExists(['addressId', 'userId'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     var userItem = await userModel.findOne({ userId: param.userId })
     if (!userItem) {
@@ -108,7 +108,7 @@ router.post('/updateAddress', async (ctx) => {
 router.post('/setDefaultAddress', async (ctx) => {
   let param = ctx.request.body
   if (!commons.judgeParamExists(['addressId', 'userId'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     var userItem = await userModel.findOne({ userId: param.userId })
     if (!userItem) {

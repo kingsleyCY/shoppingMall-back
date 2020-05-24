@@ -8,7 +8,7 @@ const { suggestModel } = require('../../model/suggestModel');
 router.post('/complaintSuggest', async (ctx) => {
   let param = ctx.request.body
   if (!commons.judgeParamExists(['type', 'content', 'userId'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     let suggestList = await suggestModel.find({ "userId": param.userId }).sort({ 'created_time': -1 })
     let lastSuggest = suggestList[0]

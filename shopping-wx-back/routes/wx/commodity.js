@@ -45,7 +45,7 @@ router.get('/getIndexData', async (ctx) => {
 router.post('/getNewCommodity', async (ctx) => {
   var param = ctx.request.body;
   if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
-    ctx.body = commons.jsonBack(1003, {}, "参数传递错误！");
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     param.page <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "页数不能小于1")) : ""
     param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
