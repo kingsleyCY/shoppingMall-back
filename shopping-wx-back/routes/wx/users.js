@@ -95,7 +95,7 @@ router.post("/payment", async (ctx) => {
   const spbill_create_ip = "119.3.77.140"; //服务器IP
   const notify_url = commons.wxurl; // 回传地址
   const trade_type = 'JSAPI';  // 'APP';公众号：'JSAPI'或'NATIVE'
-  const sign = commons.paysignjsapi(appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey);
+  const sign = commons.paysignjsapi(appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey,attach);
   console.log('sign==', sign);
 
   //组装xml数据

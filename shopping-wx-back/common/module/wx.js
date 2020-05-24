@@ -29,7 +29,7 @@ var wx = {
     return parseInt(new Date().getTime() / 1000) + '';
   },
   //签名加密算法
-  paysignjsapi: function (appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey) {
+  paysignjsapi: function (appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey, attach) {
     var ret = {
       appid: appid,
       mch_id: mch_id,
@@ -40,7 +40,8 @@ var wx = {
       out_trade_no: out_trade_no,
       spbill_create_ip: spbill_create_ip,
       total_fee: total_fee,
-      trade_type: trade_type
+      trade_type: trade_type,
+      attach: attach
     };
     console.log("ret===" + ret);
     var string = this.raw(ret);
