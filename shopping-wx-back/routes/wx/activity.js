@@ -43,10 +43,12 @@ router.post('/joinActivity', async (ctx) => {
       isWinsText: "未开奖",
       actitvtyItem: JSON.stringify(actitvtyItem)
     }
-    var newVal = await userModel.findOneAndUpdate({ "userId": param.userId }, {
-      activityList,
+    // 修改用户 参与活动数据
+    await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList }, { new: true })
+    // 修改活动参与人数
+    await activityModel.findOneAndUpdate({ id: param.activityId }, {
       activNun: (actitvtyItem.activNun ? actitvtyItem.activNun : 0) + 1
-    }, { new: true })
+    })
     ctx.body = commons.jsonBack(1, { code }, "参与成功");
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "此活动不存在"))
