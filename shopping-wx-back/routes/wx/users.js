@@ -91,7 +91,7 @@ router.post("/payment", async (ctx) => {
   const body = '测试微信支付';
   const attach = commons.raw({
     commodityId: commodItem.id,
-    userId: userItem.id
+    userId: userItem.userId
   });
   const out_trade_no = commons.setOrderCode();
   const total_fee = commons.getmoney(money);
