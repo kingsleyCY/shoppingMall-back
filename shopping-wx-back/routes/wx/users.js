@@ -89,13 +89,16 @@ router.post("/payment", async (ctx) => {
   const nonce_str = commons.createNonceStr();
   const timestamp = commons.createTimeStamp();
   const body = '测试微信支付';
-  const attach = commodItem.id;
+  const attach = commons.raw({
+    commodityId: commodItem.id,
+    userId: userItem.id
+  });
   const out_trade_no = commons.setOrderCode();
   const total_fee = commons.getmoney(money);
   const spbill_create_ip = "119.3.77.140"; //服务器IP
   const notify_url = commons.wxurl; // 回传地址
   const trade_type = 'JSAPI';  // 'APP';公众号：'JSAPI'或'NATIVE'
-  const sign = commons.paysignjsapi(appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey,attach);
+  const sign = commons.paysignjsapi(appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey, attach);
   console.log('sign==', sign);
 
   //组装xml数据
@@ -161,31 +164,39 @@ router.post("/paymentBack", async (ctx) => {
   console.log(xml);
   /*var a = {
     appid: ['wx406339775ba0e0fd'],
+    attach: ['1'],
     bank_type: ['OTHERS'],
     cash_fee: ['1'],
     fee_type: ['CNY'],
     is_subscribe: ['N'],
     mch_id: ['1593690681'],
-    nonce_str: ['b4er8d72ahv'],
+    nonce_str: ['kh1wnh11h5k'],
     openid: ['oJ0-n5F_OsfiHYxBFq6k-5oR0xI8'],
-    out_trade_no: ['1140898279p1590306408o5302675899'],
+    out_trade_no: ['4861420008k1590309450l6641178517'],
     result_code: ['SUCCESS'],
     return_code: ['SUCCESS'],
-    sign: ['2E2F7E789B11548D43CF0FA3AAA78B9D'],
-    time_end: ['20200524154652'],
+    sign: ['7C0F4F5DC55047C4923AAFF806F7DCF9'],
+    time_end: ['20200524163737'],
     total_fee: ['1'],
     trade_type: ['JSAPI'],
-    transaction_id: ['4200000567202005241257916739']
+    transaction_id: ['4200000562202005246914701329']
   }*/
   const successXml = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
   if (xml.result_code[0] === 'SUCCESS') {
+    const commodityId = qs.parse(xml.attach[0]).commodityId
+    const userId = qs.parse(xml.attach[0]).userId
+    const commodItem = await shoppingModel.findOne({ id: commodityId });
     var orderItem = {
       created_time: Date.parse(new Date()),
       out_trade_no: xml.out_trade_no[0],
+      transaction_id: xml.transaction_id[0],
+      time_end: xml.time_end[0],
       total_fee: xml.total_fee[0],
+      commodityId: commodityId,
+      userId: userId,
+      commodityDetail: commodItem,
     }
-
-
+    var orderItems = await orderModel.create(orderItem);
     ctx.body = successXml
   }
 })
