@@ -85,7 +85,7 @@ router.post("/payment", async (ctx) => {
   const commodItem = await shoppingModel.findOne({ id: param.commodityId });
   const addressItem = await addressModel.model.findOne({ id: param.addressId });
   if (!userItem || !commodItem || !addressItem) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+    ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
   }
   const money = commodItem.overPrice;
   const appid = commons.wx_appid;

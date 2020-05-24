@@ -9,12 +9,27 @@
         width="150">
       </el-table-column>
       <el-table-column
+        prop="orderStatus"
+        label="状态"
+        width="80">
+        <template slot-scope="scope">
+          <span :class="scope.row.orderStatus">
+            {{computedStatus(scope.row.orderStatus)}}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="total_fee"
         label="成交价格（￥）"
         min-width="80">
         <template slot-scope="scope">
           {{scope.row.total_fee / 100}}
         </template>
+      </el-table-column>
+      <el-table-column
+        prop="size"
+        label="尺码"
+        width="80">
       </el-table-column>
       <el-table-column
         prop="transaction_id"
@@ -27,27 +42,17 @@
         min-width="100">
       </el-table-column>
       <el-table-column
-        prop="手机号"
-        label="userId"
+        label="用户手机号"
         min-width="100">
         <template slot-scope="scope">
           {{scope.row.userDetail.phoneNumber}}
         </template>
       </el-table-column>
       <el-table-column
-        prop="commodityId"
-        label="商品ID"
-        min-width="100">
-      </el-table-column>
-      <el-table-column
-        prop="commodityId"
-        label="商品ID"
-        min-width="100">
-      </el-table-column>
-      <el-table-column
         label="商品名称"
         min-width="100">
         <template slot-scope="scope">
+          ID：{{scope.row.commodityId}}<br>
           {{scope.row.commodityDetail.classifyName +'/'+scope.row.commodityDetail.title}}
         </template>
       </el-table-column>
@@ -56,6 +61,17 @@
         min-width="100">
         <template slot-scope="scope">
           <img v-image :src="scope.row.commodityDetail.logo" style="width: 100%;height: auto">
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="地址详情"
+        min-width="150">
+        <template slot-scope="scope">
+          {{scope.row.addressDetail.provinceName
+          +'/'+scope.row.addressDetail.cityName+"/"+scope.row.addressDetail.countyName +'/'+
+          scope.row.addressDetail.detailInfo}}<br>
+          {{scope.row.addressDetail.telNumber}}<br>
+          {{scope.row.addressDetail.userName}}
         </template>
       </el-table-column>
 
@@ -83,6 +99,7 @@
 
 <script>
   import { getOrderList } from "@/api/request"
+
   export default {
     name: "orderList",
     data() {
@@ -121,10 +138,47 @@
         this.pageData.page = val
         this.getOrderList()
       },
+      computedStatus(type) {
+        switch (type) {
+          case "none":
+            return "初始化";
+          case "unpaid":
+            return "待支付";
+          case "paid":
+            return "已支付成功";
+          case "paiderror":
+            return "已支付失败";
+          case "undeliver":
+            return "待发货";
+          case "deliver":
+            return "已发货";
+          case "over":
+            return "已完成";
+        }
+      }
     }
   }
 </script>
 
 <style scoped lang="scss">
-
+  .el-table {
+    .unpaid {
+      color: #ada7a1;
+    }
+    .paid {
+      color: #4bff65;
+    }
+    .paiderror {
+      color: #ff3100;
+    }
+    .undeliver {
+      color: #6eb1ff;
+    }
+    .deliver {
+      color: #3d75ff;
+    }
+    .over {
+      color: #ff00ec;
+    }
+  }
 </style>
