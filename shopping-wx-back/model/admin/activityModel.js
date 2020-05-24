@@ -11,7 +11,8 @@ var activitySchema = new mongoose.Schema({
   status: Number, // 0初始化 1未开始 2已开始 3已结束
   scheduleStartModel: Object, // 定时任务
   scheduleEndModel: Object, // 定时任务
-  resultId: { type: String, default: "" }
+  resultId: { type: String, default: "" }, //抽奖结果
+  activNun: { type: Number, default: 0 }
 }, { collection: "activityList" });
 var activityModel = db.model("activityList", activitySchema);
 

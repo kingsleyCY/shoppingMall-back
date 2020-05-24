@@ -17,7 +17,6 @@ Vue.config.productionTip = false
 
 Vue.directive("image", {
   inserted: function (el, binding) {
-    console.log(el);
     el.style.cursor = "pointer"
     el.addEventListener("click", function () {
       ElementUI.MessageBox.alert("<img src='" + el.src + "'/>", '', {
