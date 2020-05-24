@@ -58,7 +58,7 @@ var wx = {
       signType: signType,
       timeStamp: timestamp,
     };
-    var string = raw(ret);
+    var string = this.raw(ret);
     var key = mchkey;
     string = string + '&key=' + key;
     var crypto = require('crypto');
