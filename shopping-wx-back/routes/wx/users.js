@@ -186,6 +186,7 @@ router.post("/paymentBack", async (ctx) => {
     const commodityId = qs.parse(xml.attach[0]).commodityId
     const userId = qs.parse(xml.attach[0]).userId
     const commodItem = await shoppingModel.findOne({ id: commodityId });
+    const userDetail = await userModel.findOne({ userId: userId });
     var orderItem = {
       created_time: Date.parse(new Date()),
       out_trade_no: xml.out_trade_no[0],
@@ -195,6 +196,7 @@ router.post("/paymentBack", async (ctx) => {
       commodityId: commodityId,
       userId: userId,
       commodityDetail: commodItem,
+      userDetail: userDetail,
     }
     var orderItems = await orderModel.create(orderItem);
     ctx.body = successXml

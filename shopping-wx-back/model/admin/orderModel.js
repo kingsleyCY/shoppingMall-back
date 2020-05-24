@@ -7,6 +7,7 @@ var orderSchema = new mongoose.Schema({
   commodityId: String,
   userId: String,
   commodityDetail: Object,
+  userDetail: Object,
   time_end: String, // 支付完成时间
 }, { collection: "orderList" });
 var orderModel = db.model("orderList", orderSchema);
