@@ -153,7 +153,8 @@ router.post("/payment", async (ctx) => {
 })
 
 router.post("/paymentBack", async (ctx) => {
-  console.log(ctx);
+  const xml = ctx.request.body.xml;
+  console.log(xml);
   ctx.body = commons.jsonBack(1, ctx, "请求支付成功");
 })
 

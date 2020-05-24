@@ -3,7 +3,8 @@ const app = new Koa()
 // const views = require('koa-views')
 const json = require('koa-json')
 const onerror = require('koa-onerror')
-const bodyparser = require('koa-bodyparser')
+const bodyparser = require('koa-bodyparser');
+const KoaXmlBody = require('koa-xml-body');
 const logger = require('koa-logger')
 var baseCommon = require('./common/common');
 
@@ -89,9 +90,11 @@ app.use(async (ctx, next) => {
 });
 
 // middlewares
-app.use(bodyparser({
+/*app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
-}))
+}))*/
+app.use(KoaXmlBody());
+app.use(bodyparser());
 app.use(json())
 app.use(logger())
 app.use(require('koa-static')(__dirname + '/public'))
