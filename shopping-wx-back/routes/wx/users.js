@@ -122,7 +122,7 @@ router.post("/payment", async (ctx) => {
             console.log(errors);
             reject("")
           }
-          console.log(response.xml.prepay_id);
+          console.log(response.xml);
           console.log('长度===', response.xml.prepay_id.text().length);
           var prepay_id = response.xml.prepay_id.text();
           console.log('解析后的prepay_id==', prepay_id);
@@ -150,6 +150,11 @@ router.post("/payment", async (ctx) => {
     }, "请求支付成功！");
   }
 
+})
+
+router.post("/paymentBack", async (ctx) => {
+  console.log(ctx);
+  ctx.body = commons.jsonBack(1, ctx, "请求支付成功");
 })
 
 module.exports = router

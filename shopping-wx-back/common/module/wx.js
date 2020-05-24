@@ -46,7 +46,7 @@ var wx = {
     var string = this.raw(ret);
     var key = mchkey;
     string = string + '&key=' + key;
-    console.log('string=', string);
+    // console.log('string=', string);
     var crypto = require('crypto');
     return crypto.createHash('md5').update(string, 'utf8').digest('hex').toUpperCase();
   },
