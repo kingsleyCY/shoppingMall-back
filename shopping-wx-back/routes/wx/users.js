@@ -154,8 +154,18 @@ router.post("/payment", async (ctx) => {
 
 router.post("/paymentBack", async (ctx) => {
   const xml = ctx.request.body.xml;
-  console.log(xml);
-  ctx.body = commons.jsonBack(1, ctx, "请求支付成功");
+  const successXml= "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+
+  // 这里进行签名和校验返回xml数据的真实性，以防恶意调用接口
+  //校验过程省略...
+
+  if (xml.result_code[0] === 'SUCCESS') {
+    // 根据自己的业务需求支付成功后的操作
+    //......
+    //返回xml告诉微信已经收到，并且不会再重新调用此接口
+    ctx.body = successXml
+  }
+  // ctx.body = commons.jsonBack(1, ctx, "请求支付成功");
 })
 
 module.exports = router
