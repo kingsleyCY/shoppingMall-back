@@ -17,7 +17,6 @@ const xmlreader = require("xmlreader");
 * */
 router.post('/loginWx', async (ctx) => {
   var param = ctx.request.body
-  console.log(commons.judgeParamExists(['code', 'iv', 'encryptedData', 'q'], param));
   if (!commons.judgeParamExists(['code', 'iv', 'encryptedData'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
@@ -219,5 +218,19 @@ router.post("/paymentBack", async (ctx) => {
     var orderItem = await orderModel.findOneAndUpdate({ out_trade_no }, obj, { new: true });
   }
 })
+
+/* 获取不同状态订单 */
+/*
+* param：status、userId
+* */
+router.post("/getOrderList", async (ctx) => {
+  var param = ctx.request.body
+  if (!commons.judgeParamExists(['status', 'userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var list = await orderModel.find({ userId: param.userId, orderStatus: param.status })
+  ctx.body = commons.jsonBack(1, list, "");
+})
+
 
 module.exports = router
