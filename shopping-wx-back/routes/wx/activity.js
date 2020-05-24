@@ -45,7 +45,7 @@ router.post('/joinActivity', async (ctx) => {
     }
     var newVal = await userModel.findOneAndUpdate({ "userId": param.userId }, {
       activityList,
-      activNun: ++actitvtyItem.activNun
+      activNun: (actitvtyItem.activNun ? actitvtyItem.activNun : 0) + 1
     }, { new: true })
     ctx.body = commons.jsonBack(1, { code }, "参与成功");
   } else {
