@@ -95,7 +95,7 @@ var wx = {
     const en_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'w', 'v', 'u', 'x', 'y', 'z']
     let num1 = Math.floor(Math.random() * en_arr.length + 1);
     let num2 = Math.floor(Math.random() * en_arr.length + 1);
-    return (Math.random() * 10000000).toString(16).substr(0, 10) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 10);
+    return Math.random().toString().substr(2, 10) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 10);
   }
 }
 module.exports = wx
