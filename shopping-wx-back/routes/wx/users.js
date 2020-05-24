@@ -122,7 +122,7 @@ router.post("/payment", async (ctx) => {
             console.log(errors);
             reject("")
           }
-          console.log(response.xml);
+          console.log(response.xml.return_msg.text());
           console.log('长度===', response.xml.prepay_id.text().length);
           var prepay_id = response.xml.prepay_id.text();
           console.log('解析后的prepay_id==', prepay_id);
