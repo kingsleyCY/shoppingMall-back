@@ -14,26 +14,3 @@ var userSchema = new mongoose.Schema({
 var userModel = db.model("userList", userSchema);
 
 exports.userModel = userModel
-exports.creatUser = async function (param) {
-  const user = await new Promise((resolve, reject) => {
-    userModel.create(param, function (err, doc) {
-      if (err) throw err
-      resolve(doc)
-    })
-  })
-  return user
-}
-
-exports.findUser = async function (param) {
-  const user = await new Promise((resolve, reject) => {
-    userModel.findOne(param, function (err, doc) {
-      if (err) throw err
-      if (doc) {
-        resolve(doc)
-      } else {
-        resolve('')
-      }
-    })
-  })
-  return user
-}
