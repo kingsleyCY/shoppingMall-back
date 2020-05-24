@@ -3,6 +3,7 @@ const https = require('https');
 const qs = require('querystring');
 const { userModel } = require('../../model/userModel');
 const { shoppingModel } = require('../../model/commodityModel');
+const { orderModel } = require('../../model/admin/orderModel');
 const jwt = require('jsonwebtoken');
 const request = require('request');
 const xmlreader = require("xmlreader");
@@ -88,6 +89,7 @@ router.post("/payment", async (ctx) => {
   const nonce_str = commons.createNonceStr();
   const timestamp = commons.createTimeStamp();
   const body = '测试微信支付';
+  const attach = commodItem.id;
   const out_trade_no = commons.setOrderCode();
   const total_fee = commons.getmoney(money);
   const spbill_create_ip = "119.3.77.140"; //服务器IP
@@ -104,6 +106,7 @@ router.post("/payment", async (ctx) => {
   formData += "<nonce_str>" + nonce_str + "</nonce_str>"; //随机字符串，不长于32位。
   formData += "<notify_url>" + notify_url + "</notify_url>";
   formData += "<openid>" + openid + "</openid>";
+  formData += "<attach>" + attach + "</attach>";
   formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
   formData += "<spbill_create_ip>" + spbill_create_ip + "</spbill_create_ip>";
   formData += "<total_fee>" + total_fee + "</total_fee>";
@@ -152,21 +155,39 @@ router.post("/payment", async (ctx) => {
 
 })
 
+/* 支付成功回调 */
 router.post("/paymentBack", async (ctx) => {
   const xml = ctx.request.body.xml;
   console.log(xml);
-  const successXml= "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
-
-  // 这里进行签名和校验返回xml数据的真实性，以防恶意调用接口
-  //校验过程省略...
-
+  /*var a = {
+    appid: ['wx406339775ba0e0fd'],
+    bank_type: ['OTHERS'],
+    cash_fee: ['1'],
+    fee_type: ['CNY'],
+    is_subscribe: ['N'],
+    mch_id: ['1593690681'],
+    nonce_str: ['b4er8d72ahv'],
+    openid: ['oJ0-n5F_OsfiHYxBFq6k-5oR0xI8'],
+    out_trade_no: ['1140898279p1590306408o5302675899'],
+    result_code: ['SUCCESS'],
+    return_code: ['SUCCESS'],
+    sign: ['2E2F7E789B11548D43CF0FA3AAA78B9D'],
+    time_end: ['20200524154652'],
+    total_fee: ['1'],
+    trade_type: ['JSAPI'],
+    transaction_id: ['4200000567202005241257916739']
+  }*/
+  const successXml = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
   if (xml.result_code[0] === 'SUCCESS') {
-    // 根据自己的业务需求支付成功后的操作
-    //......
-    //返回xml告诉微信已经收到，并且不会再重新调用此接口
+    var orderItem = {
+      created_time: Date.parse(new Date()),
+      out_trade_no: xml.out_trade_no[0],
+      total_fee: xml.total_fee[0],
+    }
+
+
     ctx.body = successXml
   }
-  // ctx.body = commons.jsonBack(1, ctx, "请求支付成功");
 })
 
 module.exports = router
