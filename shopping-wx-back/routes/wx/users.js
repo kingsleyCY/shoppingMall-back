@@ -209,6 +209,11 @@ router.post("/paymentBack", async (ctx) => {
     }
     const out_trade_no = xml.attach[0];
     var orderItem = await orderModel.findOneAndUpdate({ out_trade_no }, obj, { new: true });
+    if (orderItem) {
+      var userItem = userModel.findOne({ userId: orderItem.userId });
+      var integral = (userItem.integral || 0) + orderItem.total_fee / 100;
+      await userModel.findOneAndUpdate({ userId: orderItem.userId }, { integral }, { new: true })
+    }
     ctx.body = successXml
   } else {
     var obj = {
