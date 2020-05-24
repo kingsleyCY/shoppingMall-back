@@ -154,6 +154,7 @@ router.post("/payment", async (ctx) => {
 
 router.post("/paymentBack", async (ctx) => {
   const xml = ctx.request.body.xml;
+  console.log(xml);
   const successXml= "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
   // 这里进行签名和校验返回xml数据的真实性，以防恶意调用接口
