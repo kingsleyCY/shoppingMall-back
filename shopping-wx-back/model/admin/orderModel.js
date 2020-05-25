@@ -1,6 +1,7 @@
 var orderSchema = new mongoose.Schema({
   created_time: Number, // 创建时间
   out_trade_no: String, // 订单ID
+  out_refund_no: { type: String, default: "" }, // 退款订单号
   total_fee: Number, // 成交价格
   sign: String, // 支付签名
   transaction_id: { type: String, default: "" }, // 微信支付订单号

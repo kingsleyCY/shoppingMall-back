@@ -1,10 +1,11 @@
 var WXBizDataCrypt = require('../WXBizDataCrypt');
 var xmlreader = require("xmlreader");
+const request = require('request');
 
 var wx = {
   /* 解析手机号 */
   decryptData(session_key, iv, encryptedData) {
-    var appId = commons.wx_appid
+    var appId = this.wx_appid
     var sessionKey = session_key
     var encryptedData = encryptedData
     var iv = iv
@@ -43,7 +44,6 @@ var wx = {
       trade_type: trade_type,
       attach: attach
     };
-    console.log("ret===" + ret);
     var string = this.raw(ret);
     var key = mchkey;
     string = string + '&key=' + key;
@@ -97,6 +97,57 @@ var wx = {
     let num1 = Math.floor(Math.random() * en_arr.length + 1);
     let num2 = Math.floor(Math.random() * en_arr.length + 1);
     return Math.random().toString().substr(2, 10) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 10);
+  },
+  /* 申请退款 */
+  async applyRefound(orderId, userId, refundDesc) {
+    const { orderModel } = require('../../model/admin/orderModel');
+    const orderItem = await orderModel.findOne({ out_trade_no: orderId })
+    if (!orderItem) {
+      return "未查询到订单"
+    } else if (orderItem.orderStatus === "unpaid") {
+      return "该订单还未支付"
+    }
+    const appid = this.wx_appid;
+    const mch_id = this.mchid;
+    const nonce_str = this.createNonceStr();
+    // const sign = orderItem.sign;
+    const transaction_id = orderItem.transaction_id;
+    const total_fee = orderItem.total_fee;
+    const refund_fee = orderItem.total_fee;
+    const refund_desc = refundDesc || "";
+    const notify_url = this.wxrefundurl;
+    const sign = this.paysignjsapi(appid, mch_id, nonce_str, transaction_id, total_fee, refund_fee, refund_desc, notify_url);
+
+    var formData = "<xml>";
+    formData += "<appid>" + appid + "</appid>";
+    formData += "<mch_id>" + mch_id + "</mch_id>";
+    formData += "<nonce_str>" + nonce_str + "</nonce_str>";
+    formData += "<transaction_id>" + transaction_id + "</transaction_id>";
+    formData += "<total_fee>" + total_fee + "</total_fee>";
+    formData += "<refund_fee>" + refund_fee + "</refund_fee>";
+    formData += "<refund_desc>" + refund_desc + "</refund_desc>";
+    formData += "<notify_url>" + notify_url + "</notify_url>";
+    formData += "<sign>" + sign + "</sign>";
+    formData += "</xml>";
+    const url = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
+    var res = await new Promise((resolve, reject) => {
+      request({ url: url, method: 'POST', body: formData }, function (err, response, body) {
+        console.log("response==" + JSON.stringify(response));
+        if (!err && response.statusCode == 200) {
+          xmlreader.read(body.toString("utf-8"), function (errors, response) {
+            if (null !== errors) {
+              console.log("errors==" + errors);
+              reject("")
+            }
+            resolve(response)
+          });
+        } else {
+          console.log("err==" + err);
+          reject("")
+        }
+      });
+    })
+    return res
   }
 }
 module.exports = wx

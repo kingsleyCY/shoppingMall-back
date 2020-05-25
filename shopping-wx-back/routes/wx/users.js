@@ -224,6 +224,32 @@ router.post("/paymentBack", async (ctx) => {
   }
 })
 
+/* 申请退款 */
+/*
+*param：orderId、userId
+* */
+router.post("/applyRefound", async (ctx) => {
+  var param = ctx.request.body
+  if (!commons.judgeParamExists(['orderId', 'userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var res = await commons.applyRefound(param.orderId, param.userId)
+  if (typeof res === "string") {
+    ctx.body = commons.jsonBack(1003, {}, res);
+  } else {
+    ctx.body = commons.jsonBack(1, res, "");
+  }
+})
+
+/* 退款成功回调 */
+router.post("/applyRefoundBack", async (ctx) => {
+  const xml = ctx.request.body.xml;
+  var param = ctx.request.body
+  console.log(xml);
+  console.log(param);
+  ctx.body = {}
+})
+
 /* 获取不同状态订单 */
 /*
 * param：status、userId
