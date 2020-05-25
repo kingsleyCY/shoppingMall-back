@@ -10,7 +10,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="phone"
+        prop="phoneNumber"
         label="手机号"
         min-width="180">
       </el-table-column>

@@ -1,6 +1,7 @@
 var WXBizDataCrypt = require('../WXBizDataCrypt');
 var xmlreader = require("xmlreader");
 const request = require('request');
+const path = require('path');
 
 var wx = {
   /* 解析手机号 */
@@ -131,7 +132,15 @@ var wx = {
     formData += "</xml>";
     const url = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
     var res = await new Promise((resolve, reject) => {
-      request({ url: url, method: 'POST', body: formData }, function (err, response, body) {
+      request({
+        url: url,
+        method: 'POST',
+        body: formData,
+        agentOptions: {
+          cert: fs.readFileSync(path.join(__dirname, '../../../../WXcert/apiclient_cert.pem')),
+          key: fs.readFileSync(path.join(__dirname, '../../../../WXcert/apiclient_key.pem'))
+        }
+      }, function (err, response, body) {
         console.log("response==" + JSON.stringify(response));
         if (!err && response.statusCode == 200) {
           xmlreader.read(body.toString("utf-8"), function (errors, response) {
