@@ -31,7 +31,7 @@ var wx = {
   createTimeStamp: function () {
     return parseInt(new Date().getTime() / 1000) + '';
   },
-  //签名加密算法
+  // 签名加密算法
   paysignjsapi: function (appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey, attach) {
     var ret = {
       appid: appid,
@@ -45,6 +45,25 @@ var wx = {
       total_fee: total_fee,
       trade_type: trade_type,
       attach: attach
+    };
+    var string = this.raw(ret);
+    var key = mchkey;
+    string = string + '&key=' + key;
+    var crypto = require('crypto');
+    return crypto.createHash('md5').update(string, 'utf8').digest('hex').toUpperCase();
+  },
+  // 退单签名加密算法
+  refundSignjsapi: function (mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc, notify_url) {
+    var ret = {
+      appid,
+      mch_id,
+      nonce_str,
+      out_trade_no,
+      out_refund_no,
+      total_fee,
+      refund_fee,
+      refund_desc,
+      notify_url
     };
     var string = this.raw(ret);
     var key = mchkey;
@@ -111,6 +130,7 @@ var wx = {
     }
     const appid = this.wx_appid;
     const mch_id = this.mchid;
+    const mchkey = commons.mchkey; // 不需要XML传递
     const nonce_str = this.createNonceStr();
     // const transaction_id = orderItem.transaction_id; // 微信订单号
     const out_trade_no = orderItem.out_trade_no; // 商户订单号
@@ -119,7 +139,7 @@ var wx = {
     const refund_fee = orderItem.total_fee;
     const refund_desc = refundDesc || "";
     const notify_url = this.wxrefundurl;
-    const sign = this.paysignjsapi(appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc, notify_url, notify_url);
+    const sign = this.refundSignjsapi(mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc, notify_url);
 
     var formData = "<xml>";
     formData += "<appid>" + appid + "</appid>";
