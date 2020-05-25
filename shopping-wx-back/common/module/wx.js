@@ -53,7 +53,7 @@ var wx = {
     return crypto.createHash('md5').update(string, 'utf8').digest('hex').toUpperCase();
   },
   // 退单签名加密算法
-  refundSignjsapi: function (mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc, notify_url) {
+  refundSignjsapi: function (mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc) {
     var ret = {
       appid,
       mch_id,
@@ -62,9 +62,9 @@ var wx = {
       out_refund_no,
       total_fee,
       refund_fee,
-      refund_desc,
-      notify_url
+      refund_desc
     };
+    console.log(ret);
     var string = this.raw(ret);
     var key = mchkey;
     string = string + '&key=' + key;
@@ -86,17 +86,15 @@ var wx = {
     var crypto = require('crypto');
     return crypto.createHash('md5').update(string, 'utf8').digest('hex').toUpperCase();
   },
-  getXMLNodeValue: function (xml) {
-    xmlreader.read(xml, function (errors, response) {
-      if (null !== errors) {
-        console.log(errors)
-        return;
-      }
-      console.log('长度===', response.xml.prepay_id.text().length);
-      var prepay_id = response.xml.prepay_id.text();
-      console.log('解析后的prepay_id==', prepay_id);
-      return prepay_id;
-    });
+  getXMLNodeValue: function (node_name, xml) {
+    let tmp = xml.split("<" + node_name + ">");
+    if (tmp[1] != undefined) {
+      let _tmp = tmp[1].split("</" + node_name + ">");
+      let tmp1 = _tmp[0].split('[');
+
+      let _tmp1 = tmp1[2].split(']');
+      return _tmp1[0];
+    }
   },
   raw: function (args) {
     var keys = Object.keys(args);
@@ -121,8 +119,9 @@ var wx = {
   },
   /* 申请退款 */
   async applyRefound(orderId, userId, refundDesc) {
+    let that = this;
     const { orderModel } = require('../../model/admin/orderModel');
-    const orderItem = await orderModel.findOne({ out_trade_no: orderId })
+    const orderItem = await orderModel.findOne({ out_trade_no: orderId, userId: userId })
     if (!orderItem) {
       return "未查询到订单"
     } else if (orderItem.orderStatus === "unpaid") {
@@ -130,23 +129,22 @@ var wx = {
     }
     const appid = this.wx_appid;
     const mch_id = this.mchid;
-    const mchkey = commons.mchkey; // 不需要XML传递
+    const mchkey = this.mchkey; // 不需要XML传递
     const nonce_str = this.createNonceStr();
     // const transaction_id = orderItem.transaction_id; // 微信订单号
     const out_trade_no = orderItem.out_trade_no; // 商户订单号
-    const out_refund_no = this.setOrderCode();
+    const out_refund_no = this.setOrderCode(); // 退单号
     const total_fee = orderItem.total_fee;
     const refund_fee = orderItem.total_fee;
-    const refund_desc = refundDesc || "";
+    const refund_desc = refundDesc || "测试退单";
     const notify_url = this.wxrefundurl;
     const sign = this.refundSignjsapi(mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc);
+    console.log(sign);
 
     var formData = "<xml>";
     formData += "<appid>" + appid + "</appid>";
     formData += "<mch_id>" + mch_id + "</mch_id>";
     formData += "<nonce_str>" + nonce_str + "</nonce_str>";
-    // formData += "<notify_url>" + notify_url + "</notify_url>";
-    // formData += "<transaction_id>" + transaction_id + "</transaction_id>";
     formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
     formData += "<out_refund_no>" + out_refund_no + "</out_refund_no>";
     formData += "<total_fee>" + total_fee + "</total_fee>";
@@ -155,6 +153,7 @@ var wx = {
     formData += "<sign>" + sign + "</sign>";
     formData += "</xml>";
     const url = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
+    await orderModel.findOneAndUpdate({ out_trade_no: orderId, userId: userId }, { out_refund_no }, { new: true })
     var res = await new Promise((resolve, reject) => {
       request({
         url: url,
@@ -165,21 +164,31 @@ var wx = {
           key: fs.readFileSync(path.join(__dirname, '../../../../WXcert/apiclient_key.pem'))
         }
       }, function (err, response, body) {
-        console.log("response==" + JSON.stringify(response));
-        if (!err && response.statusCode == 200) {
-          xmlreader.read(body.toString("utf-8"), function (errors, response) {
-            if (null !== errors) {
-              console.log("errors==" + errors);
-              reject("")
-            }
-            resolve(response)
-          });
+        let return_code = that.getXMLNodeValue('return_code', response.body.toString('utf-8'));
+        let return_msg = that.getXMLNodeValue('return_msg', response.body.toString('utf-8'));
+        let err_code_des = that.getXMLNodeValue('err_code_des', response.body.toString('utf-8'));
+        if (return_code == 'SUCCESS' && return_msg == 'OK' && err_code_des == undefined) {
+          resolve({
+            total_fee: that.getXMLNodeValue('total_fee', response.body.toString('utf-8')),
+            refund_fee: that.getXMLNodeValue('refund_fee', response.body.toString('utf-8')),
+            out_trade_no: that.getXMLNodeValue('out_trade_no', response.body.toString('utf-8')),
+            out_refund_no: that.getXMLNodeValue('out_refund_no', response.body.toString('utf-8'))
+          })
         } else {
-          console.log("err==" + err);
-          reject("")
+          resolve({})
         }
       });
     })
+    var orderStatus = ""
+    if (res.out_refund_no) {
+      orderStatus = "refund"
+    } else {
+      orderStatus = "unrefund"
+    }
+    await orderModel.findOneAndUpdate({ out_trade_no: orderId, userId: userId }, {
+      refoundData: res,
+      orderStatus
+    }, { new: true })
     return res
   }
 }

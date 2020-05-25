@@ -13,7 +13,7 @@
         label="状态"
         width="80">
         <template slot-scope="scope">
-          <span :class="scope.row.orderStatus">
+          <span :class="[scope.row.orderStatus, 'orde-status']">
             {{computedStatus(scope.row.orderStatus)}}
           </span>
         </template>
@@ -154,6 +154,10 @@
             return "已发货";
           case "over":
             return "已完成";
+          case "refund":
+            return "已退款成功";
+          case "unrefund":
+            return "退款失败";
         }
       }
     }
@@ -162,6 +166,9 @@
 
 <style scoped lang="scss">
   .el-table {
+    .orde-status {
+      font-weight: bold;
+    }
     .unpaid {
       color: #ada7a1;
     }
@@ -179,6 +186,12 @@
     }
     .over {
       color: #ff00ec;
+    }
+    .refund {
+      color: #54fdff;
+    }
+    .unrefund {
+      color: #ffa037;
     }
   }
 </style>
