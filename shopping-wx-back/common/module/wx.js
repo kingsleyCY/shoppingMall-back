@@ -120,13 +120,14 @@ var wx = {
     const refund_fee = orderItem.total_fee;
     const refund_desc = refundDesc || "";
     const notify_url = this.wxrefundurl;
-    const sign = this.paysignjsapi(appid, mch_id, nonce_str, transaction_id, out_refund_no, total_fee, refund_fee, refund_desc, notify_url);
+    const sign = this.paysignjsapi(appid, mch_id, nonce_str, transaction_id, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc, notify_url, notify_url);
 
     var formData = "<xml>";
     formData += "<appid>" + appid + "</appid>";
     formData += "<mch_id>" + mch_id + "</mch_id>";
     formData += "<nonce_str>" + nonce_str + "</nonce_str>";
     formData += "<transaction_id>" + transaction_id + "</transaction_id>";
+    formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
     formData += "<out_refund_no>" + out_refund_no + "</out_refund_no>";
     formData += "<total_fee>" + total_fee + "</total_fee>";
     formData += "<refund_fee>" + refund_fee + "</refund_fee>";
