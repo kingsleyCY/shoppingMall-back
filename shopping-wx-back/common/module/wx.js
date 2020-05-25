@@ -2,6 +2,7 @@ var WXBizDataCrypt = require('../WXBizDataCrypt');
 var xmlreader = require("xmlreader");
 const request = require('request');
 const path = require('path');
+const fs = require("fs");
 
 var wx = {
   /* 解析手机号 */
