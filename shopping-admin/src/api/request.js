@@ -177,6 +177,14 @@ export function deleActivity(param) {
   })
 }
 
+export function overActivity(param) {
+  return instance({
+    url: '/admin/activity/overActivity',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getOrderList(param) {
   return instance({
     url: '/admin/order/orderList',

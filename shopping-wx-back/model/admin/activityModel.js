@@ -12,7 +12,10 @@ var activitySchema = new mongoose.Schema({
   scheduleStartModel: Object, // 定时任务
   scheduleEndModel: Object, // 定时任务
   resultId: { type: String, default: "" }, //抽奖结果
-  activNun: { type: Number, default: 0 }
+  activNun: { type: Number, default: 0 },
+  end_time: { type: Number, default: 0 },
+  endCode: { type: String, default: "" }, // 中奖码
+  winUerId: { type: String, default: "" } // 中奖人ID
 }, { collection: "activityList" });
 var activityModel = db.model("activityList", activitySchema);
 

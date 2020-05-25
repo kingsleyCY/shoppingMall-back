@@ -16,19 +16,19 @@
           <el-table-column
             prop="title"
             label="名称"
-            min-width="30">
+            min-width="80">
           </el-table-column>
           <el-table-column
             prop="created_time"
             label="创建时间"
-            min-width="50">
+            min-width="100">
             <template slot-scope="scope">
               {{timeTransfer(scope.row.created_time)}}
             </template>
           </el-table-column>
           <el-table-column
             label="活动时间"
-            min-width="50">
+            min-width="200">
             <template slot-scope="scope">
               {{timeTransfer(scope.row.sTime)}}<br>
               {{timeTransfer(scope.row.eTime)}}
@@ -36,14 +36,35 @@
           </el-table-column>
           <el-table-column
             label="活动奖品"
-            min-width="50">
+            min-width="100">
             <template slot-scope="scope">
               {{scope.row.prizeDeatil.classifyName +'/'+scope.row.prizeDeatil.title}}
             </template>
           </el-table-column>
           <el-table-column
+            label="结束时间"
+            min-width="80">
+            <template slot-scope="scope">
+              {{timeTransfer(scope.row.end_time)}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="中奖code"
+            min-width="100">
+            <template slot-scope="scope">
+              {{scope.row.endCode || "--"}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="中奖UserID"
+            min-width="100">
+            <template slot-scope="scope">
+              {{scope.row.winUerId || "--"}}
+            </template>
+          </el-table-column>
+          <el-table-column
             label="状态"
-            min-width="50">
+            min-width="80">
             <template slot-scope="scope">
               {{statusClassify(scope.row.status,scope.row.isDelete)}}
             </template>
@@ -53,11 +74,15 @@
             label="操作"
             width="120">
             <template slot-scope="scope">
-              <el-button type="text" size="small" v-if="scope.row.isDelete === 0"
+              <el-button type="text" size="small" v-if="scope.row.isDelete === 0 && scope.row.status===1"
                          @click="editActivity(scope.row)">编辑
               </el-button>
               <el-button type="text" size="small" v-if="scope.row.isDelete === 0"
                          @click="deleActivity(scope.row)">删除
+              </el-button>
+              <el-button type="text" size="small"
+                         v-if="scope.row.isDelete === 0 && (scope.row.status===1 || scope.row.status===2)"
+                         @click="overActivity(scope.row)">结束活动
               </el-button>
             </template>
           </el-table-column>
@@ -102,7 +127,7 @@
 </template>
 
 <script>
-  import { getCommodityList, creatActivity, getActiList, deleActivity } from '@/api/request'
+  import { getCommodityList, creatActivity, getActiList, deleActivity, overActivity } from '@/api/request'
 
   export default {
     name: "activityList",
@@ -234,9 +259,24 @@
 
         })
       },
+      overActivity(row) {
+        overActivity({id: row.id}).then(res => {
+          if (res.code === 1) {
+            this.$message.success("操作成功")
+            this.handleClick()
+          } else {
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+
+        })
+      },
 
 
       timeTransfer(data) {
+        if (!data) {
+          return "--"
+        }
         function add0(m) {
           return m < 10 ? '0' + m : m
         }

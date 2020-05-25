@@ -79,6 +79,8 @@ router.post('/deleActivity', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   var item = await activityModel.findOneAndUpdate({ id: param.id }, { isDelete: 1 }, { new: true });
+  commons.repeatSchedule(item.scheduleStartModel)
+  commons.repeatSchedule(item.scheduleEndModel)
   ctx.body = commons.jsonBack(1, item, "删除成功");
 })
 
@@ -112,67 +114,57 @@ router.post('/getActiList', async (ctx) => {
   ctx.body = commons.jsonBack(1, list, "获取数据成功");
 })
 
+/* 结束活动 */
+/*
+* param:id
+* */
+router.post('/overActivity', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['id'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var item = await activityModel.findOne({ id: param.id });
+  if (!item) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
+  } else if (item.isDelete === 1) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该活动已删除"))
+  } else if (item.status === 3) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该活动已结束"))
+  }
+  if (item.status === 1) {
+    commons.repeatSchedule(item.scheduleStartModel)
+    commons.repeatSchedule(item.scheduleEndModel)
+    var actItem = await activityModel.findOneAndUpdate({ id: param.id }, {
+      status: 3,
+      endCode: "",
+      end_time: Date.parse(new Date())
+    }, { new: true });
+    ctx.body = commons.jsonBack(1, actItem, "结束成功");
+  } else if (item.status === 2) {
+    commons.repeatSchedule(item.scheduleEndModel);
+    await commons.setActivityCode(item.id)
+  }
+  ctx.body = commons.jsonBack(1, {}, "结束成功");
+})
+
 
 /* 修改状态，添加定时任务 */
 /* 创建定时任务条件：初始化/未开始 */
 async function setActitvtyStatus(data) {
   const nowTime = Date.parse(new Date());
   if (nowTime < data.sTime) { // 未开始
-    await createdStartSchedule(data)
-    await createdEndSchedule(data)
+    await commons.createdStartSchedule(data)
+    await commons.createdEndSchedule(data)
   } else if (nowTime >= data.sTime && nowTime < data.eTime) { // 已开始
     if (data.scheduleStartModel) {
       repeatSchedule(data.scheduleStartModel)
     }
-    await createdEndSchedule(data)
+    await commons.createdEndSchedule(data)
   }
   var statusItem = await activityModel.findOne({ id: data.id });
   statusItem = commons.judgeParamExists(statusItem, ["scheduleStartModel", "scheduleEndModel"])
   return statusItem
 }
-async function createdStartSchedule(item) {
-  if (item.scheduleStartModel) {
-    repeatSchedule(item.scheduleStartModel)
-  }
-  var stimeArr = commons.timeTransfer(item.sTime, true)
-  var sdate = new Date(stimeArr[0], stimeArr[1] - 1, stimeArr[2], stimeArr[3], stimeArr[4], stimeArr[5]);
-  var jobId = "start" + item.id;
-  schedule.scheduleJob(jobId, sdate, async function () {
-    console.log("开始执行。。。");
-    var a = await activityModel.findOneAndUpdate({ id: item.id }, {
-      update_time: Date.parse(new Date()),
-      status: 2
-    }, { new: true })
-  }, function () {
-    console.log("开始执行1。。。");
-  });
-  await activityModel.findOneAndUpdate({ id: item.id }, {
-    status: 1,
-    scheduleStartModel: jobId
-  })
-}
-async function createdEndSchedule(item) {
-  if (item.scheduleEndModel) {
-    repeatSchedule(item.scheduleEndModel)
-  }
-  var etimeArr = commons.timeTransfer(item.eTime, true)
-  var edate = new Date(etimeArr[0], etimeArr[1] - 1, etimeArr[2], etimeArr[3], etimeArr[4], etimeArr[5]);
-  var jobId = "end" + item.id;
-  schedule.scheduleJob(jobId, edate, async function () {
-    console.log("结束执行。。。");
-    var a = await activityModel.findOneAndUpdate({ id: item.id }, {
-      update_time: Date.parse(new Date()),
-      status: 3
-    })
-  }, function () {
-    console.log("结束执行1。。。");
-  });
-  await activityModel.findOneAndUpdate({ id: item.id }, {
-    scheduleEndModel: jobId
-  })
-}
-function repeatSchedule(str) {
-  schedule.scheduledJobs[str] ? schedule.scheduledJobs[str].cancel() : ""
-}
+
 
 module.exports = router

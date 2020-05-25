@@ -141,6 +141,7 @@ class baseCommon {
       }
     }
   }
+  /* 设置活动开始定时任务 */
   async createdStartSchedule(item) {
     const { activityModel } = require('../model/admin/activityModel');
     if (item.scheduleStartModel) {
@@ -163,7 +164,9 @@ class baseCommon {
       scheduleStartModel: jobId
     })
   }
+  /* 设置活动结束定时任务 */
   async createdEndSchedule(item) {
+    let that = this
     const { activityModel } = require('../model/admin/activityModel');
     if (item.scheduleEndModel) {
       this.repeatSchedule(item.scheduleEndModel)
@@ -173,10 +176,11 @@ class baseCommon {
     var jobId = "end" + item.id;
     schedule.scheduleJob(jobId, edate, async function () {
       console.log("结束执行。。。");
-      var a = await activityModel.findOneAndUpdate({ id: item.id }, {
+      var actItem = await activityModel.findOneAndUpdate({ id: item.id }, {
         update_time: Date.parse(new Date()),
         status: 3
       })
+      that.setActivityCode(actItem.id)
     }, function () {
       console.log("结束执行1。。。");
     });
@@ -184,8 +188,46 @@ class baseCommon {
       scheduleEndModel: jobId
     })
   }
+  /* 删除定时任务 */
   repeatSchedule(str) {
     schedule.scheduledJobs[str] ? schedule.scheduledJobs[str].cancel() : ""
+  }
+  /* 结束活动，生成抽奖码 */
+  async setActivityCode(id) {
+    let that = this
+    const { userModel } = require('../model/userModel');
+    const { activityModel } = require('../model/admin/activityModel');
+    const end_time = Date.parse(new Date());
+    var endCode = "";
+    // var actItem = await activityModel.findOne({ id });
+    var userList = await userModel.find();
+    var winUser = null;
+    function getwinUser() {
+      endCode = that.activityCode()
+      for (let i = 0; i < userList.length; i++) {
+        if (
+          userList[i].activityList &&
+          userList[i].activityList[id] &&
+          userList[i].activityList[id].code &&
+          userList[i].activityList[id].joinStatus &&
+          userList[i].activityList[id].code === endCode
+        ) {
+          winUser = userList[i];
+          break;
+        }
+      }
+      if (winUser) {
+        getwinUser();
+      }
+    }
+    getwinUser();
+    console.log(endCode);
+    var actItems = await activityModel.findOneAndUpdate({ id }, {
+      end_time,
+      endCode,
+      winUerId: winUser ? winUser.userId : "",
+      status: 3
+    }, { new: true });
   }
 }
 for (let key in wx) {
