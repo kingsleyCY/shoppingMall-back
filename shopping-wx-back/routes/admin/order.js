@@ -37,5 +37,28 @@ router.post('/creatOrder', async (ctx) => {
   ctx.body = commons.jsonBack(1, item, "");
 })
 
+/* 订单录入快递号 */
+/* param: out_trade_no、userId、mailOrder、mailRemark
+ * */
+router.post('/setMail', async (ctx) => {
+  var param = ctx.request.body;
+  if (!commons.judgeParamExists(['out_trade_no', 'userId', "mailOrder", "mailRemark"], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no, userId: param.userId })
+  if (!orderItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
+  }
+  if (orderItem.orderStatus !== "undeliver" || orderItem.orderStatus !== "deliver") {
+    ctx.throw(200, commons.jsonBack(1003, {}, "当前订单不是发货状态"))
+  }
+  var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no, userId: param.userId }, {
+    mailOrder: param.mailOrder,
+    mailRemark: param.mailRemark,
+    orderStatus: "deliver",
+  }, { new: true });
+  ctx.body = commons.jsonBack(1, orderItems, "");
+})
+
 
 module.exports = router

@@ -88,6 +88,12 @@
           <el-button type="text" size="small" v-if="scope.row.orderStatus==='paid'">
             确认订单
           </el-button>
+          <!-- 录入订单物流信息 -->
+          <el-button type="text" size="small"
+                     v-if="scope.row.orderStatus==='undeliver' || scope.row.orderStatus==='deliver'"
+                     @click="openMailModel">
+            录入物流信息
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -100,6 +106,16 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="pageData.total">
     </el-pagination>
+
+    <el-dialog
+      title="提示" :visible.sync="maildialogVisible" width="30%">
+      <span>物流信息</span>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -116,6 +132,7 @@
           pageSize: 10,
           total: 0,
         },
+        maildialogVisible: false
       }
     },
     mounted() {
@@ -165,6 +182,9 @@
           case "unrefund":
             return "退款失败";
         }
+      },
+      openMailModel() {
+
       }
     }
   }

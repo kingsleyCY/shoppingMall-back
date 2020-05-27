@@ -21,7 +21,9 @@ var orderSchema = new mongoose.Schema({
   mess: { type: String, default: "" },
   size: { type: String, default: "" },
   unpidData: { type: Object, default: {} }, // 支付微信参数
-  refoundData: { type: Object, default: {} } // 支付微信参数
+  refoundData: { type: Object, default: {} }, // 支付微信参数
+  mailOrder: { type: String, default: "" },
+  mailRemark: { type: String, default: "" },
 }, { collection: "orderList" });
 var orderModel = db.model("orderList", orderSchema);
 
