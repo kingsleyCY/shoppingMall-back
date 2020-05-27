@@ -9,9 +9,9 @@ const logger = require('koa-logger');
 const { loggers, accessLogger } = require('./logger');
 var baseCommon = require('./common/common');
 app.use(accessLogger());
+global.logger = loggers;
 
 global.commons = baseCommon;
-global.logger = loggers;
 
 var baseConfig = require('./common/baseConfig');
 /* 连接数据库 */

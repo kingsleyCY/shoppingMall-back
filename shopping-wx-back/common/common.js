@@ -151,7 +151,7 @@ class baseCommon {
     var sdate = new Date(stimeArr[0], stimeArr[1] - 1, stimeArr[2], stimeArr[3], stimeArr[4], stimeArr[5]);
     var jobId = "start" + item.id;
     schedule.scheduleJob(jobId, sdate, async function () {
-      console.log("开始执行。。。");
+      logger.error("定时任务-start：" + jobId);
       var a = await activityModel.findOneAndUpdate({ id: item.id }, {
         update_time: Date.parse(new Date()),
         status: 2
@@ -175,7 +175,7 @@ class baseCommon {
     var edate = new Date(etimeArr[0], etimeArr[1] - 1, etimeArr[2], etimeArr[3], etimeArr[4], etimeArr[5]);
     var jobId = "end" + item.id;
     schedule.scheduleJob(jobId, edate, async function () {
-      console.log("结束执行。。。");
+      logger.error("定时任务-end：" + jobId);
       var actItem = await activityModel.findOneAndUpdate({ id: item.id }, {
         update_time: Date.parse(new Date()),
         status: 3

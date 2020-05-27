@@ -70,9 +70,10 @@ router.post('/activited', async (ctx) => {
   }
   var userItem = await userModel.findOne({ "userId": param.userId })
   if (userItem) {
-    var activityList = userItem.activityList
+    var activityList = JSON.parse(JSON.stringify(userItem.activityList))
     for (let key in activityList) {
       let actItem = await activityModel.findOne({ id: key });
+      activityList[key].actitvtyItem = JSON.stringify(actItem)
       if (actItem.status === 3) {
         if (actItem.resultId === activityList[key].code) {
           activityList[key].isWins = 1
