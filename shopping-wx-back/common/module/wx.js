@@ -175,7 +175,7 @@ var wx = {
             out_refund_no: that.getXMLNodeValue('out_refund_no', response.body.toString('utf-8'))
           })
         } else {
-          resolve({})
+          resolve(err_code_des + return_msg)
         }
       });
     })

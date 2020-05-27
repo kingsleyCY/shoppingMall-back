@@ -294,7 +294,8 @@ router.post("/paymentBack", async (ctx) => {
     var obj = {
       transaction_id: xml.transaction_id[0],
       time_end: xml.time_end[0],
-      orderStatus: "paid"
+      orderStatus: "undeliver",
+      // orderStatus: "paid",
     }
     const out_trade_no = xml.attach[0];
     var orderItem = await orderModel.findOneAndUpdate({ out_trade_no }, obj, { new: true });
@@ -317,7 +318,7 @@ router.post("/paymentBack", async (ctx) => {
   }
 })
 
-/* 申请退款 */
+/* 取消订单/退款 */
 /*
 *param：out_trade_no、userId
 * */
@@ -337,7 +338,7 @@ router.post("/applyRefound", async (ctx) => {
     if (res.out_refund_no) {
       ctx.body = commons.jsonBack(1, {}, "退款成功！");
     } else {
-      ctx.body = commons.jsonBack(1, {}, "退款失败！");
+      ctx.body = commons.jsonBack(1003, {}, "退款失败！");
     }
   }
 })

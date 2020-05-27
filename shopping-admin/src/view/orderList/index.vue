@@ -80,7 +80,13 @@
         label="操作"
         width="120">
         <template slot-scope="scope">
-          <el-button type="text" size="small" v-if="scope.row.isDelete === 0">
+          <!-- 未发货订单可退货 -->
+          <el-button type="text" size="small" v-if="scope.row.orderStatus==='paid'">
+            取消订单
+          </el-button>
+          <!-- 已收到订单信息联系卖方 -->
+          <el-button type="text" size="small" v-if="scope.row.orderStatus==='paid'">
+            确认订单
           </el-button>
         </template>
       </el-table-column>
