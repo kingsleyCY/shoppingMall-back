@@ -5,10 +5,13 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser');
 const KoaXmlBody = require('koa-xml-body');
-const logger = require('koa-logger')
+const logger = require('koa-logger');
+const { loggers, accessLogger } = require('./logger');
 var baseCommon = require('./common/common');
+app.use(accessLogger());
 
 global.commons = baseCommon;
+global.logger = loggers;
 
 var baseConfig = require('./common/baseConfig');
 /* 连接数据库 */
@@ -95,9 +98,9 @@ app.use(async (ctx, next) => {
 }))*/
 app.use(KoaXmlBody());
 app.use(bodyparser());
-app.use(json())
-app.use(logger())
-app.use(require('koa-static')(__dirname + '/public'))
+app.use(json());
+app.use(logger());
+app.use(require('koa-static')(__dirname + '/public'));
 
 /*app.use(views(__dirname + '/views', {
   extension: 'ejs'
