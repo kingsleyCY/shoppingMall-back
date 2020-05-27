@@ -164,6 +164,7 @@ var wx = {
           key: fs.readFileSync(path.join(__dirname, '../../../../WXcert/apiclient_key.pem'))
         }
       }, function (err, response, body) {
+        logger.error(response.body.toString('utf-8'));
         let return_code = that.getXMLNodeValue('return_code', response.body.toString('utf-8'));
         let return_msg = that.getXMLNodeValue('return_msg', response.body.toString('utf-8'));
         let err_code_des = that.getXMLNodeValue('err_code_des', response.body.toString('utf-8'));
