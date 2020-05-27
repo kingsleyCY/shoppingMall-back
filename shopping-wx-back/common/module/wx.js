@@ -90,8 +90,10 @@ var wx = {
     let tmp = xml.split("<" + node_name + ">");
     if (tmp[1] != undefined) {
       let _tmp = tmp[1].split("</" + node_name + ">");
+      if (_tmp.indexOf('[') < 0 && _tmp.indexOf(']')) {
+        return _tmp;
+      }
       let tmp1 = _tmp[0].split('[');
-
       let _tmp1 = tmp1[2].split(']');
       return _tmp1[0];
     }
