@@ -16,7 +16,7 @@ client.on('error', function (err) {
   console.log('Something went wrong ' + err);
 });
 /* 连接Mongo */
-var mongooseIP = "mongodb://" + ip + ":8001/shoppingMall"
+var mongooseIP = "mongodb://cheng:cheng950724@" + ip + ":8001/shoppingMall"
 mongoose.connect(mongooseIP, {
   useNewUrlParser: true,
   useUnifiedTopology: true //这个即是报的警告
