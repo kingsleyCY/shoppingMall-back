@@ -192,3 +192,11 @@ export function getOrderList(param) {
     data: param
   })
 }
+
+export function setMail(param) {
+  return instance({
+    url: '/admin/order/setMail',
+    method: 'post',
+    data: param
+  })
+}

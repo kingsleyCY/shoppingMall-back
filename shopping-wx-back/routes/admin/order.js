@@ -38,26 +38,31 @@ router.post('/creatOrder', async (ctx) => {
 })
 
 /* 订单录入快递号 */
-/* param: out_trade_no、userId、mailOrder、mailRemark
+/* param: out_trade_no、mailOrder、mailRemark
  * */
 router.post('/setMail', async (ctx) => {
   var param = ctx.request.body;
-  if (!commons.judgeParamExists(['out_trade_no', 'userId', "mailOrder", "mailRemark"], param)) {
+  if (!commons.judgeParamExists(['out_trade_no', "mailOrder", "mailRemark"], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no, userId: param.userId })
+  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no })
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
-  if (orderItem.orderStatus !== "undeliver" || orderItem.orderStatus !== "deliver") {
+  console.log(orderItem);
+  if (orderItem.orderStatus !== "undeliver" && orderItem.orderStatus !== "deliver") {
     ctx.throw(200, commons.jsonBack(1003, {}, "当前订单不是发货状态"))
   }
-  var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no, userId: param.userId }, {
+  var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
     mailOrder: param.mailOrder,
     mailRemark: param.mailRemark,
     orderStatus: "deliver",
   }, { new: true });
-  ctx.body = commons.jsonBack(1, orderItems, "");
+  if (!orderItems) {
+    ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
+  } else {
+    ctx.body = commons.jsonBack(1, orderItems, "录入数据成功");
+  }
 })
 
 

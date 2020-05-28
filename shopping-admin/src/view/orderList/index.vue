@@ -74,6 +74,20 @@
           {{scope.row.addressDetail.userName}}
         </template>
       </el-table-column>
+      <el-table-column
+        label="物流号"
+        min-width="150">
+        <template slot-scope="scope">
+          {{scope.row.mailOrder || "--"}}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="物流备注"
+        min-width="150">
+        <template slot-scope="scope">
+          {{scope.row.mailRemark || "--"}}
+        </template>
+      </el-table-column>
 
       <el-table-column
         fixed="right"
@@ -90,9 +104,14 @@
           </el-button>
           <!-- 录入订单物流信息 -->
           <el-button type="text" size="small"
-                     v-if="scope.row.orderStatus==='undeliver' || scope.row.orderStatus==='deliver'"
-                     @click="openMailModel">
+                     v-if="scope.row.orderStatus==='undeliver'"
+                     @click="openMailModel(scope.row)">
             录入物流信息
+          </el-button>
+          <el-button type="text" size="small"
+                     v-if="scope.row.orderStatus==='deliver'"
+                     @click="openMailModel(scope.row)">
+            修改物流信息
           </el-button>
         </template>
       </el-table-column>
@@ -107,32 +126,42 @@
       :total="pageData.total">
     </el-pagination>
 
-    <el-dialog
-      title="提示" :visible.sync="maildialogVisible" width="30%">
-      <span>物流信息</span>
-
+    <el-dialog title="物流信息" :visible.sync="maildialogVisible" width="30%">
+      <el-form ref="form" :model="mailForm" label-width="80px">
+        <el-form-item label="快递单号">
+          <el-input v-model.trim="mailForm.mailOrder"></el-input>
+        </el-form-item>
+        <el-form-item label="快递备注">
+          <el-input type="textarea" v-model="mailForm.mailRemark"></el-input>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="submitMail">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getOrderList } from "@/api/request"
+  import { getOrderList, setMail } from "@/api/request"
 
   export default {
     name: "orderList",
     data() {
       return {
         orderList: [],
+        checkedItem: null,
         pageData: {
           page: 1,
           pageSize: 10,
           total: 0,
         },
-        maildialogVisible: false
+        maildialogVisible: false,
+        mailForm: {
+          mailOrder: "",
+          mailRemark: "",
+        }
       }
     },
     mounted() {
@@ -183,8 +212,37 @@
             return "退款失败";
         }
       },
-      openMailModel() {
+      openMailModel(row) {
+        this.maildialogVisible = true;
+        this.checkedItem = row;
+        if (row.orderStatus === 'undeliver') {
+          this.mailForm = {
+            mailOrder: "",
+            mailRemark: "",
+          }
+        } else if (row.orderStatus === 'deliver') {
+          this.mailForm = {
+            mailOrder: row.mailOrder,
+            mailRemark: row.mailRemark
+          }
+        }
+      },
+      submitMail() {
+        if (this.mailForm.mailOrder) {
+          let parm = JSON.parse(JSON.stringify(this.mailForm));
+          parm.out_trade_no = this.checkedItem.out_trade_no
+          setMail(parm).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.maildialogVisible = false;
+              this.getOrderList();
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(reds => {
 
+          })
+        }
       }
     }
   }

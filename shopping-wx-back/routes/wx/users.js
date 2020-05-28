@@ -365,5 +365,28 @@ router.post("/getOrderList", async (ctx) => {
   ctx.body = commons.jsonBack(1, list, "");
 })
 
+/* 确认收货 */
+/*
+* param：out_trade_no、userId
+* */
+router.post("/sureReceipt", async (ctx) => {
+  var param = ctx.request.body
+  if (!commons.judgeParamExists(['out_trade_no', 'userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var orderItem = await orderModel.findOne({
+    userId: param.userId,
+    out_trade_no: param.out_trade_no
+  })
+  if (orderItem && orderItem.orderStatus === "deliver") {
+    var orderItems = await orderModel.findOneAndUpdate({
+      userId: param.userId,
+      out_trade_no: param.out_trade_no
+    }, { orderStatus: "over" }, { new: true });
+    ctx.body = commons.jsonBack(1, orderItems, "");
+  } else {
+    ctx.body = commons.jsonBack(1003, {}, "该订单状态错误！");
+  }
+})
 
 module.exports = router
