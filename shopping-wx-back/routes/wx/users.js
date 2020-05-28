@@ -300,9 +300,6 @@ router.post("/paymentBack", async (ctx) => {
     const out_trade_no = xml.attach[0];
     var orderItem = await orderModel.findOneAndUpdate({ out_trade_no }, obj, { new: true });
     if (orderItem) {
-      var userItem = userModel.findOne({ userId: orderItem.userId });
-      var integral = (userItem.integral || 0) + orderItem.total_fee / 100;
-      await userModel.findOneAndUpdate({ userId: orderItem.userId }, { integral }, { new: true })
       logger.error(orderItem.commodityId);
       await shoppingModel.findOneAndUpdate({
         id: orderItem.commodityId
@@ -379,6 +376,9 @@ router.post("/sureReceipt", async (ctx) => {
     out_trade_no: param.out_trade_no
   })
   if (orderItem && orderItem.orderStatus === "deliver") {
+    var userItem = userModel.findOne({ userId: param.userId });
+    var integral = (userItem.integral || 0) + orderItem.total_fee / 100;
+    await userModel.findOneAndUpdate({ userId: orderItem.userId }, { integral }, { new: true })
     var orderItems = await orderModel.findOneAndUpdate({
       userId: param.userId,
       out_trade_no: param.out_trade_no
