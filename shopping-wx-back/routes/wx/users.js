@@ -377,7 +377,7 @@ router.post("/sureReceipt", async (ctx) => {
   })
   if (orderItem && orderItem.orderStatus === "deliver") {
     var userItem = userModel.findOne({ userId: param.userId });
-    var integral = (userItem.integral || 0) + orderItem.total_fee / 100;
+    var integral = (userItem.integral || 0) + (orderItem.total_fee / 100);
     await userModel.findOneAndUpdate({ userId: orderItem.userId }, { integral }, { new: true })
     var orderItems = await orderModel.findOneAndUpdate({
       userId: param.userId,
