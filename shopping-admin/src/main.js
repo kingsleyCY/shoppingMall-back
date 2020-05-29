@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import VueRouter from 'vue-router'
+import common from './assets/common'
 
 Vue.use(VueRouter)
 import { router } from './router'
@@ -14,6 +15,7 @@ import VueCropper from 'vue-cropper'
 Vue.use(VueCropper)
 
 Vue.config.productionTip = false
+Vue.prototype.common = common;
 
 Vue.directive("image", {
   inserted: function (el, binding) {

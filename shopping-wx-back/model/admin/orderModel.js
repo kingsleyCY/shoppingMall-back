@@ -7,18 +7,14 @@ var orderSchema = new mongoose.Schema({
   transaction_id: { type: String, default: "" }, // 微信支付订单号
   commodityId: String,
   userId: String,
+  // userId: mongoose.Schema.Types.ObjectId,
   addressId: String,
   commodityDetail: Object,
   userDetail: Object,
   addressDetail: Object,
   time_end: String, // 支付完成时间
-  /*
-  * none 初始化 unpaid 待支付 paid 已支付成功 paiderror 已支付失败
-  * undeliver 待发货  deliver 已发货 over 已完成
-  * refund 已退款成功 unrefund 退款失败
-  * */
   orderStatus: { type: String, default: "none" },
-  mess: { type: String, default: "" },
+  mess: { type: String, default: "" }, // 下单备注
   size: { type: String, default: "" },
   unpidData: { type: Object, default: {} }, // 支付微信参数
   refoundData: { type: Object, default: {} }, // 支付微信参数
@@ -27,4 +23,20 @@ var orderSchema = new mongoose.Schema({
 }, { collection: "orderList" });
 var orderModel = db.model("orderList", orderSchema);
 
-exports.orderModel = orderModel
+exports.orderModel = orderModel;
+
+/* orderStatus说明 */
+
+/*
+* none 初始化
+* unpaid 待支付
+* paid 已支付成功
+* paiderror 已支付失败
+* undeliver 待发货(未提交给商家)
+* deliver 待发货(已提交给商家)
+* delivered 已发货
+* over 已完成
+* refund 已退款成功
+* unrefund 退款失败
+*
+* */

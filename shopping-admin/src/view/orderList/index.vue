@@ -1,131 +1,153 @@
 <template>
-  <div>
-    <el-table
-      :data="orderList" border
-      style="width: 100%">
-      <el-table-column
-        prop="out_trade_no"
-        label="订单ID"
-        width="150">
-      </el-table-column>
-      <el-table-column
-        prop="orderStatus"
-        label="状态"
-        width="80">
-        <template slot-scope="scope">
+  <div class="search-box">
+    <div class="search-header">
+      <el-form :inline="true" :model="searchForm" class="demo-form-inline" size="mini">
+        <el-form-item label="订单状态：">
+          <el-select v-model="searchForm.orderStatus" placeholder="选择订单状态" clearable>
+            <el-option :label="item.label" :value="item.value" v-for="(item,index) in orderStatusArr"
+                       :key="index"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="formSearch">查询</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="search-content">
+      <el-table
+        :data="orderList" border class="search-table" ref="searchTable" :height="tableHeight" v-loading="loading">
+        <el-table-column
+          prop="out_trade_no"
+          label="订单ID"
+          width="150">
+        </el-table-column>
+        <el-table-column
+          label="创建时间"
+          width="100">
+          <template slot-scope="scope">
+            {{common.timeTransfer(scope.row.created_time).slice(0,10)}}<br>
+            {{common.timeTransfer(scope.row.created_time).slice(10)}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="orderStatus"
+          label="状态"
+          width="80">
+          <template slot-scope="scope">
           <span :class="[scope.row.orderStatus, 'orde-status']">
             {{computedStatus(scope.row.orderStatus)}}
           </span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="total_fee"
-        label="成交价格（￥）"
-        min-width="80">
-        <template slot-scope="scope">
-          {{scope.row.total_fee / 100}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="size"
-        label="尺码"
-        width="80">
-      </el-table-column>
-      <el-table-column
-        prop="transaction_id"
-        label="微信支付订单号"
-        min-width="100">
-      </el-table-column>
-      <el-table-column
-        prop="userId"
-        label="userId"
-        min-width="100">
-      </el-table-column>
-      <el-table-column
-        label="用户手机号"
-        min-width="100">
-        <template slot-scope="scope">
-          {{scope.row.userDetail.phoneNumber}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="商品名称"
-        min-width="100">
-        <template slot-scope="scope">
-          ID：{{scope.row.commodityId}}<br>
-          {{scope.row.commodityDetail.classifyName +'/'+scope.row.commodityDetail.title}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="商品logo"
-        min-width="100">
-        <template slot-scope="scope">
-          <img v-image :src="scope.row.commodityDetail.logo" style="width: 100%;height: auto">
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="地址详情"
-        min-width="150">
-        <template slot-scope="scope">
-          {{scope.row.addressDetail.provinceName
-          +'/'+scope.row.addressDetail.cityName+"/"+scope.row.addressDetail.countyName +'/'+
-          scope.row.addressDetail.detailInfo}}<br>
-          {{scope.row.addressDetail.telNumber}}<br>
-          {{scope.row.addressDetail.userName}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="物流号"
-        min-width="150">
-        <template slot-scope="scope">
-          {{scope.row.mailOrder || "--"}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="物流备注"
-        min-width="150">
-        <template slot-scope="scope">
-          {{scope.row.mailRemark || "--"}}
-        </template>
-      </el-table-column>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="total_fee"
+          label="成交价格（￥）"
+          min-width="80">
+          <template slot-scope="scope">
+            {{scope.row.total_fee / 100}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="支付时间"
+          min-width="100">
+          <template slot-scope="scope">
+            {{scope.row.time_end?scope.row.time_end.slice(0,4)+"-"+scope.row.time_end.slice(4,6)+"-"+scope.row.time_end.slice(6,8):"--"}}<br>
+            {{scope.row.time_end?scope.row.time_end.slice(8,10)+":"+scope.row.time_end.slice(10,12)+":"+scope.row.time_end.slice(12,14):"--"}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="size"
+          label="尺码"
+          width="80">
+        </el-table-column>
+        <el-table-column
+          prop="transaction_id"
+          label="微信支付订单号"
+          min-width="100">
+        </el-table-column>
+        <el-table-column
+          prop="userId"
+          label="userId"
+          min-width="100">
+        </el-table-column>
+        <el-table-column
+          label="用户手机号"
+          min-width="100">
+          <template slot-scope="scope">
+            {{scope.row.userDetail.phoneNumber}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="商品名称"
+          min-width="100">
+          <template slot-scope="scope">
+            ID：{{scope.row.commodityId}}<br>
+            {{scope.row.commodityDetail.classifyName +'/'+scope.row.commodityDetail.title}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="商品logo"
+          min-width="100">
+          <template slot-scope="scope">
+            <img v-image :src="scope.row.commodityDetail.logo" style="width: 100%;height: auto">
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="地址详情"
+          min-width="150">
+          <template slot-scope="scope">
+            {{scope.row.addressDetail.provinceName
+            +'/'+scope.row.addressDetail.cityName+"/"+scope.row.addressDetail.countyName +'/'+
+            scope.row.addressDetail.detailInfo}}<br>
+            {{scope.row.addressDetail.telNumber}}<br>
+            {{scope.row.addressDetail.userName}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="物流号"
+          min-width="150">
+          <template slot-scope="scope">
+            {{scope.row.mailOrder || "--"}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="物流备注"
+          min-width="150">
+          <template slot-scope="scope">
+            {{scope.row.mailRemark || "--"}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="mess"
+          label="下单备注"
+          min-width="120">
+        </el-table-column>
 
-      <el-table-column
-        fixed="right"
-        label="操作"
-        width="120">
-        <template slot-scope="scope">
-          <!-- 未发货订单可退货 -->
-          <el-button type="text" size="small" v-if="scope.row.orderStatus==='paid'">
-            取消订单
-          </el-button>
-          <!-- 已收到订单信息联系卖方 -->
-          <el-button type="text" size="small" v-if="scope.row.orderStatus==='paid'">
-            确认订单
-          </el-button>
-          <!-- 录入订单物流信息 -->
-          <el-button type="text" size="small"
-                     v-if="scope.row.orderStatus==='undeliver'"
-                     @click="openMailModel(scope.row)">
-            录入物流信息
-          </el-button>
-          <el-button type="text" size="small"
-                     v-if="scope.row.orderStatus==='deliver'"
-                     @click="openMailModel(scope.row)">
-            修改物流信息
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="pageData.page"
-      :page-sizes="[10, 20, 50]"
-      :page-size="pageData.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="pageData.total">
-    </el-pagination>
-
+        <el-table-column fixed="right" label="操作" width="150">
+          <template slot-scope="scope">
+            <!-- 已收到订单信息联系卖方 -->
+            <el-button type="text" size="small" v-if="scope.row.orderStatus==='undeliver'"
+                       @click="checkOrderToBus(scope.row)">
+              确认订单
+            </el-button>
+            <!-- 录入订单物流信息 -->
+            <el-button type="text" size="small" v-if="scope.row.orderStatus==='deliver'"
+                       @click="openMailModel(scope.row)">
+              录入/修改物流信息
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="pageData.page"
+        :page-sizes="[10, 20, 50]"
+        :page-size="pageData.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pageData.total">
+      </el-pagination>
+    </div>
     <el-dialog title="物流信息" :visible.sync="maildialogVisible" width="30%">
       <el-form ref="form" :model="mailForm" label-width="80px">
         <el-form-item label="快递单号">
@@ -144,12 +166,13 @@
 </template>
 
 <script>
-  import { getOrderList, setMail } from "@/api/request"
+  import { getOrderList, checkOrderToBus, setMail } from "@/api/request"
 
   export default {
     name: "orderList",
     data() {
       return {
+        loading: false,
         orderList: [],
         checkedItem: null,
         pageData: {
@@ -161,22 +184,63 @@
         mailForm: {
           mailOrder: "",
           mailRemark: "",
-        }
+        },
+        tableHeight: 0,
+        searchForm: {
+          orderStatus: ""
+        },
+        orderStatusArr: [
+          {
+            label: "待支付",
+            value: "unpaid"
+          }, {
+            label: "已支付成功",
+            value: "paid"
+          }, {
+            label: "已支付失败",
+            value: "paiderror"
+          }, {
+            label: "待发货(未提交",
+            value: "undeliver"
+          }, {
+            label: "待发货(已提交",
+            value: "deliver"
+          }, {
+            label: "已发货",
+            value: "delivered"
+          }, {
+            label: "已完成",
+            value: "over"
+          }, {
+            label: "已退款成功",
+            value: "refund"
+          }, {
+            label: "退款失败",
+            value: "unrefund"
+          }
+        ]
       }
     },
     mounted() {
-      this.getOrderList()
+      this.getOrderList();
+      this.$nextTick(() => {
+        this.tableHeight = document.getElementsByClassName('search-content')[0].clientHeight - 50
+      })
     },
     methods: {
       getOrderList() {
         let param = {
           page: this.pageData.page,
-          pageSize: this.pageData.pageSize
+          pageSize: this.pageData.pageSize,
         }
+        this.searchForm.orderStatus ? param.orderStatus = this.searchForm.orderStatus : ""
+        this.loading = true
         getOrderList(param).then(res => {
+          this.loading = false
           this.orderList = res.data.list;
           this.pageData.total = res.data.total;
         }).catch(res => {
+          this.loading = false
           this.orderList = [];
           this.pageData.total = 0;
         })
@@ -201,8 +265,10 @@
           case "paiderror":
             return "已支付失败";
           case "undeliver":
-            return "待发货";
+            return "待发货/未提交";
           case "deliver":
+            return "待发货/已提交";
+          case "delivered":
             return "已发货";
           case "over":
             return "已完成";
@@ -240,9 +306,28 @@
               this.$message.error(res.mess)
             }
           }).catch(reds => {
-
+            this.$message.error("操作失败")
           })
         }
+      },
+      checkOrderToBus(row) {
+        let parm = {
+          out_trade_no: row.out_trade_no
+        }
+        checkOrderToBus(parm).then(res => {
+          if (res.code === 1) {
+            this.$message.success(res.mess);
+            this.getOrderList();
+          } else {
+            this.$message.error(res.mess);
+          }
+        }).catch(reds => {
+          this.$message.error("操作失败")
+        })
+      },
+      formSearch() {
+        this.pageData.page = 1
+        this.getOrderList()
       }
     }
   }
@@ -260,22 +345,25 @@
       color: #4bff65;
     }
     .paiderror {
-      color: #ff3100;
+      color: #ff0018;
     }
     .undeliver {
-      color: #6eb1ff;
+      color: #83cdff;
     }
     .deliver {
-      color: #3d75ff;
+      color: #68a5ff;
+    }
+    .delivered {
+      color: #011fff;
     }
     .over {
-      color: #ff00ec;
+      color: #000000;
     }
     .refund {
       color: #54fdff;
     }
     .unrefund {
-      color: #ffa037;
+      color: #ff690a;
     }
   }
 </style>

@@ -193,6 +193,14 @@ export function getOrderList(param) {
   })
 }
 
+export function checkOrderToBus(param) {
+  return instance({
+    url: '/admin/order/checkOrderToBus',
+    method: 'post',
+    data: param
+  })
+}
+
 export function setMail(param) {
   return instance({
     url: '/admin/order/setMail',

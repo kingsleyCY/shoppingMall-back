@@ -69,7 +69,7 @@
       width: calc(100% - 200px);
       overflow-y: auto;
       box-sizing: border-box;
-      padding: 20px 25px;
+      padding: 10px 15px;
     }
   }
 </style>
