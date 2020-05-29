@@ -200,10 +200,10 @@
             label: "已支付失败",
             value: "paiderror"
           }, {
-            label: "待发货(未提交",
+            label: "待发货-未提交",
             value: "undeliver"
           }, {
-            label: "待发货(已提交",
+            label: "待发货-已提交",
             value: "deliver"
           }, {
             label: "已发货",
