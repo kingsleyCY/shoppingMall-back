@@ -9,7 +9,8 @@ var userSchema = new mongoose.Schema({
   idProxy: Number, // 推荐二维码地址
   isProxy: { type: Number, default: 0 }, // 是否为代理
   activityList: { type: Object, default: {} },
-  integral: { type: Number, default: 0 } // 积分
+  integral: { type: Number, default: 0 }, // 积分
+  wxUserInfo: { type: Object, default: {} }
 }, { collection: "userList" });
 var userModel = db.model("userList", userSchema);
 
