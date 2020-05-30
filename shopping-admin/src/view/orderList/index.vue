@@ -295,8 +295,8 @@
         this.searchForm.timeRange[1] ? param.createEtime = this.searchForm.timeRange[1] : "";
         this.searchForm.orderTimeRange[0] ? param.orderStime = this.searchForm.orderTimeRange[0] : "";
         this.searchForm.orderTimeRange[1] ? param.orderEtime = this.searchForm.orderTimeRange[1] : "";
-        this.searchForm.totalFeeMin ? param.totalFeeMin = this.searchForm.totalFeeMin : "";
-        this.searchForm.totalFeeMax ? param.totalFeeMax = this.searchForm.totalFeeMax : "";
+        this.searchForm.totalFeeMin ? param.totalFeeMin = Number(this.searchForm.totalFeeMin) : "";
+        this.searchForm.totalFeeMax ? param.totalFeeMax = Number(this.searchForm.totalFeeMax) : "";
         this.searchForm.phone ? param.phone = this.searchForm.phone : "";
         this.loading = true;
         this.visible = false;

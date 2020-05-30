@@ -16,10 +16,16 @@ router.post('/orderList', async (ctx) => {
   param.userId ? search.userId = param.userId : "";
   param.orderStatus ? search.orderStatus = param.orderStatus : "";
   param.orderId ? search.orderId = param.orderId : "";
-  param.createStime && param.createEtime ? search.created_time = { $gte: param.createStime, $lt: param.createEtime } : "";
-  // param.orderStime && param.orderEtime ? search.created_time = { $gte: param.orderStime, $lt: param.orderEtime } : "";
-  param.totalFeeMin && param.totalFeeMax ? search.total_fee = { $gte: param.totalFeeMin, $lt: param.totalFeeMax } : "";
+  param.createStime && param.createEtime ? search.created_time = {
+    $gte: param.createStime,
+    $lte: param.createEtime
+  } : "";
+  param.totalFeeMin && param.totalFeeMax ? search.total_fee = {
+    $gte: Number(param.totalFeeMin) * 100,
+    $lte: Number(param.totalFeeMax) * 100
+  } : "";
   param.phone ? search['userDetail.phoneNumber'] = param.phone : "";
+  console.log(search);
 
   const list = await orderModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await orderModel.find(search);
