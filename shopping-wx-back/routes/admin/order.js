@@ -5,6 +5,7 @@ const { orderModel } = require('../../model/admin/orderModel');
 /*
 * param: page、pageSize
 * opparam：userId、orderStatus
+* orderId、createStime、createEtime、orderStime、orderEtime、totalFeeMin、totalFeeMax、phone
 * */
 router.post('/orderList', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
@@ -14,6 +15,12 @@ router.post('/orderList', async (ctx) => {
   let search = {}
   param.userId ? search.userId = param.userId : "";
   param.orderStatus ? search.orderStatus = param.orderStatus : "";
+  param.orderId ? search.orderId = param.orderId : "";
+  param.createStime && param.createEtime ? search.created_time = { $gte: param.createStime, $lt: param.createEtime } : "";
+  // param.orderStime && param.orderEtime ? search.created_time = { $gte: param.orderStime, $lt: param.orderEtime } : "";
+  param.totalFeeMin && param.totalFeeMax ? search.total_fee = { $gte: param.totalFeeMin, $lt: param.totalFeeMax } : "";
+  param.phone ? search['userDetail.phoneNumber'] = param.phone : "";
+
   const list = await orderModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await orderModel.find(search);
   ctx.body = commons.jsonBack(1, {

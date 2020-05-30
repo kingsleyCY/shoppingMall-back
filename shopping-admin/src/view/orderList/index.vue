@@ -9,8 +9,57 @@
           </el-select>
         </el-form-item>
         <el-form-item>
+          <el-button type="primary" @click="openMoreSearch">更多查询条件</el-button>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" @click="formSearch">查询</el-button>
         </el-form-item>
+        <el-popover
+          placement="right"
+          width="600"
+          trigger="manual" v-model="visible">
+          <div>
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline more-search" size="mini">
+              <el-form-item label="订单ID">
+                <el-input v-model="searchForm.orderId" clearable></el-input>
+              </el-form-item>
+              <el-form-item label="订单价格">
+                <el-input v-model="searchForm.totalFeeMin" clearable></el-input>
+                至
+                <el-input v-model="searchForm.totalFeeMax" clearable></el-input>
+              </el-form-item>
+              <el-form-item label="订单创建时间">
+                <el-date-picker
+                  v-model="searchForm.timeRange"
+                  type="datetimerange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期" value-format="timestamp">
+                </el-date-picker>
+              </el-form-item>
+              <!--<el-form-item label="支付时间">
+                <el-date-picker
+                  v-model="searchForm.orderTimeRange"
+                  type="datetimerange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期" value-format="timestamp">
+                </el-date-picker>
+              </el-form-item>-->
+              <el-form-item label="手机号">
+                <el-input v-model="searchForm.phone" clearable></el-input>
+              </el-form-item>
+              <div>
+                <el-form-item>
+                  <el-button @click="initMoreSearch">清空</el-button>
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" @click="formSearch">确定</el-button>
+                </el-form-item>
+              </div>
+            </el-form>
+          </div>
+        </el-popover>
       </el-form>
     </div>
     <div class="search-content">
@@ -187,7 +236,13 @@
         },
         tableHeight: 0,
         searchForm: {
-          orderStatus: ""
+          orderStatus: "",
+          orderId: "",
+          timeRange: [],
+          orderTimeRange: [],
+          totalFeeMin: "",
+          totalFeeMax: "",
+          phone: "",
         },
         orderStatusArr: [
           {
@@ -218,7 +273,8 @@
             label: "退款失败",
             value: "unrefund"
           }
-        ]
+        ],
+        visible: false
       }
     },
     mounted() {
@@ -233,8 +289,17 @@
           page: this.pageData.page,
           pageSize: this.pageData.pageSize,
         }
-        this.searchForm.orderStatus ? param.orderStatus = this.searchForm.orderStatus : ""
-        this.loading = true
+        this.searchForm.orderStatus ? param.orderStatus = this.searchForm.orderStatus : "";
+        this.searchForm.orderId ? param.orderId = this.searchForm.orderId : "";
+        this.searchForm.timeRange[0] ? param.createStime = this.searchForm.timeRange[0] : "";
+        this.searchForm.timeRange[1] ? param.createEtime = this.searchForm.timeRange[1] : "";
+        this.searchForm.orderTimeRange[0] ? param.orderStime = this.searchForm.orderTimeRange[0] : "";
+        this.searchForm.orderTimeRange[1] ? param.orderEtime = this.searchForm.orderTimeRange[1] : "";
+        this.searchForm.totalFeeMin ? param.totalFeeMin = this.searchForm.totalFeeMin : "";
+        this.searchForm.totalFeeMax ? param.totalFeeMax = this.searchForm.totalFeeMax : "";
+        this.searchForm.phone ? param.phone = this.searchForm.phone : "";
+        this.loading = true;
+        this.visible = false;
         getOrderList(param).then(res => {
           this.loading = false
           this.orderList = res.data.list;
@@ -328,6 +393,17 @@
       formSearch() {
         this.pageData.page = 1
         this.getOrderList()
+      },
+      openMoreSearch() {
+        this.visible = !this.visible
+      },
+      initMoreSearch() {
+        this.searchForm.orderId = "";
+        this.searchForm.timeRange = [];
+        this.searchForm.orderTimeRange = [];
+        this.searchForm.totalFeeMin = "";
+        this.searchForm.totalFeeMax = "";
+        this.searchForm.phone = "";
       }
     }
   }
@@ -364,6 +440,11 @@
     }
     .unrefund {
       color: #ff690a;
+    }
+  }
+  .more-search {
+    .el-input {
+      width: 120px;
     }
   }
 </style>
