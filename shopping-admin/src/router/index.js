@@ -50,6 +50,12 @@ const mainRouter = [
     tilte: '订单列表',
     component: resolve => require(['@/view/orderList'], resolve),
   },
+  {
+    path: 'couponList',
+    name: 'couponList',
+    tilte: '优惠券列表',
+    component: resolve => require(['@/view/couponList'], resolve),
+  },
 ]
 
 

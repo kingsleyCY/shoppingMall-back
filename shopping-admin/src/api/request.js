@@ -88,6 +88,16 @@ export function addCommodity(param) {
   })
 }
 
+export function bathExportCommodity(param) {
+  return instance({
+    url: '/admin/commodity/bathExportCommodity',
+    method: 'post',
+    headers: {"Content-Type": "multipart/form-data"},
+    data: param
+  })
+}
+
+
 export function commodityDetail(id) {
   return instance({
     url: '/admin/commodity/commodityDetail',
@@ -204,6 +214,38 @@ export function checkOrderToBus(param) {
 export function setMail(param) {
   return instance({
     url: '/admin/order/setMail',
+    method: 'post',
+    data: param
+  })
+}
+
+export function getCounponList(param) {
+  return instance({
+    url: '/admin/coupon/getCounponList',
+    method: 'post',
+    data: param
+  })
+}
+
+export function createdCoupon(param) {
+  return instance({
+    url: '/admin/coupon/createdCoupon',
+    method: 'post',
+    data: param
+  })
+}
+
+export function deleteCoupon(param) {
+  return instance({
+    url: '/admin/coupon/deleteCoupon',
+    method: 'post',
+    data: param
+  })
+}
+
+export function couponBindUser(param) {
+  return instance({
+    url: '/admin/coupon/couponBindUser',
     method: 'post',
     data: param
   })

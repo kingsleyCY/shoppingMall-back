@@ -1,6 +1,9 @@
 const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
+const xlsx = require('node-xlsx');      // 读写xlsx的插件
+const multiparty = require("multiparty");
+const fs = require("fs");
 
 /* 商品列表-admin */
 /*
@@ -8,7 +11,7 @@ const { classifyModel } = require('../../model/admin/classifyModel');
 * opparam: title、classifyId
 * */
 router.post('/commodityList', async (ctx) => {
-  var param = ctx.request.body;
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
   if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
@@ -123,6 +126,23 @@ router.post('/updateIndexList', async (ctx) => {
   }
   await shoppingModel.updateMany({ [key]: 1 }, { $set: { [key]: 0 } })
   await shoppingModel.updateMany({ id: { $in: idArr } }, { $set: { [key]: 1 } })
+  ctx.body = commons.jsonBack(1, {}, "操作成功！");
+})
+
+/* 上传xlsx 批量导入商品 */
+router.post('/bathExportCommodity', async (ctx) => {
+  let form = new multiparty.Form();
+  form.parse(ctx.req, function (err, fields, files) {
+    console.log(files.username[0])
+    console.log(fields)
+    let input = files.username[0]
+    const file = files.file; // 获取上传文件
+    const reader = fs.createReadStream(input.path); // 创建可读流
+    const ext = input.originalFilename.split('.').pop(); // 获取上传文件扩展名
+    const upStream = fs.createWriteStream(`upload/${Math.random().toString()}.${ext}`); // 创建可写流
+    reader.pipe(upStream);
+    // console.log(fields.aa[0])
+  })
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 

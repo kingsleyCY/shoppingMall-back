@@ -19,7 +19,7 @@ client.on('error', function (err) {
 var mongooseIP = "mongodb://cheng:cheng950724@" + ip + ":8001/shoppingMall"
 mongoose.connect(mongooseIP, {
   useNewUrlParser: true,
-  useUnifiedTopology: true //这个即是报的警告
+  useUnifiedTopology: true, //这个即是报的警告
 });
 var db = mongoose.connection;
 db.on('error', function () {

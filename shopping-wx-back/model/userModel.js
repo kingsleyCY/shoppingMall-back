@@ -10,8 +10,9 @@ var userSchema = new mongoose.Schema({
   isProxy: { type: Number, default: 0 }, // 是否为代理
   activityList: { type: Object, default: {} },
   integral: { type: Number, default: 0 }, // 积分
-  wxUserInfo: { type: Object, default: {} }
-}, { collection: "userList" });
+  wxUserInfo: { type: Object, default: {} },
+  couponList: { type: Array, default: [] }, //优惠券信息
+}, { collection: "userList", versionKey: false });
 var userModel = db.model("userList", userSchema);
 
 exports.userModel = userModel

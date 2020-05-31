@@ -6,14 +6,17 @@
           <el-input size="mini" v-model="search.title" clearable></el-input>
         </el-form-item>
         <el-form-item label="分类：">
-          <el-cascader size="mini" :props="cascaderProps" v-model="search.classifyId" :options="treeData" clearable></el-cascader>
+          <el-cascader size="mini" :props="cascaderProps" v-model="search.classifyId" :options="treeData"
+                       clearable></el-cascader>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="searchList" size="mini">搜索</el-button>
         </el-form-item>
       </el-form>
-
     </div>
     <el-button type="primary" @click="addCommodity" size="mini">添加商品</el-button>
     <el-button type="primary" @click="deleCommodity" size="mini">删除选中</el-button>
-    <el-button type="primary" @click="searchList" size="mini">搜索</el-button>
+    <el-button type="primary" @click="openBathExport" size="mini">批量上传</el-button>
     <ul class="list-box">
       <li v-for="(item, index) in commodityList" :key="index" class="item-commo" @click="editCommodity(item.id)">
         <el-checkbox v-model="item.checked" @click.native.stop="checkedCommodity(item)" class="checkbox"></el-checkbox>
@@ -36,11 +39,32 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="pageData.total">
     </el-pagination>
+
+    <el-dialog
+      custom-class="most-dislog"
+      title="批量上传"
+      :visible.sync="bathdialogVisible"
+      width="50%">
+      <el-upload
+        class="upload-demo" :limit="1"
+        drag :auto-upload="false"
+        action=""
+        :on-change="fileChange"
+        :multiple="false">
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="bathdialogVisible = false" size="small">取 消</el-button>
+        <el-button type="primary" @click="uploadFile" size="small">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getCommodityList, deleCommodity, getClassifyList } from '@/api/request'
+  import { getCommodityList, deleCommodity, getClassifyList, bathExportCommodity } from '@/api/request'
 
   export default {
     name: "commidity",
@@ -60,7 +84,9 @@
         cascaderProps: {
           value: "id",
           label: "title",
-        }
+        },
+        bathdialogVisible: false,
+        bathFile: null
       }
     },
     mounted() {
@@ -118,7 +144,7 @@
           }
         })
         if (arr.length > 0) {
-          deleCommodity({ id: arr }).then(res => {
+          deleCommodity({id: arr}).then(res => {
             if (res.code === 1) {
               this.$message.success(res.mess)
               this.getList()
@@ -127,6 +153,21 @@
             }
           })
         }
+      },
+      openBathExport() {
+        return
+        this.bathdialogVisible = true
+      },
+      fileChange(file, fileList) {
+        this.bathFile = file;
+      },
+      uploadFile() {
+        console.log(this.bathFile);
+        let param = new FormData();
+        param.append("file", this.bathFile.raw);
+        bathExportCommodity(param).then(res => {
+          console.log(res);
+        })
       }
     }
   }
@@ -175,5 +216,8 @@
         font-size: 12px;
       }
     }
+  }
+  .upload-demo {
+    text-align: center;
   }
 </style>
