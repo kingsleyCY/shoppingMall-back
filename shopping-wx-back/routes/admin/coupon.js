@@ -53,6 +53,10 @@ router.post('/createdCoupon', async (ctx) => {
     }
     if (param.useType === 1) {
       obj.lotteryCode = param.code;
+      var lotteryCodeCpupon = await couponModel.findOne({ lotteryCode: obj.lotteryCode })
+      if (lotteryCodeCpupon) {
+        ctx.throw(200, commons.jsonBack(1003, {}, "优惠券抽奖码已存在，不可重复！"))
+      }
       if (!validFullDecre(param)) {
         obj.fullDecre = {
           fullFee: Number(param.fullFee),
@@ -123,7 +127,6 @@ router.post('/deleteCoupon', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   var item = await couponModel.remove({ _id: mongoose.Types.ObjectId(param.id) })
-  console.log(item);
   await deletAllUserCoupon(param.id)
   ctx.body = commons.jsonBack(1, {}, "删除成功");
 })
@@ -168,6 +171,9 @@ router.post('/couponBindUser', async (ctx) => {
     var userItem = await userModel.findOne(searchObj)
     if (!userItem) {
       ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
+    }
+    if (userItem.couponList.indexOf(param.couponId) >= 0) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "该用户已绑定此优惠券"))
     }
     var couponItems = await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, { crowdData: userItem }, { new: true });
     ctx.body = commons.jsonBack(1, couponItems, "绑定成功");

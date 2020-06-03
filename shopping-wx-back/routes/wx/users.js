@@ -2,6 +2,7 @@ const router = require('koa-router')()
 const https = require('https');
 const qs = require('querystring');
 const { userModel } = require('../../model/userModel');
+const { couponModel } = require('../../model/admin/couponModel');
 const jwt = require('jsonwebtoken');
 
 /* 绑定用户获取openID */
@@ -88,5 +89,54 @@ router.post("/getUserInfo", async (ctx) => {
     ctx.body = commons.jsonBack(1003, {}, "未查询到此用户信息！");
   }
 })
+
+/* 获取用户可用优惠券信息 */
+/*
+* parama：userId
+* */
+router.post("/getCounponList", async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var userItem = await userModel.findOne({ userId: param.userId })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户信息!"))
+  }
+  var counponList = await couponModel.find({ _id: { $in: userItem.couponList } });
+
+  ctx.body = commons.jsonBack(1, counponList, "获取优惠券信息成功！");
+})
+
+/* 用户传递code 绑定优惠券 */
+/*
+* parama：userId、code
+* */
+router.post("/bindCouponByCode", async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['userId', 'code'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var couponItem = await couponModel.findOne({ lotteryCode: param.code })
+  if (!couponItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券信息!"))
+  }
+  var bindUserItem = await userModel.findOne({
+    couponList: { "$elemMatch": { $eq: couponItem._id } }
+  });
+  if (bindUserItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "此优惠券已绑定用户!"))
+  }
+  var userItem = await userModel.findOne({ userId: param.userId })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户信息!"))
+  }
+  var couponList = JSON.parse(JSON.stringify(userItem)).couponList;
+  couponList.push(couponItem._id)
+  var userItems = await userModel.findOneAndUpdate({ userId: param.userId }, { couponList }, { new: true })
+
+  ctx.body = commons.jsonBack(1, userItems, "获取优惠券信息成功！");
+})
+
 
 module.exports = router
