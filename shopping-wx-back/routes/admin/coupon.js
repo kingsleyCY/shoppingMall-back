@@ -175,12 +175,16 @@ router.post('/couponBindUser', async (ctx) => {
     if (userItem.couponList.indexOf(param.couponId) >= 0) {
       ctx.throw(200, commons.jsonBack(1003, {}, "该用户已绑定此优惠券"))
     }
+    // 更新优惠券model信息
     var couponItems = await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, {
       crowdData: {
         userId: userItem.userId,
         phoneNumber: userItem.phoneNumber
       }
     }, { new: true });
+    var item = JSON.parse(JSON.stringify(userItem));
+    item.couponList.push(couponItem._id);
+    await userModel.findOneAndUpdate(searchObj, { couponList: item.couponList }, { new: true })
     ctx.body = commons.jsonBack(1, couponItems, "绑定成功");
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券"))
