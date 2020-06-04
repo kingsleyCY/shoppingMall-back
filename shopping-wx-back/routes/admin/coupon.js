@@ -71,7 +71,7 @@ router.post('/createdCoupon', async (ctx) => {
           obj.timeRange = {}
         }
         var couponItem = await saveCoupon();
-        await setAllUserCoupon(couponItem);
+        // await setAllUserCoupon(couponItem);
       } else {
         ctx.throw(200, commons.jsonBack(1003, {}, validFullDecre(param)))
       }
@@ -175,7 +175,12 @@ router.post('/couponBindUser', async (ctx) => {
     if (userItem.couponList.indexOf(param.couponId) >= 0) {
       ctx.throw(200, commons.jsonBack(1003, {}, "该用户已绑定此优惠券"))
     }
-    var couponItems = await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, { crowdData: userItem }, { new: true });
+    var couponItems = await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, {
+      crowdData: {
+        userId: userItem.userId,
+        phoneNumber: userItem.phoneNumber
+      }
+    }, { new: true });
     ctx.body = commons.jsonBack(1, couponItems, "绑定成功");
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券"))
