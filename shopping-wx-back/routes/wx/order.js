@@ -287,15 +287,21 @@ router.post("/applyRefoundBack", async (ctx) => {
 
 /* 获取不同状态订单 */
 /*
-* param：status、userId
+* param：status、userId、page、pageSize
 * */
 router.post("/getOrderList", async (ctx) => {
   var param = ctx.request.body
-  if (!commons.judgeParamExists(['status', 'userId'], param)) {
+  if (!commons.judgeParamExists(['status', 'userId', 'page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var list = await orderModel.find({ userId: param.userId, orderStatus: param.status }).sort({ "_id": -1 })
-  ctx.body = commons.jsonBack(1, list, "");
+  var list = await orderModel.find({ userId: param.userId, orderStatus: param.status }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var total = await orderModel.find({ userId: param.userId, orderStatus: param.status });
+  ctx.body = commons.jsonBack(1, {
+    list: list,
+    total: total.length,
+    page: param.page,
+    pageSize: param.pageSize,
+  }, "");
 })
 
 /* 确认收货 */
