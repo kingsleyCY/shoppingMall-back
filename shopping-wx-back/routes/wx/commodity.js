@@ -4,27 +4,30 @@ const { classifyModel } = require('../../model/admin/classifyModel');
 
 /* 获取商品分类及列表 */
 router.get('/getBaseClassify', async (ctx) => {
-  /*var classifyList = await classifyModel.find();
-  console.log(classifyList);*/
   var comClassify = JSON.parse(JSON.stringify(await classifyModel.find()));
-  var commidityList = await shoppingModel.find();
-  for (let i = 0; i < commidityList.length; i++) {
-    for (let j = 0; j < comClassify.length; j++) {
-      if (String(comClassify[j].id) === String(commidityList[i].classifyId)) {
-        comClassify[j].list ? "" : comClassify[j].list = []
-        comClassify[j].list.push(commidityList[i])
-        break;
-      }
-    }
-  }
-  for (let i = 0; i < comClassify.length; i++) {
-    var list = await shoppingModel.find({ "classifyId": String(comClassify[i].id) })
-    comClassify[i].list = list
-  }
   ctx.body = commons.jsonBack(1, {
     classifyList: comClassify
   }, "获取数据成功");
-})
+});
+
+/* 分类获取列表 */
+/*
+* param：classifyId、page、pageSize
+* */
+router.post('/getWareByClassify', async (ctx) => {
+  var param = ctx.request.body;
+  if (!commons.judgeParamExists(['classifyId', 'page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
+  }
+  var list = await shoppingModel.find({ classifyId: param.classifyId }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var total = await shoppingModel.find({ classifyId: param.classifyId });
+  ctx.body = commons.jsonBack(1, {
+    list: list,
+    total: total.length,
+    page: param.page,
+    pageSize: param.pageSize,
+  }, "获取数据成功");
+});
 
 /* 获取首页数据 */
 router.get('/getIndexData', async (ctx) => {
