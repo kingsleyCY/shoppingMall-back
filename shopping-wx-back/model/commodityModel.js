@@ -24,7 +24,7 @@ var shoppingSchema = new mongoose.Schema({
   isRebate: { type: Number, default: 0 }, // 是否为折扣
   rebateIndex: { type: Number, default: 0 },
   sizeCollet: { type: Object, default: {} }, // 商品码数集合
-}, { collection: "shoppingList" });
+}, { collection: "shoppingList", versionKey: false });
 var shoppingModel = db.model("shoppingList", shoppingSchema);
 
 exports.shoppingModel = shoppingModel

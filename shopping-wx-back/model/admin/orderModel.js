@@ -20,7 +20,7 @@ var orderSchema = new mongoose.Schema({
   refoundData: { type: Object, default: {} }, // 支付微信参数
   mailOrder: { type: String, default: "" },
   mailRemark: { type: String, default: "" },
-}, { collection: "orderList" });
+}, { collection: "orderList", versionKey: false });
 var orderModel = db.model("orderList", orderSchema);
 
 exports.orderModel = orderModel;

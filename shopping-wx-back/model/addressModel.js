@@ -10,7 +10,7 @@ var addressSchema = new mongoose.Schema({
   id: String,
   userId: String, // 用户ID
   isDefault: { type: Number, default: 0 }
-}, { collection: "addressList" });
+}, { collection: "addressList", versionKey: false });
 var addressModel = db.model("addressList", addressSchema);
 
 exports.creatAddress = async function (param) {

@@ -4,7 +4,7 @@ var suggestSchema = new mongoose.Schema({
   content: String,
   userId: String,
   type: Number
-}, { collection: "suggestList" });
+}, { collection: "suggestList", versionKey: false });
 var suggestModel = db.model("suggestList", suggestSchema);
 
 exports.suggestModel = suggestModel
