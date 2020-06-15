@@ -2,26 +2,59 @@ const router = require('koa-router')();
 const { userModel } = require('../../model/userModel');
 const { shoppingModel } = require('../../model/commodityModel');
 const { orderModel } = require('../../model/admin/orderModel');
+const { couponModel } = require('../../model/admin/couponModel');
 const addressModel = require('../../model/addressModel');
 const request = require('request');
 const xmlreader = require("xmlreader");
 
 /* 支付 */
 /*
-* param：userId、commodityId、size、addressId
-* params: mess
+* param：userId、out_trade_no（无此参数毕传commodityId、size、addressId）
+* params: mess、couponId
 * */
 router.post("/payment", async (ctx) => {
-  var param = JSON.parse(JSON.stringify(ctx.request.body))
-  if (!commons.judgeParamExists(['userId', 'commodityId', 'size', 'addressId'], param)) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  var orderItem = null
+  if (param.out_trade_no) {
+    if (!commons.judgeParamExists(['out_trade_no', 'userId'], param)) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+    }
+    orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no, userId: param.userId });
+    if (!orderItem) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此订单"))
+    }
+  } else {
+    if (!commons.judgeParamExists(['userId', 'commodityId', 'size', 'addressId'], param)) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+    }
   }
+
   const userItem = await userModel.findOne({ userId: param.userId });
-  const commodItem = await shoppingModel.findOne({ id: param.commodityId });
-  const addressItem = await addressModel.model.findOne({ id: param.addressId });
+  const commodItem = await shoppingModel.findOne({ id: orderItem ? orderItem.commodityId : param.commodityId });
+  // const addressItem = await addressModel.model.findOne({ id: orderItem ? orderItem.addressId : param.addressId });
+  const addressItem = await addressModel.model.findOne({ id: param.addressId || orderItem.addressId });
   if (!userItem || !commodItem || !addressItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
   }
+  // 判断优惠券可用性
+  const nowDate = Date.parse(new Date());
+  const couponId = orderItem ? orderItem.couponId : param.couponId;
+  if (couponId) {
+    const couponItem = await couponModel.findOne({ _id: mongoose.Types.ObjectId(couponId) });
+    if (!couponItem) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券信息"));
+      // 优惠券时间限制判断
+      if (couponItem.timeRange && couponItem.timeRange.sTime && couponItem.timeRange.eTime) {
+        if (nowDate < couponItem.timeRange.sTime) {
+          ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券未到使用时间"));
+        } else if (nowDate > couponItem.timeRange.eTime) {
+          ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券已过期"));
+        }
+      }
+
+    }
+  }
+
   const money = commodItem.overPrice;
   const appid = commons.wx_appid;
   const openid = userItem.openId;
@@ -30,10 +63,10 @@ router.post("/payment", async (ctx) => {
   const nonce_str = commons.createNonceStr();
   const timestamp = commons.createTimeStamp();
   const body = '测试微信支付';
-  const out_trade_no = commons.setOrderCode(); // 商户订单
+  const out_trade_no = orderItem ? orderItem.out_trade_no : commons.setOrderCode(); // 商户订单
   const attach = out_trade_no;
   const total_fee = commons.getmoney(money);
-  const spbill_create_ip = "119.3.77.140"; // 服务器IP
+  const spbill_create_ip = commons.spbill_create_ip; // 服务器IP
   const notify_url = commons.wxurl; // 回传地址
   const trade_type = 'JSAPI';  // 'APP';公众号：'JSAPI'或'NATIVE'
   const sign = commons.paysignjsapi(appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey, attach);
@@ -99,108 +132,28 @@ router.post("/payment", async (ctx) => {
       userDetail: userItem,
       addressDetail: addressItem,
       orderStatus: "unpaid",
-      mess: param.mess || "",
-      size: param.size || "",
+      mess: param.mess || orderItem.mess,
+      size: param.size || orderItem.size,
       unpidData
     }
-    await orderModel.create(orderItem);
-    ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
-  }
-
-})
-
-/* 支付未付款订单 */
-/*
-* param：out_trade_no、userId
-* */
-router.post("/paymentOrder", async (ctx) => {
-  var param = JSON.parse(JSON.stringify(ctx.request.body))
-  if (!commons.judgeParamExists(['out_trade_no', 'userId'], param)) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
-  }
-  const orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no, userId: param.userId });
-  if (orderItem) {
-    const userItem = await userModel.findOne({ userId: param.userId });
-    const appid = commons.wx_appid;
-    const openid = userItem.openId;
-    const mch_id = commons.mchid;
-    const mchkey = commons.mchkey;
-    const nonce_str = commons.createNonceStr();
-    const timestamp = commons.createTimeStamp();
-    const body = '测试微信支付';
-    const out_trade_no = param.out_trade_no; // 商户订单
-    const attach = out_trade_no;
-    const total_fee = orderItem.total_fee;
-    const spbill_create_ip = "119.3.77.140"; // 服务器IP
-    const notify_url = commons.wxurl; // 回传地址
-    const trade_type = 'JSAPI';  // 'APP';公众号：'JSAPI'或'NATIVE'
-    const sign = commons.paysignjsapi(appid, body, mch_id, nonce_str, notify_url, openid, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey, attach);
-    //组装xml数据
-    var formData = "<xml>";
-    formData += "<appid>" + appid + "</appid>";  //appid
-    formData += "<body><![CDATA[" + "测试微信支付" + "]]></body>";
-    formData += "<mch_id>" + mch_id + "</mch_id>";  //商户号
-    formData += "<nonce_str>" + nonce_str + "</nonce_str>"; //随机字符串，不长于32位。
-    formData += "<notify_url>" + notify_url + "</notify_url>";
-    formData += "<openid>" + openid + "</openid>";
-    formData += "<attach>" + attach + "</attach>";
-    formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
-    formData += "<spbill_create_ip>" + spbill_create_ip + "</spbill_create_ip>";
-    formData += "<total_fee>" + total_fee + "</total_fee>";
-    formData += "<trade_type>" + trade_type + "</trade_type>";
-    formData += "<sign>" + sign + "</sign>";
-    formData += "</xml>";
-
-    const url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
-    var prepay_id = await new Promise((resolve, reject) => {
-      request({ url: url, method: 'POST', body: formData }, function (err, response, body) {
-        if (!err && response.statusCode == 200) {
-          xmlreader.read(body.toString("utf-8"), function (errors, response) {
-            if (null !== errors) {
-              logger.error(errors);
-              reject("")
-            }
-            var prepay_id = response.xml.prepay_id.text();
-            resolve(prepay_id)
-          });
-        } else {
-          logger.error(err);
-          reject("")
-        }
-      });
-    })
-    if (prepay_id) {
-//将预支付订单和其他信息一起签名后返回给前端
-      let package = "prepay_id=" + prepay_id;
-      let signType = "MD5";
-      let minisign = commons.paysignjsapimini(appid, nonce_str, package, signType, timestamp, mchkey);
-      const unpidData = {
-        appId: appid,
-        partnerId: mch_id,
-        prepayId: prepay_id,
-        nonceStr: nonce_str,
-        timeStamp: timestamp,
-        package: 'Sign=WXPay',
-        paySign: minisign
-      }
+    if (orderItem) {
       var orderObj = {
-        out_trade_no,
-        total_fee,
         sign,
-        unpidData
+        unpidData,
+        addressId: addressItem.id,
+        addressDetail: addressItem,
+        mess: param.mess || orderItem.mess,
+        size: param.size || orderItem.size,
       }
       await orderModel.findOneAndUpdate({
         out_trade_no: param.out_trade_no,
         userId: param.userId
       }, orderObj, { new: true });
-      ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
     } else {
-      logger.error("paymentOrder=>获取prepay_id参数失败")
+      await orderModel.create(orderItem);
     }
-  } else {
-    ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
+    ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
   }
-
 })
 
 /* 支付成功回调 */
@@ -294,7 +247,13 @@ router.post("/getOrderList", async (ctx) => {
   if (!commons.judgeParamExists(['status', 'userId', 'page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var list = await orderModel.find({ userId: param.userId, orderStatus: param.status }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var list = await orderModel.find({
+    userId: param.userId,
+    orderStatus: param.status
+  }, {
+    userDetail: 0,
+    unpidData: 0
+  }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await orderModel.find({ userId: param.userId, orderStatus: param.status });
   ctx.body = commons.jsonBack(1, {
     list: list,

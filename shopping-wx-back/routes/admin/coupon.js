@@ -167,7 +167,7 @@ router.post('/couponBindUser', async (ctx) => {
   var couponItem = await couponModel.findOne({ _id: mongoose.Types.ObjectId(param.couponId) })
   if (couponItem) {
     var searchObj = {}
-    param.userId ? searchObj.userId = param.userId : searchObj.phoneNumber = param.phone
+    param.userId ? searchObj.userId = param.userId : searchObj.phoneNumber = param.phone;
     var userItem = await userModel.findOne(searchObj)
     if (!userItem) {
       ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
