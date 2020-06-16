@@ -1,8 +1,8 @@
 const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
-const xlsx = require('node-xlsx');      // 读写xlsx的插件
-const multiparty = require("multiparty");
+const xlsx = require('node-xlsx');
+const xlsxs = require('xlsx');
 const fs = require("fs");
 
 /* 商品列表-admin */
@@ -131,18 +131,16 @@ router.post('/updateIndexList', async (ctx) => {
 
 /* 上传xlsx 批量导入商品 */
 router.post('/bathExportCommodity', async (ctx) => {
-  let form = new multiparty.Form();
-  form.parse(ctx.req, function (err, fields, files) {
-    console.log(files.username[0])
-    console.log(fields)
-    let input = files.username[0]
-    const file = files.file; // 获取上传文件
-    const reader = fs.createReadStream(input.path); // 创建可读流
-    const ext = input.originalFilename.split('.').pop(); // 获取上传文件扩展名
-    const upStream = fs.createWriteStream(`upload/${Math.random().toString()}.${ext}`); // 创建可写流
-    reader.pipe(upStream);
-    // console.log(fields.aa[0])
-  })
+  // 上传单个文件
+  const file = ctx.request.files.file; // 获取上传文件
+  /*const workSheetsFromFile = xlsx.parse(file.path);
+  console.log(workSheetsFromFile[0].data);*/
+  let workbook = xlsxs.readFile(file.path);
+  let sheetNames = workbook.SheetNames;
+  let sheet = workbook.Sheets[sheetNames[0]];
+  var data = xlsxs.utils.sheet_to_json(sheet);
+  console.log(data);
+
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 

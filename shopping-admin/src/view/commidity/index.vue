@@ -155,7 +155,6 @@
         }
       },
       openBathExport() {
-        return
         this.bathdialogVisible = true
       },
       fileChange(file, fileList) {
@@ -164,6 +163,7 @@
       uploadFile() {
         console.log(this.bathFile);
         let param = new FormData();
+        console.log(this.bathFile.raw);
         param.append("file", this.bathFile.raw);
         bathExportCommodity(param).then(res => {
           console.log(res);

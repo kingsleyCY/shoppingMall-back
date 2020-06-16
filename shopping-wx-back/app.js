@@ -5,6 +5,7 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser');
 const KoaXmlBody = require('koa-xml-body');
+const koaBody = require('koa-body');
 const logger = require('koa-logger');
 const { loggers, accessLogger } = require('./logger');
 var baseCommon = require('./common/common');
@@ -96,6 +97,14 @@ app.use(async (ctx, next) => {
 /*app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
 }))*/
+app.use(koaBody({
+  multipart: true,
+  formidable: {
+    maxFileSize: 200 * 1024 * 1024,    // 设置上传文件大小最大限制，默认2M
+    uploadDir: __dirname + '/uploads',
+    keepExtensions: true,
+  }
+}));
 app.use(KoaXmlBody());
 app.use(bodyparser());
 app.use(json());
