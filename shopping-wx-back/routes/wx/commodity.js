@@ -34,9 +34,9 @@ router.get('/getIndexData', async (ctx) => {
   var bannerList = await shoppingModel.find({ "isBanner": 1 }).sort({ 'bannerIndex': -1 })
   var hotList = await shoppingModel.find({ "isHot": 1 }).sort({ 'bannerIndex': -1 })
   var explosiveList = await shoppingModel.find({ "isExplosive": 1 }).sort({ 'bannerIndex': -1 })
-  var rebateList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
+  // var rebateList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
   ctx.body = commons.jsonBack(1, {
-    bannerList, hotList, explosiveList, rebateList
+    bannerList, hotList, explosiveList
   }, "获取数据成功");
 })
 
@@ -54,6 +54,31 @@ router.post('/getNewCommodity', async (ctx) => {
     param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
     var commodityList = await shoppingModel.find({ "isNews": 1 }).sort({ 'newsIndex': -1 })
     /*.skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize))*/
+    var skipList = []
+    var startIndex = (param.page - 1) * param.pageSize
+    commodityList ? skipList = commodityList.slice(startIndex, startIndex + param.pageSize + 1) : ""
+    ctx.body = commons.jsonBack(1, {
+      list: skipList,
+      page: param.page,
+      pageSize: param.pageSize,
+      total: commodityList.length
+    }, "获取数据成功");
+  }
+})
+
+/* 获取折扣款数据 */
+/*
+* page、pageSize
+*
+* */
+router.post('/getRebate', async (ctx) => {
+  var param = ctx.request.body;
+  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  } else {
+    param.page <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "页数不能小于1")) : ""
+    param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
+    var commodityList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
     var skipList = []
     var startIndex = (param.page - 1) * param.pageSize
     commodityList ? skipList = commodityList.slice(startIndex, startIndex + param.pageSize + 1) : ""
