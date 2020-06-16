@@ -120,22 +120,6 @@ router.post("/payment", async (ctx) => {
       package: 'Sign=WXPay',
       paySign: minisign
     }
-    var orderItem = {
-      created_time: Date.parse(new Date()),
-      out_trade_no,
-      total_fee,
-      sign,
-      commodityId: commodItem.id,
-      userId: userItem.userId,
-      addressId: addressItem.id,
-      commodityDetail: commodItem,
-      userDetail: userItem,
-      addressDetail: addressItem,
-      orderStatus: "unpaid",
-      mess: param.mess || orderItem.mess,
-      size: param.size || orderItem.size,
-      unpidData
-    }
     if (orderItem) {
       var orderObj = {
         sign,
@@ -150,7 +134,23 @@ router.post("/payment", async (ctx) => {
         userId: param.userId
       }, orderObj, { new: true });
     } else {
-      await orderModel.create(orderItem);
+      var newOrderItem = {
+        created_time: Date.parse(new Date()),
+        out_trade_no,
+        total_fee,
+        sign,
+        commodityId: commodItem.id,
+        userId: userItem.userId,
+        addressId: addressItem.id,
+        commodityDetail: commodItem,
+        userDetail: userItem,
+        addressDetail: addressItem,
+        orderStatus: "unpaid",
+        mess: param.mess || (orderItem && orderItem.mess) || "",
+        size: param.size || (orderItem && orderItem.size) || "",
+        unpidData
+      }
+      await orderModel.create(newOrderItem);
     }
     ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
   }
