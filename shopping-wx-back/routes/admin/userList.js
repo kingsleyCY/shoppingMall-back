@@ -30,7 +30,10 @@ router.post('/loginAdmin', async (ctx) => {
 })
 
 /* 获取用户列表 */
-/* listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表 */
+/*
+* param: listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表(id)
+* opparam: page, pageSize
+* */
 router.post('/getCustomer', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
   var params = {

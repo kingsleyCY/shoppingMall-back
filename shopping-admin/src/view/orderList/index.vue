@@ -410,38 +410,6 @@
 </script>
 
 <style scoped lang="scss">
-  .el-table {
-    .orde-status {
-      font-weight: bold;
-    }
-    .unpaid {
-      color: #ada7a1;
-    }
-    .paid {
-      color: #4bff65;
-    }
-    .paiderror {
-      color: #ff0018;
-    }
-    .undeliver {
-      color: #83cdff;
-    }
-    .deliver {
-      color: #68a5ff;
-    }
-    .delivered {
-      color: #011fff;
-    }
-    .over {
-      color: #000000;
-    }
-    .refund {
-      color: #54fdff;
-    }
-    .unrefund {
-      color: #ff690a;
-    }
-  }
   .more-search {
     .el-input {
       width: 120px;

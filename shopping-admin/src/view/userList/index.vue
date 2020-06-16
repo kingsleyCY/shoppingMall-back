@@ -67,26 +67,66 @@
       title="我是标题"
       size="60%"
       :visible.sync="drawer"
-      :with-header="false">
+      :with-header="false" custom-class="auto-drawer">
       <div>
         <el-table :data="orderTable" border style="width: 100%">
           <el-table-column
             prop="date"
             label="日期"
-            min-width="180">
+            min-width="150">
             <template slot-scope="scope">
               {{timeTransfer(scope.row.created_time)}}
             </template>
           </el-table-column>
           <el-table-column
-            prop="userId"
-            label="userId"
-            min-width="180">
+              prop="orderStatus"
+              label="状态"
+              width="80">
+            <template slot-scope="scope">
+          <span :class="[scope.row.orderStatus, 'orde-status']">
+            {{computedStatus(scope.row.orderStatus)}}
+          </span>
+            </template>
           </el-table-column>
           <el-table-column
-            prop="price"
+              label="尺码"
+              min-width="50">
+            <template slot-scope="scope">
+              {{scope.row.size}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="total_fee"
             label="价格"
-            min-width="180">
+            min-width="80">
+            <template slot-scope="scope">
+              {{scope.row.total_fee / 100}}
+            </template>
+          </el-table-column>
+          <el-table-column
+              prop="total_fee"
+              label="商品详情"
+              min-width="150">
+            <template slot-scope="scope">
+              {{scope.row.commodityDetail.title}}
+            </template>
+          </el-table-column>
+          <el-table-column
+              prop="total_fee"
+              label="地址详情"
+              min-width="200">
+            <template slot-scope="scope">
+              {{scope.row.addressDetail.provinceName
+              +'/'+scope.row.addressDetail.cityName+"/"+scope.row.addressDetail.countyName +'/'+
+              scope.row.addressDetail.detailInfo}}<br>
+              {{scope.row.addressDetail.telNumber}}<br>
+              {{scope.row.addressDetail.userName}}
+            </template>
+          </el-table-column>
+          <el-table-column
+              prop="mess"
+              label="备注"
+              min-width="150">
           </el-table-column>
         </el-table>
         <el-pagination
@@ -188,6 +228,30 @@
       orderCurrentChange(val) {
         this.orderPage.page = val
         this.getOrderList()
+      },
+      computedStatus(type) {
+        switch (type) {
+          case "none":
+            return "初始化";
+          case "unpaid":
+            return "待支付";
+          case "paid":
+            return "已支付成功";
+          case "paiderror":
+            return "已支付失败";
+          case "undeliver":
+            return "待发货/未提交";
+          case "deliver":
+            return "待发货/已提交";
+          case "delivered":
+            return "已发货";
+          case "over":
+            return "已完成";
+          case "refund":
+            return "已退款成功";
+          case "unrefund":
+            return "退款失败";
+        }
       },
       timeTransfer(data) {
         function add0(m) {
