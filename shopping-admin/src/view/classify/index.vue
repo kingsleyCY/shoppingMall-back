@@ -106,8 +106,8 @@
           canMoveBox: true,
           autoCrop: true,
           // 只有自动截图开启 宽度高度才生效
-          autoCropWidth: 375,
-          autoCropHeight: 234,
+          autoCropWidth: 150,
+          autoCropHeight: 150,
           centerBox: true,
           high: true
         },
