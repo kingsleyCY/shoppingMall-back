@@ -102,7 +102,6 @@ router.post('/createdCoupon', async (ctx) => {
 
   async function saveCoupon() {
     var couponItem
-    console.log(obj._id);
     if (obj._id) {
       var objs = JSON.parse(JSON.stringify(obj))
       objs = commons.deleteKey(objs, ['_id'])
@@ -197,7 +196,7 @@ async function setAllUserCoupon(couponItem) {
     userModel.find({}, async function (err, data) {
       for (let i = 0; i < data.length; i++) {
         var item = JSON.parse(JSON.stringify(data[i]))
-        item.couponList.indexOf(couponItem._id) < 0 ? item.couponList.push(couponItem._id) : ""
+        item.couponList.indexOf(couponItem._id) < 0 ? item.couponList.push(String(couponItem._id)) : ""
         await userModel.findOneAndUpdate({ userId: item.userId }, { couponList: item.couponList }, { new: true })
       }
       resolve()
