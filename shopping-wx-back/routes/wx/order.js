@@ -14,6 +14,7 @@ const xmlreader = require("xmlreader");
 * */
 router.post("/payment", async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
+  console.log(param);
   var orderItem = null
   if (param.out_trade_no) {
     if (!commons.judgeParamExists(['out_trade_no', 'userId'], param)) {
@@ -31,31 +32,49 @@ router.post("/payment", async (ctx) => {
 
   const userItem = await userModel.findOne({ userId: param.userId });
   const commodItem = await shoppingModel.findOne({ id: orderItem ? orderItem.commodityId : param.commodityId });
-  // const addressItem = await addressModel.model.findOne({ id: orderItem ? orderItem.addressId : param.addressId });
   const addressItem = await addressModel.model.findOne({ id: param.addressId || orderItem.addressId });
   if (!userItem || !commodItem || !addressItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
   }
+  var money = commodItem.overPrice;
   // 判断优惠券可用性
   const nowDate = Date.parse(new Date());
   const couponId = orderItem ? orderItem.couponId : param.couponId;
+  console.log(couponId);
   if (couponId) {
     const couponItem = await couponModel.findOne({ _id: mongoose.Types.ObjectId(couponId) });
     if (!couponItem) {
       ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券信息"));
-      // 优惠券时间限制判断
-      if (couponItem.timeRange && couponItem.timeRange.sTime && couponItem.timeRange.eTime) {
-        if (nowDate < couponItem.timeRange.sTime) {
-          ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券未到使用时间"));
-        } else if (nowDate > couponItem.timeRange.eTime) {
-          ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券已过期"));
+    }
+    // 优惠券时间限制判断
+    if (couponItem.timeRange && couponItem.timeRange.sTime && couponItem.timeRange.eTime) {
+      if (nowDate < couponItem.timeRange.sTime) {
+        ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券未到使用时间"));
+      } else if (nowDate > couponItem.timeRange.eTime) {
+        ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券已过期"));
+      }
+    }
+    // 判断优惠券合法性
+    var couponList = JSON.parse(JSON.stringify(userItem.couponList));
+    if (couponList.indexOf(couponId) >= 0) {
+      if (couponItem.useType === 1) {
+        if (money >= couponItem.fullDecre.fullFee) {
+          money = commons.subtract(money, couponItem.fullDecre.decre);
+          console.log(money);
+          // 删除该用户指定优惠券可用性
+          // couponList.splice(couponList.indexOf(couponId), 1);
+          // var newUser = await userModel.findOneAndUpdate({ userId: param.userId }, { couponList });
+          logger.error("删除用户优惠券成功：" + userModel.phoneNumber + "," + couponItem.title)
         }
       }
-
+    } else {
+      ctx.throw(200, commons.jsonBack(1003, {}, "该用户无此优惠券"));
     }
   }
 
-  const money = commodItem.overPrice;
+  console.log(money);
+  // 计算微信参数
+  const original_fee = commodItem.overPrice;
   const appid = commons.wx_appid;
   const openid = userItem.openId;
   const mch_id = commons.mchid;
@@ -122,6 +141,8 @@ router.post("/payment", async (ctx) => {
     }
     if (orderItem) {
       var orderObj = {
+        total_fee,
+        original_fee,
         sign,
         unpidData,
         addressId: addressItem.id,
@@ -138,6 +159,8 @@ router.post("/payment", async (ctx) => {
         created_time: Date.parse(new Date()),
         out_trade_no,
         total_fee,
+        original_fee,
+        couponId,
         sign,
         commodityId: commodItem.id,
         userId: userItem.userId,

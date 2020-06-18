@@ -15,11 +15,13 @@ var orderSchema = new mongoose.Schema({
   time_end: String, // 支付完成时间
   orderStatus: { type: String, default: "none" },
   mess: { type: String, default: "" }, // 下单备注
-  size: { type: String, default: "" },
+  size: { type: String, default: "" }, // 尺寸
   unpidData: { type: Object, default: {} }, // 支付微信参数
   refoundData: { type: Object, default: {} }, // 支付微信参数
-  mailOrder: { type: String, default: "" },
-  mailRemark: { type: String, default: "" },
+  mailOrder: { type: String, default: "" }, // 快递单号
+  mailRemark: { type: String, default: "" }, // 快递备注
+  couponId: { type: String, default: "" },
+  original_fee: Number
 }, { collection: "orderList", versionKey: false });
 var orderModel = db.model("orderList", orderSchema);
 

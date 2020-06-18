@@ -4,7 +4,8 @@ const schedule = require("node-schedule");
 var localData = fs.readFileSync("./common/data.json", 'utf-8');
 localData = JSON.parse(localData)
 
-var wx = require("./module/wx")
+var wx = require("./module/wx");
+var floatObj = require("./module/floatObj");
 
 class baseCommon {
   constructor() {
@@ -232,6 +233,9 @@ class baseCommon {
 }
 for (let key in wx) {
   baseCommon.prototype[key] = wx[key]
+}
+for (let key in floatObj) {
+  baseCommon.prototype[key] = floatObj[key]
 }
 
 module.exports = new baseCommon()

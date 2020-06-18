@@ -89,6 +89,14 @@
           </template>
         </el-table-column>
         <el-table-column
+          prop="original_fee"
+          label="原价（￥）"
+          min-width="80">
+          <template slot-scope="scope">
+            {{scope.row.original_fee || scope.row.total_fee / 100 }}
+          </template>
+        </el-table-column>
+        <el-table-column
           prop="total_fee"
           label="成交价格（￥）"
           min-width="80">
