@@ -98,15 +98,15 @@ app.use(async (ctx, next) => {
   enableTypes: ['json', 'form', 'text']
 }))*/
 app.use(KoaXmlBody());
-/*app.use(koaBody({
+app.use(koaBody({
   multipart: true,
   formidable: {
     maxFileSize: 200 * 1024 * 1024,    // 设置上传文件大小最大限制，默认2M
     uploadDir: __dirname + '/uploads',
     keepExtensions: true,
   }
-}));*/
-app.use(bodyparser());
+}));
+// app.use(bodyparser());
 app.use(json());
 app.use(logger());
 app.use(require('koa-static')(__dirname + '/public'));
