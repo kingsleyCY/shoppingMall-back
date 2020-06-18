@@ -197,7 +197,7 @@ async function setAllUserCoupon(couponItem) {
     userModel.find({}, async function (err, data) {
       for (let i = 0; i < data.length; i++) {
         var item = JSON.parse(JSON.stringify(data[i]))
-        item.couponList.push(couponItem._id)
+        item.couponList.indexOf(couponItem._id) < 0 ? item.couponList.push(couponItem._id) : ""
         await userModel.findOneAndUpdate({ userId: item.userId }, { couponList: item.couponList }, { new: true })
       }
       resolve()
