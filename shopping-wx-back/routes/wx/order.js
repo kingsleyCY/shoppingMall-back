@@ -287,7 +287,6 @@ router.post("/getOrderList", async (ctx) => {
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "订单状态传递错误"))
   }
-  console.log(statusList);
   var list = await orderModel.find({
     userId: param.userId,
     // orderStatus: param.status
