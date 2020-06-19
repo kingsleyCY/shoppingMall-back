@@ -183,6 +183,7 @@ router.post("/payment", async (ctx) => {
 )
 
 /* 支付成功回调 */
+/* unpaid => undeliver */
 router.post("/paymentBack", async (ctx) => {
   const xml = ctx.request.body.xml;
   /*var a = {
@@ -267,20 +268,35 @@ router.post("/applyRefoundBack", async (ctx) => {
 /* 获取不同状态订单 */
 /*
 * param：status、userId、page、pageSize
+* status: unpaid、undeliver、delivered、over
 * */
 router.post("/getOrderList", async (ctx) => {
   var param = ctx.request.body
   if (!commons.judgeParamExists(['status', 'userId', 'page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
+  var statusList = []
+  if (param.status === "unpaid") {
+    statusList = ["unpaid"]
+  } else if (param.status === "undeliver") {
+    statusList = ["paid", "undeliver", "deliver"]
+  } else if (param.status === "delivered") {
+    statusList = ["delivered"]
+  } else if (param.status === "over") {
+    statusList = ["over", "refund"]
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "订单状态传递错误"))
+  }
+  console.log(statusList);
   var list = await orderModel.find({
     userId: param.userId,
-    orderStatus: param.status
+    // orderStatus: param.status
+    orderStatus: { $in: statusList }
   }, {
     userDetail: 0,
     unpidData: 0
   }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
-  var total = await orderModel.find({ userId: param.userId, orderStatus: param.status });
+  var total = await orderModel.find({ userId: param.userId, orderStatus: { $in: statusList } });
   ctx.body = commons.jsonBack(1, {
     list: list,
     total: total.length,
