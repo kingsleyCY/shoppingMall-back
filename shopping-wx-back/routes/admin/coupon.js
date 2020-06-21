@@ -5,7 +5,7 @@ const { userModel } = require('../../model/userModel');
 /* 创建优惠券 */
 /*
 * param: title、type、useType
-* opparam：code(type) fullFee(useType) decre(useType)
+* opparam：type === 2(code、usageLimit) useType === 1(fullFee、decre)
 * sTime、eTime
 * */
 router.post('/createdCoupon', async (ctx) => {
@@ -48,8 +48,10 @@ router.post('/createdCoupon', async (ctx) => {
     }
   } else if (obj.type === 2) {
     /* 抽奖惠券 */
-    if (!param.code) {
-      ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误-缺少code"))
+    if (!param.code || !param.usageLimit) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误-缺少code/usageLimit"))
+    } else if (!(Number(param.usageLimit) > 0)) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "usageLimit必须大于0"))
     }
     if (param.useType === 1) {
       obj.lotteryCode = param.code;
@@ -70,6 +72,8 @@ router.post('/createdCoupon', async (ctx) => {
         } else {
           obj.timeRange = {}
         }
+        obj.usageLimit = param.usageLimit;
+        obj.usageIds = [];
         var couponItem = await saveCoupon();
         // await setAllUserCoupon(couponItem);
       } else {
@@ -83,10 +87,7 @@ router.post('/createdCoupon', async (ctx) => {
   }
   if (flag) {
     ctx.throw(200, commons.jsonBack(1003, {}, flag))
-  } else {
-
   }
-
 
   function validFullDecre(param) {
     var mess = ""
@@ -111,7 +112,6 @@ router.post('/createdCoupon', async (ctx) => {
       couponItem = await couponModel.create(obj);
       ctx.body = commons.jsonBack(1, couponItem, "创建优惠券成功！");
     }
-    console.log(couponItem);
     return couponItem
   }
 })
@@ -167,24 +167,24 @@ router.post('/couponBindUser', async (ctx) => {
   if (couponItem) {
     var searchObj = {}
     param.userId ? searchObj.userId = param.userId : searchObj.phoneNumber = param.phone;
-    var userItem = await userModel.findOne(searchObj)
+    var userItem = await userModel.findOne(searchObj);
     if (!userItem) {
       ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
     }
-    if (userItem.couponList.indexOf(param.couponId) >= 0) {
+    var userItems = JSON.parse(JSON.stringify(userItem));
+    couponItem = JSON.parse(JSON.stringify(couponItem))
+    var couponList = userItems.couponList || []
+    if (couponList.indexOf(String(couponItem._id)) >= 0) {
       ctx.throw(200, commons.jsonBack(1003, {}, "该用户已绑定此优惠券"))
+    } else if (couponItem.usageIds.length >= Number(couponItem.usageLimit)) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "该优惠券绑定人数已超出上限"))
     }
-    // 更新优惠券model信息
-    var couponItems = await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, {
-      crowdData: {
-        userId: userItem.userId,
-        phoneNumber: userItem.phoneNumber
-      }
-    }, { new: true });
-    var item = JSON.parse(JSON.stringify(userItem));
-    item.couponList.push(couponItem._id);
-    await userModel.findOneAndUpdate(searchObj, { couponList: item.couponList }, { new: true })
-    ctx.body = commons.jsonBack(1, couponItems, "绑定成功");
+    var usageIds = couponItem.usageIds.concat([userItem.userId]);
+
+    couponList.push(couponItem._id);
+    await userModel.findOneAndUpdate(searchObj, { couponList }, { new: true })
+    await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, { usageIds })
+    ctx.body = commons.jsonBack(1, {}, "绑定成功");
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券"))
   }
@@ -208,7 +208,7 @@ async function deletAllUserCoupon(id) {
     userModel.find({}, async function (err, data) {
       for (let i = 0; i < data.length; i++) {
         var item = JSON.parse(JSON.stringify(data[i]))
-        if (item.couponList.indexOf(id) >= 0) {
+        if (item.couponList && item.couponList.indexOf(id) >= 0) {
           item.couponList.splice(item.couponList.indexOf(id), 1)
           await userModel.findOneAndUpdate({ userId: item.userId }, { couponList: item.couponList }, { new: true })
         }

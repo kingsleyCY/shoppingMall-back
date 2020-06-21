@@ -231,7 +231,7 @@ router.post("/paymentBack", async (ctx) => {
   }
 })
 
-/* 取消订单/退款 */
+/* 退款-取消订单 */
 /*
 *param：out_trade_no、userId
 * */
@@ -319,7 +319,8 @@ router.post("/sureReceipt", async (ctx) => {
   })
   if (orderItem && orderItem.orderStatus === "delivered") {
     var userItem = await userModel.findOne({ userId: param.userId });
-    var integral = (userItem.integral || 0) + (orderItem.total_fee / 100);
+    // var integral = (userItem.integral || 0) + (orderItem.total_fee / 100);
+    var integral = commons.add((userItem.integral || 0), (orderItem.total_fee / 100));
     await userModel.findOneAndUpdate({ userId: orderItem.userId }, { integral }, { new: true })
     var orderItems = await orderModel.findOneAndUpdate({
       userId: param.userId,

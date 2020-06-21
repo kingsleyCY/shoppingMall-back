@@ -75,7 +75,7 @@ var floatObj = function () {
     }
   }
 
-// 加减乘除的四个接口
+  // 加减乘除的四个接口
   function add(a, b) {
     return operation(a, b, 'add')
   }

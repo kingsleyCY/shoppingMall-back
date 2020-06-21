@@ -63,17 +63,24 @@
           </el-table-column>
           <div v-if="activeName==='second'">
             <el-table-column
-              label="用户手机号"
-              min-width="120">
+              label="人数限制"
+              min-width="100">
               <template slot-scope="scope">
-                {{scope.row.crowdData?scope.row.crowdData.phoneNumber:"--"}}
+                {{scope.row.usageLimit}}
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="已绑定人数"
+              min-width="100">
+              <template slot-scope="scope">
+                {{scope.row.usageIds.length}}
               </template>
             </el-table-column>
           </div>
           <el-table-column
             fixed="right"
             label="操作"
-            width="120">
+            width="200">
             <template slot-scope="scope">
               <!--<el-button type="text" size="small"
                          @click="editCoupon(scope.row)">编辑
@@ -84,62 +91,77 @@
               <el-button type="text" size="small" v-if="scope.row.type === 2"
                          @click="bindUserModel(scope.row)">绑定用户
               </el-button>
+              <el-button type="text" size="small"
+                         @click="getbindUserModel(scope.row)">查看绑定用户数据
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
     </div>
-    <div class="activity-content">
-      <p style="padding: 15px 0 15px 10px;font-size: 20px;font-weight: bold;border-bottom: 1px solid #717171">
-        {{isAdd?"添加":"编辑"}}</p>
-      <el-form ref="form" :model="form" label-width="120px" size="small" style="width: 500px;padding-top: 20px">
-        <el-form-item label="名称">
-          <el-input v-model="form.title"></el-input>
-        </el-form-item>
-        <el-form-item label="优惠券类型">
-          <el-select v-model="form.type" placeholder="请选择优惠券类型">
-            <el-option label="通用" :value="1"></el-option>
-            <el-option label="抽奖" :value="2"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="优惠券使用类型">
-          <el-select v-model="form.useType" placeholder="请选择优惠券使用类型">
-            <el-option label="满减" :value="1"></el-option>
-          </el-select>
-        </el-form-item>
-        <div v-if="form.type === 2">
-          <el-form-item label="抽奖code">
-            <el-input v-model="form.lotteryCode"></el-input>
+    <el-drawer
+      :with-header="false" size="500"
+      :visible.sync="drawer">
+      <div v-if="contentType === 'add'" class="activity-content">
+        <p style="padding: 15px 0 15px 10px;font-size: 20px;font-weight: bold;border-bottom: 1px solid #717171">添加</p>
+        <el-form ref="form" :model="form" label-width="120px" size="small" style="width: 100%;padding-top: 20px">
+          <el-form-item label="名称">
+            <el-input v-model="form.title"></el-input>
           </el-form-item>
-        </div>
-        <div v-if="form.useType === 1">
-          <el-form-item label="满足金额">
-            <el-input v-model="form.fullFee"></el-input>
+          <el-form-item label="优惠券类型">
+            <el-select v-model="form.type" placeholder="请选择优惠券类型">
+              <el-option label="通用" :value="1"></el-option>
+              <el-option label="抽奖" :value="2"></el-option>
+            </el-select>
           </el-form-item>
-          <el-form-item label="减免金额">
-            <el-input v-model="form.decre"></el-input>
+          <el-form-item label="优惠券使用类型">
+            <el-select v-model="form.useType" placeholder="请选择优惠券使用类型">
+              <el-option label="满减" :value="1"></el-option>
+            </el-select>
           </el-form-item>
-        </div>
-        <el-form-item label="使用时间">
-          <el-date-picker
-            v-model="form.timeRange"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="timestamp">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitActivity">提交</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+          <!--优惠券类型-->
+          <div v-if="form.type === 2">
+            <el-form-item label="抽奖code">
+              <el-input v-model="form.lotteryCode"></el-input>
+            </el-form-item>
+            <el-form-item label="限制人数">
+              <el-input v-model="form.usageLimit"></el-input>
+            </el-form-item>
+          </div>
+
+          <!--优惠券使用类型-->
+          <div v-if="form.useType === 1">
+            <el-form-item label="满足金额">
+              <el-input v-model="form.fullFee"></el-input>
+            </el-form-item>
+            <el-form-item label="减免金额">
+              <el-input v-model="form.decre"></el-input>
+            </el-form-item>
+          </div>
+          <el-form-item label="使用时间">
+            <el-date-picker
+              v-model="form.timeRange"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="timestamp">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitActivity">提交</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div v-if="contentType === 'usageIds'">
+        1
+      </div>
+    </el-drawer>
     <el-dialog
       custom-class="most-dislog" title="绑定手机号"
       :visible.sync="bindUserDialog" width="30%">
       <div>
-        <el-input v-model="bindPhone" placeholder="请输入用户手机号"></el-input>
+        <el-input v-model="bindPhone" @keyup.enter.native="submitBindUser" placeholder="请输入用户手机号"></el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="bindUserDialog = false">取 消</el-button>
@@ -156,14 +178,16 @@
     name: "couponList",
     data() {
       return {
-        isAdd: true,
+        contentType: "add",
         rowData: null,
         activeName: "first",
+        drawer: false,
         form: {
           title: "",
           type: 1,
           useType: 1,
           lotteryCode: "",
+          usageLimit: "",
           fullFee: "",
           decre: "",
           timeRange: [],
@@ -215,7 +239,8 @@
         }
       },
       toAdd() {
-        this.isAdd = true;
+        this.contentType = "add";
+        this.drawer = true;
         this.form = {
           title: "",
           type: 1,
@@ -234,6 +259,7 @@
         }
         if (param.type === 2) {
           param.code = this.form.lotteryCode
+          param.usageLimit = this.form.usageLimit
         }
         if (this.form.fullFee && this.form.decre) {
           param.fullFee = this.form.fullFee
@@ -243,14 +269,11 @@
           param.sTime = this.form.timeRange[0]
           param.eTime = this.form.timeRange[1]
         }
-        if (!this.isAdd) {
-          param.id = this.rowData._id
-        }
         createdCoupon(param).then(res => {
           if (res.code === 1) {
             this.$message.success("操作成功")
-            this.toAdd()
             this.handleClick()
+            this.drawer = false;
           } else {
             this.$message.error(res.mess)
           }
@@ -259,7 +282,6 @@
         })
       },
       editCoupon(row) {
-        this.isAdd = false;
         this.rowData = row;
         this.form.title = row.title;
         this.form.type = row.type;
@@ -302,6 +324,10 @@
           this.$message.error("操作失败")
         })
       },
+      getbindUserModel() {
+        this.contentType = "usageIds";
+        this.drawer = true;
+      },
 
       timeTransfer(data) {
         if (!data) {
@@ -318,7 +344,7 @@
         var mm = time.getMinutes();
         var s = time.getSeconds();
         return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
-      },
+      }
     }
   }
 </script>
@@ -328,9 +354,8 @@
     width: 100%;
     height: 100%;
     .activity-list {
-      width: 550px;
       height: 100%;
-      border-right: 1px solid #bababa;
+      width: 100%;
       .header {
         position: relative;
         .add-btn {
@@ -341,7 +366,6 @@
       }
     }
     .activity-content {
-      width: calc(100% - 550px);
       height: 100%;
     }
   }
