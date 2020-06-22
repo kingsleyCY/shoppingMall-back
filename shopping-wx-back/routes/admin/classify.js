@@ -1,5 +1,6 @@
 const router = require('koa-router')();
 const { classifyModel } = require('../../model/admin/classifyModel');
+const { shoppingModel } = require('../../model/commodityModel');
 
 /* 添加商品分类 */
 /* param: title
@@ -16,12 +17,15 @@ router.post('/addClassify', async (ctx) => {
   var parentItem
   if (param.parentId) {
     parentItem = await classifyModel.findOne({ id: param.parentId })
+    if (!parentItem) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "父节点不存在"))
+    }
     if (parentItem.level >= 3) {
       ctx.throw(200, commons.jsonBack(1004, {}, "最多添加三级"))
     }
-    newId = lastItem ? param.parentId + "-" + String(Number(lastItem.id.split("-")[parentItem.level]) + 1) : param.parentId + "-" + "1"
+    newId = lastItem ? param.parentId + "-" + String(Number(lastItem.id.split("-")[parentItem.level]) + 1) : param.parentId + "-" + "1";
   } else {
-    newId = lastItem ? String(Number(lastItem.id) + 1) : "1"
+    newId = lastItem ? String(Number(lastItem.id) + 1) : "1";
   }
   let classify = await classifyModel.create({
     title: param.title,
@@ -31,6 +35,13 @@ router.post('/addClassify', async (ctx) => {
     parentId: param.parentId || "0",
     level: param.parentId ? parentItem.level + 1 : 1,
   })
+  // 父节点下如有商品转移到添加的子节点
+  if (!lastItem && !param.parentId) {
+    var commodityCount = await shoppingModel.count({ classifyId: param.parentId });
+    if (commodityCount > 0) {
+      await shoppingModel.updateMany({ classifyId: param.parentId }, { classifyId: newId })
+    }
+  }
   ctx.body = commons.jsonBack(1, classify, "添加成功");
 })
 
@@ -73,7 +84,17 @@ router.post('/deleteClassify', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   var item = await classifyModel.findOne({ id: param.id });
-  await classifyModel.deleteOne({ id: param.id })
+  await classifyModel.deleteOne({ id: param.id });
+  var zeroItem = await classifyModel.findOne({ id: -1 });
+  if (!zeroItem) {
+    await classifyModel.create({
+      title: "补全分类",
+      created_time: Date.parse(new Date()),
+      update_time: Date.parse(new Date()),
+      id: -1,
+      level: 1,
+    });
+  }
   if (item.level === 3) {
 
   } else if (item.level === 2) {

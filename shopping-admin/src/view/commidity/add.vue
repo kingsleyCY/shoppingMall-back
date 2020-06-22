@@ -291,7 +291,7 @@
         this.ruleForm.isExplosive = detail.isExplosive ? true : false
         this.ruleForm.isNews = detail.isNews ? true : false
         this.ruleForm.isRebate = detail.isRebate ? true : false
-        var sizeCollet = detail.sizeCollet ? detail.sizeCollet : [[]];
+        var sizeCollet = detail.sizeCollet ? detail.sizeCollet : {};
         let newsizeCollet = []
         for (var key in sizeCollet) {
           newsizeCollet.push([key, sizeCollet[key]])
