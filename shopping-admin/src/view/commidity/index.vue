@@ -17,9 +17,13 @@
     <el-button type="primary" @click="addCommodity" size="mini">添加商品</el-button>
     <el-button type="primary" @click="deleCommodity" size="mini">删除选中</el-button>
     <el-button type="primary" @click="openBathExport" size="mini">批量上传</el-button>
+    <el-button type="primary" @click="batchMove" size="mini">批量移动</el-button>
+    <el-button type="primary" @click="selectAll" size="mini">全选</el-button>
+    <el-button type="primary" @click="reverseSelect" size="mini">反选</el-button>
     <ul class="list-box">
       <li v-for="(item, index) in commodityList" :key="index" class="item-commo" @click="editCommodity(item.id)">
-        <el-checkbox v-model="item.checked" @click.native.stop="checkedCommodity(item)" class="checkbox"></el-checkbox>
+        <el-checkbox v-model="item.checked" @click.native.stop.self="checkedCommodity(item)"
+                     class="checkbox"></el-checkbox>
         <img :src="item.logo" alt="">
         <p>{{item.title}}</p>
         <div class="introduction">{{item.introduction}}</div>
@@ -60,16 +64,36 @@
         <el-button type="primary" @click="uploadFile" size="small">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      title="批量移动"
+      :visible.sync="batchMoveVisible"
+      width="350px">
+      <div>
+        <el-cascader size="mini" :props="cascaderProps" v-model="batchMoveValue" :options="treeData"
+                     clearable></el-cascader>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="batchMoveVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitBatchMove">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getCommodityList, deleCommodity, getClassifyList, bathExportCommodity } from '@/api/request'
+  import {
+    getCommodityList,
+    deleCommodity,
+    getClassifyList,
+    bathExportCommodity,
+    batchMoveCommdity
+  } from '@/api/request'
 
   export default {
     name: "commidity",
     data() {
       return {
+        selectArr: [],
         pageData: {
           page: 1,
           pageSize: 10,
@@ -86,7 +110,9 @@
           label: "title",
         },
         bathdialogVisible: false,
-        bathFile: null
+        bathFile: null,
+        batchMoveVisible: false,
+        batchMoveValue: []
       }
     },
     mounted() {
@@ -109,6 +135,9 @@
         getCommodityList(param).then(res => {
           this.commodityList = res.data.list
           this.pageData.total = res.data.total
+          this.commodityList.forEach(item => {
+            this.$set(item, "checked", false)
+          });
         }).catch(res => {
 
         })
@@ -134,7 +163,7 @@
         this.$router.push('/admin_html/addcommidity?id=' + id)
       },
       checkedCommodity(item) {
-        item.checked = !item.checked
+        this.$set(item, "checked", !item.checked)
       },
       deleCommodity() {
         var arr = []
@@ -144,14 +173,22 @@
           }
         })
         if (arr.length > 0) {
-          deleCommodity({id: arr}).then(res => {
-            if (res.code === 1) {
-              this.$message.success(res.mess)
-              this.getList()
-            } else {
-              this.$message.error(res.mess)
-            }
+          this.$confirm('此操作将永久删除选中商品, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            deleCommodity({id: arr}).then(res => {
+              if (res.code === 1) {
+                this.$message.success(res.mess)
+                this.getList()
+              } else {
+                this.$message.error(res.mess)
+              }
+            })
           })
+        } else {
+          this.$message.info("请选择")
         }
       },
       openBathExport() {
@@ -168,7 +205,48 @@
         bathExportCommodity(param).then(res => {
           console.log(res);
         })
-      }
+      },
+
+      batchMove() {
+        var arr = []
+        this.commodityList.forEach(v => {
+          if (v.checked) {
+            arr.push(v.id)
+          }
+        });
+        this.selectArr = arr
+        if (arr.length > 0) {
+          this.batchMoveVisible = true;
+          this.batchMoveValue = this.search.classifyId;
+        } else {
+          this.$message.info("请选择")
+        }
+      },
+      submitBatchMove() {
+        var param = {ids: this.selectArr}
+        if (this.batchMoveValue.length > 0) {
+          param.classifyId = this.batchMoveValue[this.batchMoveValue.length - 1]
+        }
+        batchMoveCommdity(param).then(res => {
+          if (res.code === 1) {
+            this.$message.success(res.mess)
+            this.batchMoveVisible = false;
+            this.getList()
+          } else {
+            this.$message.error(res.mess)
+          }
+        })
+      },
+      selectAll() {
+        this.commodityList.forEach(item => {
+          this.$set(item, "checked", true)
+        })
+      },
+      reverseSelect() {
+        this.commodityList.forEach(item => {
+          this.$set(item, "checked", !item.checked)
+        })
+      },
     }
   }
 </script>
@@ -190,6 +268,23 @@
         position: absolute;
         left: 0;
         top: 0;
+        width: 20px;
+        height: 20px;
+        /deep/ .el-checkbox__input {
+          width: 100%;
+          height: 100%;
+          display: inline-block;
+          .el-checkbox__inner {
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            &::after {
+              height: 10px;
+              left: 6px;
+              width: 5px;
+            }
+          }
+        }
       }
       img {
         width: 100%;

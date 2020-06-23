@@ -144,5 +144,25 @@ router.post('/bathExportCommodity', async (ctx) => {
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 
+/* 批量修改商品分类 */
+/*
+* param：ids、classifyId
+* */
+router.post('/batchMoveCommdity', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['classifyId', 'ids'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var classifyItem = await classifyModel.findOne({ id: param.classifyId })
+  if (!classifyItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此分类"))
+  }
+  var list = await shoppingModel.updateMany({ id: { $in: param.ids } }, {
+    classifyId: param.classifyId,
+    classifyName: classifyItem.title
+  })
+  ctx.body = commons.jsonBack(1, {}, "操作成功！");
+})
+
 
 module.exports = router

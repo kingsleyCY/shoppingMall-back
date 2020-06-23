@@ -4,17 +4,20 @@ const { shoppingModel } = require('../../model/commodityModel');
 
 /* 添加商品分类 */
 /* param: title
- * optitle: parentId
+ * optitle: parentId、sort
  * */
 router.post('/addClassify', async (ctx) => {
   var param = ctx.request.body;
   if (!commons.judgeParamExists(['title'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  const list = await classifyModel.find({ parentId: param.parentId || "0" }).sort({ "_id": -1 })
-  const lastItem = list[0]
-  var newId
-  var parentItem
+  if (param.parentId === "-1") {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该分类不支持添加子分类！"))
+  }
+  const list = await classifyModel.find({ parentId: param.parentId || "0", id: { $ne: "-1" } }).sort({ "_id": -1 })
+  const lastItem = list[0];
+  var newId;
+  var parentItem;
   if (param.parentId) {
     parentItem = await classifyModel.findOne({ id: param.parentId })
     if (!parentItem) {
@@ -32,12 +35,13 @@ router.post('/addClassify', async (ctx) => {
     created_time: Date.parse(new Date()),
     update_time: Date.parse(new Date()),
     id: newId,
+    sort: param.sort || "1",
     parentId: param.parentId || "0",
     level: param.parentId ? parentItem.level + 1 : 1,
   })
   // 父节点下如有商品转移到添加的子节点
-  if (!lastItem && !param.parentId) {
-    var commodityCount = await shoppingModel.count({ classifyId: param.parentId });
+  if (!lastItem && param.parentId) {
+    var commodityCount = await shoppingModel.countDocuments({ classifyId: param.parentId });
     if (commodityCount > 0) {
       await moveCommodity(param.parentId)
     }
@@ -47,7 +51,7 @@ router.post('/addClassify', async (ctx) => {
 
 /* 查询分类列表 */
 router.get('/getClassify', async (ctx) => {
-  var list = await classifyModel.find()
+  var list = await classifyModel.find().sort({ sort: -1 })
   list = JSON.parse(JSON.stringify(list))
   function jsonToTree(jsonData, id, pid) {
     let result = [],
@@ -83,20 +87,73 @@ router.post('/deleteClassify', async (ctx) => {
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var item = await classifyModel.findOne({ id: param.id });
-  await classifyModel.deleteOne({ id: param.id });
-  if (item.level === 3) {
-    await moveCommodity(item.id)
-  } else if (item.level === 2) {
-    // await classifyModel.deleteMany({ parentId: param.id })
+  if (param.id === "-1") {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该分类不可删除！"))
+  }
+  var classifyList = await classifyModel.find({ id: { $ne: "-1" } });
+  var zeroItem = await classifyModel.findOne({ id: "-1" });
+  if (!zeroItem) {
+    zeroItem = await classifyModel.create({
+      title: "补全分类",
+      created_time: Date.parse(new Date()),
+      update_time: Date.parse(new Date()),
+      id: "-1",
+      level: 1,
+    });
+  }
+  await loop(param.id);
 
+  async function loop(classifyId) {
+    // 更新分类下商品
+    await shoppingModel.updateMany({ classifyId }, { classifyId: "-1" });
+    let childList = classifyList.filter(v => {
+      return v.parentId === classifyId
+    })
+    for (let i = 0; i < childList.length; i++) {
+      if (childList[i].parentId === classifyId) {
+        loop(childList[i].id)
+      }
+    }
+    console.log(classifyId);
+    await classifyModel.deleteOne({ id: classifyId });
+  }
+
+
+  // await classifyModel.deleteOne({ id: param.id });
+  /*if (item.level === 3) {
+    await shoppingModel.updateMany({ classifyId: item.id }, { classifyId: "-1" })
+  } else if (item.level === 2) {
+    var list = await classifyModel.find({ parentId: param.id });
+    var ids = []
+    for (let i = 0; i < list.length; i++) {
+      ids.push(list[i].id)
+    }
+    // 迁移分类下商品
+    if (ids.length === 0) {
+      await shoppingModel.updateMany({ classifyId: item.id }, { classifyId: "-1" });
+    } else {
+      await shoppingModel.updateMany({ classifyId: { $in: ids } }, { classifyId: "-1" });
+    }
+    // 删除子分类
+    await classifyModel.deleteMany({ parentId: param.id });
   } else if (item.level === 1) {
     var list = await classifyModel.find({ parentId: param.id });
+    var ids = []
     for (let i = 0; i < list.length; i++) {
-      await classifyModel.deleteMany({ parentId: list[i].id })
+      // await classifyModel.deleteMany({ parentId: list[i].id })
+      ids.push(list[i].id)
+    }
+    // 迁移分类下商品
+    if (ids.length === 0) {
+      await shoppingModel.updateMany({ classifyId: item.id }, { classifyId: "-1" });
+    } else {
+      // 循环二级分类
+      for (let i = 0; i < ids.length; i++) {
+
+      }
     }
     await classifyModel.deleteMany({ parentId: param.id })
-  }
+  }*/
   ctx.body = commons.jsonBack(1, {}, "操作成功");
 })
 
@@ -110,7 +167,11 @@ router.post('/editClassify', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   if (param.title) {
-    await classifyModel.findOneAndUpdate({ id: param.id }, { title: param.title, update_time: Date.parse(new Date()) })
+    await classifyModel.findOneAndUpdate({ id: param.id }, {
+      title: param.title,
+      update_time: Date.parse(new Date()),
+      sort: param.sort || "1"
+    })
     ctx.body = commons.jsonBack(1, {}, "操作成功");
   } else if (param.logo) {
     await classifyModel.findOneAndUpdate({ id: param.id }, { logo: param.logo, update_time: Date.parse(new Date()) })
@@ -124,8 +185,8 @@ router.post('/editClassify', async (ctx) => {
 /* 指定节点下商品移动到特殊分类 */
 async function moveCommodity(classifyId) {
   var zeroItem = await classifyModel.findOne({ id: "-1" });
-  if (!allClassify) {
-    zeroItem = await classifyModel.create({
+  if (!zeroItem) {
+    await classifyModel.create({
       title: "补全分类",
       created_time: Date.parse(new Date()),
       update_time: Date.parse(new Date()),
@@ -133,7 +194,6 @@ async function moveCommodity(classifyId) {
       level: 1,
     });
   }
-  console.log(zeroItem);
   await shoppingModel.updateMany({ classifyId: classifyId }, { classifyId: "-1" })
 }
 

@@ -1,16 +1,18 @@
 <template>
   <div>
     <el-button size="mini" @click="addClassifyMethods(0)">添加一级分类</el-button>
+    <el-button size="mini" @click="getClassifyList">刷新</el-button>
     <el-tree :data="treeData" :props="defaultProps" :expand-on-click-node="false" :default-expand-all="true">
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span class="left">
           <div class="img">
-            <img :src="data.logo" v-image>
+            <img :src="data.logo || 'http://lioncc.oss-cn-beijing.aliyuncs.com/shop/config/1.png'" v-image>
           </div>
           <span class="text">{{ data.title }}</span>
         </span>
         <span class="right">
           <el-button
+            v-if="data.id !== '-1'"
             type="text"
             size="mini" @click="addClassifyMethods(data.id)">
             添加子节点
@@ -21,11 +23,13 @@
             修改logo
           </el-button>
           <el-button
+            v-if="data.id !== '-1'"
             type="text"
             size="mini" @click="editClassifyMethods(data)">
             编辑
           </el-button>
           <el-button
+            v-if="data.id !== '-1'"
             type="text"
             size="mini" @click="deleteClassifyMethods(data.id)">
             删除
@@ -40,12 +44,20 @@
       width="600px"
       :before-close="handleClose">
       <div>
-        <el-input v-model="input" placeholder="请输入内容"></el-input>
+        <el-form ref="form" :model="form" label-width="80px">
+          <el-form-item label="分类名称">
+            <el-input v-model="form.input" @keyup.enter.native="submitClassify" placeholder="请输入分类名称"></el-input>
+          </el-form-item>
+          <el-form-item label="排序">
+            <el-input v-model="form.sort" @keyup.enter.native="submitClassify" placeholder="请输入排序"
+                      type="number"></el-input>
+          </el-form-item>
+        </el-form>
       </div>
-      <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="submitClassify">确 定</el-button>
-  </span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitClassify">确 定</el-button>
+      </div>
     </el-dialog>
     <el-dialog
       title="图片剪裁"
@@ -91,7 +103,10 @@
         dialogVisible: false,
         dialogVisible1: false,
         isAdd: true,
-        input: "",
+        form: {
+          input: "",
+          sort: "",
+        },
         rowData: null,
         parentId: "0",
         partIndex: 1,
@@ -137,6 +152,8 @@
         this.dialogVisible = true;
         this.isAdd = true;
         this.parentId = id;
+        this.form.input = "";
+        this.form.sort = "";
       },
       editLogo(data) {
         this.rowData = data;
@@ -151,7 +168,8 @@
       editClassifyMethods(data) {
         this.dialogVisible = true;
         this.isAdd = false;
-        this.input = data.title;
+        this.form.input = data.title;
+        this.form.sort = data.sort;
         this.rowData = data;
       },
       deleteClassifyMethods(id) {
@@ -160,7 +178,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          deleteClassify({ id }).then(res => {
+          deleteClassify({id}).then(res => {
             if (res.code === 1) {
               this.$message.success("删除成功")
               this.getClassifyList()
@@ -171,14 +189,15 @@
         })
       },
       submitClassify() {
-        if (!this.input) {
+        if (!this.form.input) {
           this.$message.info("不能为空")
           return
         }
         if (this.isAdd) {
           addClassify({
-            title: this.input,
+            title: this.form.input,
             parentId: this.parentId,
+            sort: this.form.sort,
           }).then(res => {
             if (res.code === 1) {
               this.handleClose()
@@ -190,8 +209,9 @@
           })
         } else {
           editClassify({
-            title: this.input,
+            title: this.form.input,
             id: this.rowData.id,
+            sort: this.form.sort,
           }).then(res => {
             if (res.code === 1) {
               this.handleClose()
@@ -202,7 +222,6 @@
             }
           })
         }
-
       },
       getClassifyList() {
         getClassifyList().then(res => {

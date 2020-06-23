@@ -6,6 +6,7 @@ var classifySchema = new mongoose.Schema({
   parentId: { type: String, default: "0" },
   level: { type: Number, default: 1 },
   logo: { type: String, default: "" },
+  sort: { type: Number, default: "1" },
 }, { collection: "classifyTree", versionKey: false });
 var classifyModel = db.model("classifyTree", classifySchema);
 

@@ -4,7 +4,7 @@ const { classifyModel } = require('../../model/admin/classifyModel');
 
 /* 获取商品分类及列表 */
 router.get('/getBaseClassify', async (ctx) => {
-  var comClassify = JSON.parse(JSON.stringify(await classifyModel.find()));
+  var comClassify = JSON.parse(JSON.stringify(await classifyModel.find({ id: { $ne: "-1" } }).sort({ sort: -1 })));
   ctx.body = commons.jsonBack(1, {
     classifyList: comClassify
   }, "获取数据成功");

@@ -113,6 +113,13 @@ export function deleCommodity(param) {
     data: param
   })
 }
+export function batchMoveCommdity(param) {
+  return instance({
+    url: '/admin/commodity/batchMoveCommdity',
+    method: 'POST',
+    data: param
+  })
+}
 
 /* 获取首页数据 */
 export function getIndexData() {
