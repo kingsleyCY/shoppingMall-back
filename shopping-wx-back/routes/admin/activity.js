@@ -95,7 +95,7 @@ router.post('/getActiList', async (ctx) => {
   }
   var obj = {}
   if (param.type === "all") {
-
+    obj.isDelete = 0
   } else if (param.type === "ready") {
     obj.status = 1
     obj.isDelete = 0
@@ -152,17 +152,19 @@ router.post('/overActivity', async (ctx) => {
 /* 创建定时任务条件：初始化/未开始 */
 async function setActitvtyStatus(data) {
   const nowTime = Date.parse(new Date());
+  var status = 0
   if (nowTime < data.sTime) { // 未开始
     await commons.createdStartSchedule(data)
     await commons.createdEndSchedule(data)
+    status = 1
   } else if (nowTime >= data.sTime && nowTime < data.eTime) { // 已开始
     if (data.scheduleStartModel) {
-      repeatSchedule(data.scheduleStartModel)
+      commons.repeatSchedule(data.scheduleStartModel)
     }
     await commons.createdEndSchedule(data)
+    status = 2
   }
-  var statusItem = await activityModel.findOne({ id: data.id });
-  statusItem = commons.judgeParamExists(statusItem, ["scheduleStartModel", "scheduleEndModel"])
+  var statusItem = await activityModel.findOneAndUpdate({ id: data.id }, { status }, { new: true });
   return statusItem
 }
 
