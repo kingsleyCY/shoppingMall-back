@@ -70,25 +70,30 @@ router.post('/activited', async (ctx) => {
   }
   var userItem = await userModel.findOne({ "userId": param.userId })
   if (userItem) {
-    var activityList = JSON.parse(JSON.stringify(userItem.activityList))
+    var activityList = JSON.parse(JSON.stringify(userItem.activityList));
+    var newActivityList = {}
     for (let key in activityList) {
       let actItem = await activityModel.findOne({ id: key });
-      activityList[key].actitvtyItem = JSON.stringify(actItem)
+      if (!actItem) {
+        continue
+      }
+      newActivityList[key] = activityList[key]
+      newActivityList[key].actitvtyItem = JSON.stringify(actItem)
       if (actItem.status === 3) {
-        if (actItem.resultId === activityList[key].code) {
-          activityList[key].isWins = 1
-          activityList[key].isWinsText = "已中奖"
+        if (actItem.resultId === newActivityList[key].code) {
+          newActivityList[key].isWins = 1
+          newActivityList[key].isWinsText = "已中奖"
         } else {
-          activityList[key].isWins = 0
-          activityList[key].isWinsText = "未中奖"
+          newActivityList[key].isWins = 0
+          newActivityList[key].isWinsText = "未中奖"
         }
       } else {
-        activityList[key].isWins = 2
-        activityList[key].isWinsText = "未开奖"
+        newActivityList[key].isWins = 2
+        newActivityList[key].isWinsText = "未开奖"
       }
     }
-    await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList: activityList })
-    ctx.body = commons.jsonBack(1, { activityList: activityList }, "获取成功");
+    await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList: newActivityList })
+    ctx.body = commons.jsonBack(1, { activityList: newActivityList }, "获取成功");
   } else {
     ctx.throw(200, commons.jsonBack(1001, {}, "此用户不存在"))
   }
