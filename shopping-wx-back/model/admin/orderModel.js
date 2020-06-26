@@ -21,7 +21,7 @@ var orderSchema = new mongoose.Schema({
   mailOrder: { type: String, default: "" }, // 快递单号
   mailRemark: { type: String, default: "" }, // 快递备注
   couponId: { type: String, default: "" },
-  original_fee: Number
+  original_fee: { type: Number, default: "" }, // 原价(元)
 }, { collection: "orderList", versionKey: false });
 var orderModel = db.model("orderList", orderSchema);
 
@@ -41,5 +41,13 @@ exports.orderModel = orderModel;
 * refund 已退款成功
 * unrefund 退款失败
 * canceled 取消订单（未付款）
+*
+* */
+
+/* 金额说明 */
+/*
+* original_fee 原价(元)
+* total_fee 成交价(分)
+*
 *
 * */
