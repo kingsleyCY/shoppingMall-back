@@ -70,6 +70,11 @@
             </template>
           </el-table-column>
           <el-table-column
+            prop="additionNum"
+            label="增加量"
+            min-width="80">
+          </el-table-column>
+          <el-table-column
             fixed="right"
             label="操作"
             width="120">
@@ -83,6 +88,9 @@
               <el-button type="text" size="small"
                          v-if="scope.row.isDelete === 0 && (scope.row.status===1 || scope.row.status===2)"
                          @click="overActivity(scope.row)">结束活动
+              </el-button>
+              <el-button type="text" size="small"
+                         @click="oprnAdditonModel(scope.row)">修改增加量
               </el-button>
             </template>
           </el-table-column>
@@ -123,11 +131,23 @@
         </el-form-item>
       </el-form>
     </div>
+
+    <el-dialog
+      custom-class="most-dislog" title="修改增加量"
+      :visible.sync="bindUserDialog" width="30%">
+      <div>
+        <el-input v-model="additionNum" @keyup.enter.native="submitAddition" placeholder="请输入用户手机号"></el-input>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="bindUserDialog = false">取 消</el-button>
+        <el-button type="primary" @click="submitAddition">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getCommodityList, creatActivity, getActiList, deleActivity, overActivity } from '@/api/request'
+  import { getCommodityList, creatActivity, getActiList, deleActivity, overActivity, addAddition } from '@/api/request'
 
   export default {
     name: "activityList",
@@ -147,7 +167,9 @@
           disabledDate: time => {
             return time.getTime() < (Date.now() - 24 * 60 * 60 * 1000)
           }
-        }
+        },
+        bindUserDialog: false,
+        additionNum: 0,
       }
     },
     created() {
@@ -248,15 +270,21 @@
         }
       },
       deleActivity(row) {
-        deleActivity({id: row.id}).then(res => {
-          if (res.code === 1) {
-            this.$message.success("操作成功")
-            this.handleClick()
-          } else {
-            this.$message.error(res.mess)
-          }
-        }).catch(res => {
+        this.$confirm('此操作将永久删除该活动, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleActivity({id: row.id}).then(res => {
+            if (res.code === 1) {
+              this.$message.success("操作成功")
+              this.handleClick()
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(res => {
 
+          })
         })
       },
       overActivity(row) {
@@ -271,7 +299,28 @@
 
         })
       },
-
+      oprnAdditonModel(row) {
+        this.bindUserDialog = true;
+        this.rowData = row;
+        this.additionNum = this.rowData.additionNum || 0;
+      },
+      submitAddition() {
+        let param = {
+          id: this.rowData.id,
+          additionNum: this.additionNum,
+        }
+        addAddition(param).then(res => {
+          this.bindUserDialog = false;
+          if (res.code === 1) {
+            this.$message.success("操作成功")
+            this.handleClick()
+          } else {
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+          this.$message.error("操作失败")
+        })
+      },
 
       timeTransfer(data) {
         if (!data) {

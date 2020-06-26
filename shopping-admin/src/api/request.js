@@ -202,6 +202,14 @@ export function overActivity(param) {
   })
 }
 
+export function addAddition(param) {
+  return instance({
+    url: '/admin/activity/addAddition',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getOrderList(param) {
   return instance({
     url: '/admin/order/orderList',

@@ -15,7 +15,8 @@ var activitySchema = new mongoose.Schema({
   activNun: { type: Number, default: 0 },
   end_time: { type: Number, default: 0 },
   endCode: { type: String, default: "" }, // 中奖码
-  winUerId: { type: String, default: "" } // 中奖人ID
+  winUerId: { type: String, default: "" }, // 中奖人ID
+  additionNum: { type: Number, default: 0 }, // 新加人数
 }, { collection: "activityList", versionKey: false });
 var activityModel = db.model("activityList", activitySchema);
 

@@ -69,6 +69,21 @@ router.post('/creatActivity', async (ctx) => {
   }
 })
 
+/* 修改additionNum */
+/*
+* param：id、additionNum
+* */
+router.post('/addAddition', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['id', 'additionNum'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var num = Math.abs(param.additionNum);
+  var a = await activityModel.findOneAndUpdate({ id: param.id }, { additionNum: num }, { new: true });
+  ctx.body = commons.jsonBack(1, {}, "修改成功！");
+})
+
+
 /* 删除活动 */
 /*
 * param:id
