@@ -231,7 +231,7 @@ router.post("/paymentBack", async (ctx) => {
   }
 })
 
-/* 退款-取消订单 */
+/* 取消订单 */
 /*
 *param：out_trade_no、userId
 * */
@@ -244,15 +244,22 @@ router.post("/applyRefound", async (ctx) => {
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
-  var res = await commons.applyRefound(param.out_trade_no, param.userId, "测试退款")
-  if (typeof res === "string") {
-    ctx.body = commons.jsonBack(1003, {}, res);
-  } else {
-    if (res.out_refund_no) {
-      ctx.body = commons.jsonBack(1, {}, "退款成功！");
+  if (orderItem.orderStatus === "unpaid") {
+    await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, { orderStatus: "canceled" }, { new: true });
+    ctx.body = commons.jsonBack(1, {}, "取消订单成功！");
+  } else if (orderItem.orderStatus === "undeliver") {
+    var res = await commons.applyRefound(param.out_trade_no, param.userId, "测试退款")
+    if (typeof res === "string") {
+      ctx.body = commons.jsonBack(1003, {}, res);
     } else {
-      ctx.body = commons.jsonBack(1003, {}, "退款失败！");
+      if (res.out_refund_no) {
+        ctx.body = commons.jsonBack(1, {}, "退款成功！");
+      } else {
+        ctx.body = commons.jsonBack(1003, {}, "退款失败！");
+      }
     }
+  } else {
+    ctx.body = commons.jsonBack(1003, {}, "该状态下无法退款！");
   }
 })
 

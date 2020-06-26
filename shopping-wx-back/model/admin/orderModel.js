@@ -40,5 +40,6 @@ exports.orderModel = orderModel;
 * over 已完成
 * refund 已退款成功
 * unrefund 退款失败
+* canceled 取消订单（未付款）
 *
 * */
