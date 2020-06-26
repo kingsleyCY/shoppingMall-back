@@ -101,5 +101,31 @@ router.post('/getSingleDetail', async (ctx) => {
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
 
+/* 获取单个商品详情 */
+/*
+* param: page、pageSize
+* opparam: title
+* */
+router.post('/searchCommodity', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  const reg = new RegExp(param.title, 'i') //不区分大小写
+  var search = {
+    $or: [
+      { title: { '$regex': reg } }
+    ],
+  }
+  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
+  var total = await shoppingModel.find(search)
+  ctx.body = commons.jsonBack(1, {
+    list,
+    total: total.length,
+    page: param.page,
+    pageSize: param.pageSize,
+  }, "获取数据成功");
+})
+
 
 module.exports = router
