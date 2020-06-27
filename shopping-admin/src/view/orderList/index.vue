@@ -192,6 +192,23 @@
                        @click="openMailModel(scope.row)">
               录入/修改物流信息
             </el-button>
+            <!--退/换货录入客户物流信息-->
+            <el-button type="text" size="small" v-if="scope.row.orderStatus==='applyAfter'"
+                       @click="openMailModel(scope.row)">
+              修改用户物流
+            </el-button>
+            <!--退货退款-->
+            <el-button type="text" size="small"
+                       v-if="(scope.row.orderStatus==='applyAfter' || scope.row.orderStatus==='unrefund') && scope.row.applyAfterDetail && scope.row.applyAfterDetail.applyType === 1 && scope.row.applyAfterDetail.returnGoods && scope.row.applyAfterDetail.returnGoods.mailOrder"
+                       @click="openApplyRefoundModel(scope.row, 'mailOrder')">
+              退货退款
+            </el-button>
+            <!--换货物流信息-->
+            <el-button type="text" size="small"
+                       v-if="scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && scope.row.applyAfterDetail.exchangeGoods && scope.row.applyAfterDetail.exchangeGoods.mailOrder"
+                       @click="openMailModel(scope.row, 'manuMail')">
+              修改换货物流
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -219,11 +236,29 @@
         <el-button type="primary" @click="submitMail">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="退货退款" :visible.sync="refounddialogVisible" width="30%">
+      <el-form ref="form" label-width="80px">
+        <el-form-item label="退款备注">
+          <el-input type="textarea" v-model="refoundRemark"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="refounddialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="applyRefoundMethods">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getOrderList, checkOrderToBus, setMail } from "@/api/request"
+  import {
+    getOrderList,
+    checkOrderToBus,
+    setMail,
+    afterSalesSetMail,
+    applyRefound,
+    setExchangeMail
+  } from "@/api/request"
 
   export default {
     name: "orderList",
@@ -238,6 +273,7 @@
           total: 0,
         },
         maildialogVisible: false,
+        mailType: "",
         mailForm: {
           mailOrder: "",
           mailRemark: "",
@@ -252,7 +288,9 @@
           totalFeeMax: "",
           phone: "",
         },
-        visible: false
+        visible: false,
+        refounddialogVisible: false,
+        refoundRemark: ""
       }
     },
     mounted() {
@@ -297,26 +335,52 @@
         this.pageData.page = val
         this.getOrderList()
       },
-      openMailModel(row) {
+      openMailModel(row, type) {
         this.maildialogVisible = true;
         this.checkedItem = row;
-        if (row.orderStatus === 'undeliver') {
-          this.mailForm = {
-            mailOrder: "",
-            mailRemark: "",
-          }
-        } else if (row.orderStatus === 'deliver') {
+        this.mailType = type
+        if (row.orderStatus === 'deliver') {
           this.mailForm = {
             mailOrder: row.mailOrder,
             mailRemark: row.mailRemark
+          }
+        } else if (row.orderStatus === 'applyAfter') {
+          var mailOrder = "", mailRemark = "";
+          if (row.applyAfterDetail.applyType === 1) {
+            mailOrder = row.applyAfterDetail.returnGoods ? row.applyAfterDetail.returnGoods.mailOrder : ""
+            mailRemark = row.applyAfterDetail.returnGoods ? row.applyAfterDetail.returnGoods.mailRemark : ""
+          } else if (row.applyAfterDetail.applyType === 2) {
+            if (type === 'mailOrder') {
+              mailOrder = row.applyAfterDetail.exchangeGoods ? row.applyAfterDetail.exchangeGoods.mailOrder : ""
+              mailRemark = row.applyAfterDetail.exchangeGoods ? row.applyAfterDetail.exchangeGoods.mailRemark : ""
+            } else if (type === 'manuMail') {
+              mailOrder = row.applyAfterDetail.exchangeGoods ? row.applyAfterDetail.exchangeGoods.manuMail : ""
+              mailRemark = row.applyAfterDetail.exchangeGoods ? row.applyAfterDetail.exchangeGoods.manuMailRemark : ""
+            }
+          }
+          this.mailForm = {
+            mailOrder: mailOrder,
+            mailRemark: mailRemark
           }
         }
       },
       submitMail() {
         if (this.mailForm.mailOrder) {
+          var requestMethods = null
+          if (this.checkedItem.orderStatus === "deliver") {
+            requestMethods = setMail
+          } else if (this.checkedItem.orderStatus === "applyAfter") {
+            if (type === 'mailOrder') {
+              requestMethods = afterSalesSetMail
+            } else if (type === 'manuMail') {
+              requestMethods = setExchangeMail
+            }
+          } else {
+            return
+          }
           let parm = JSON.parse(JSON.stringify(this.mailForm));
           parm.out_trade_no = this.checkedItem.out_trade_no
-          setMail(parm).then(res => {
+          requestMethods(parm).then(res => {
             if (res.code === 1) {
               this.$message.success(res.mess)
               this.maildialogVisible = false;
@@ -342,6 +406,38 @@
           }
         }).catch(reds => {
           this.$message.error("操作失败")
+        })
+      },
+      openApplyRefoundModel(row) {
+        this.refounddialogVisible = true;
+        this.checkedItem = row;
+        this.refoundRemark = "";
+      },
+      applyRefoundMethods() {
+        if (!this.refoundRemark) {
+          this.$message.info("备注必填")
+          return
+        }
+        this.$confirm('确定退款, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let param = {
+            out_trade_no: this.checkedItem.out_trade_no,
+            remark: this.refoundRemark
+          }
+          applyRefound(param).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.refounddialogVisible = false;
+              this.getOrderList();
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(reds => {
+            this.$message.error("操作失败")
+          })
         })
       },
       formSearch() {

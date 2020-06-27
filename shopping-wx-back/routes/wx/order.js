@@ -1,6 +1,5 @@
 const router = require('koa-router')();
 const { userModel } = require('../../model/userModel');
-const addressModel = require('../../model/addressModel');
 const { shoppingModel } = require('../../model/commodityModel');
 const { orderModel } = require('../../model/admin/orderModel');
 const { couponModel } = require('../../model/admin/couponModel');

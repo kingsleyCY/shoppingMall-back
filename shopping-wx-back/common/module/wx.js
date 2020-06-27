@@ -140,18 +140,19 @@ var wx = {
     var reduce_fee = reduce_fee || 0;
     reduce_fee = reduce_fee * 100;
     if (reduce_fee >= total_fee) {
-      return "减少运费金额小于总金额！"
+      // return "减少运费金额小于总金额！"
+      reduce_fee = 0
     }
     const refund_fee = orderItem.total_fee - reduce_fee;
     const refund_desc = refundDesc || "测试退单";
-    const notify_url = this.wxrefundurl;
-    const sign = this.refundSignjsapi(mchkey, appid, mch_id, nonce_str, notify_url, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc);
+    // const notify_url = this.wxrefundurl;
+    const sign = this.refundSignjsapi(mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc);
 
     var formData = "<xml>";
     formData += "<appid>" + appid + "</appid>";
     formData += "<mch_id>" + mch_id + "</mch_id>";
     formData += "<nonce_str>" + nonce_str + "</nonce_str>";
-    formData += "<notify_url>" + notify_url + "</notify_url>";
+    // formData += "<notify_url>" + notify_url + "</notify_url>";
     formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
     formData += "<out_refund_no>" + out_refund_no + "</out_refund_no>";
     formData += "<total_fee>" + total_fee + "</total_fee>";

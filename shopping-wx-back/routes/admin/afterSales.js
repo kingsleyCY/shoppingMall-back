@@ -25,9 +25,17 @@ router.post('/applyAfter', async (ctx) => {
     applyRemark: param.applyRemark,
   }
   if (param.applyType === 1) {
-    applyAfterDetail.returnGoods = {}
+    applyAfterDetail.returnGoods = {
+      mailOrder: "",
+      mailRemark: ""
+    }
   } else if (param.applyType === 2) {
-    applyAfterDetail.exchangeGoods = {}
+    applyAfterDetail.exchangeGoods = {
+      mailOrder: "",
+      mailRemark: "",
+      manuMail: "",
+      manuMailRemark: "",
+    }
   }
   var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
     applyAfterDetail,
@@ -102,18 +110,23 @@ router.post('/applyRefound', async (ctx) => {
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
-  if (orderItem && orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail && orderItem.applyAfterDetail.applyType === 1) {
+  if (orderItem && (orderItem.orderStatus === "applyAfter" || orderItem.orderStatus === "unrefund") && orderItem.applyAfterDetail && orderItem.applyAfterDetail.applyType === 1) {
     var res = await commons.applyRefound(param.out_trade_no, orderItem.userId, "测试退款", 15);
     if (typeof res === "string") {
       ctx.body = commons.jsonBack(1003, {}, res);
     } else {
       if (res.out_refund_no) {
-        await commons.pushOrderStatusLog(param.out_trade_no, "applyAfter", "refund", {
+        await commons.pushOrderStatusLog(param.out_trade_no, orderItem.orderStatus, "refund", {
           created_time: Date.parse(new Date()),
           remark: param.remark
         })
         ctx.body = commons.jsonBack(1, {}, "退款成功！");
       } else {
+        await commons.pushOrderStatusLog(param.out_trade_no, "applyAfter", "unrefund", {
+          created_time: Date.parse(new Date()),
+          remark: param.remark,
+          refundDes: res
+        })
         ctx.body = commons.jsonBack(1003, {}, "退款失败！");
       }
     }
@@ -140,7 +153,6 @@ router.post('/setExchangeMail', async (ctx) => {
       "applyAfterDetail.exchangeGoods.manuMail": param.mailOrder,
       "applyAfterDetail.exchangeGoods.manuMailRemark": param.mailRemark
     }, { new: true });
-    console.log(orderItems);
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
     } else {
@@ -153,6 +165,41 @@ router.post('/setExchangeMail', async (ctx) => {
     }
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "该订单状态无法录入换货物流信息！"))
+  }
+})
+
+/* 完成订单-（售后） */
+/*
+* param：out_trade_no、remark
+* */
+router.post('/overOrder', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['out_trade_no', "remark"], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no })
+  if (!orderItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
+  }
+  if (
+    (orderItem.orderStatus === "refund" && orderItem.applyAfterDetail.applyType === 1) ||
+    (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail.applyType === 2 && orderItem.applyAfterDetail.exchangeGoods && orderItem.applyAfterDetail.exchangeGoods.manuMail)
+  ) {
+    var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
+      orderStatus: "over"
+    }, { new: true });
+    if (!orderItems) {
+      ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
+    } else {
+      await commons.pushOrderStatusLog(param.out_trade_no, orderItem.orderStatus, "over", {
+        created_time: Date.parse(new Date()),
+        applyType: orderItem.applyAfterDetail.applyType,
+        remark: param.applyType,
+      })
+      ctx.body = commons.jsonBack(1, orderItems, "完成订单成功！");
+    }
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该订单状态无法修改为已完成！"))
   }
 })
 

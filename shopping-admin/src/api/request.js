@@ -265,3 +265,27 @@ export function couponBindUser(param) {
     data: param
   })
 }
+
+export function afterSalesSetMail(param) {
+  return instance({
+    url: '/admin/afterSales/setMail',
+    method: 'post',
+    data: param
+  })
+}
+
+export function applyRefound(param) {
+  return instance({
+    url: '/admin/afterSales/applyRefound',
+    method: 'post',
+    data: param
+  })
+}
+
+export function setExchangeMail(param) {
+  return instance({
+    url: '/admin/afterSales/setExchangeMail',
+    method: 'post',
+    data: param
+  })
+}
