@@ -72,6 +72,7 @@ router.post('/setMail', async (ctx) => {
         "applyAfterDetail.exchangeGoods.mailRemark": param.mailRemark
       }, { new: true });
     }
+    console.log(orderItems);
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
     } else {
@@ -139,6 +140,7 @@ router.post('/setExchangeMail', async (ctx) => {
       "applyAfterDetail.exchangeGoods.manuMail": param.mailOrder,
       "applyAfterDetail.exchangeGoods.manuMailRemark": param.mailRemark
     }, { new: true });
+    console.log(orderItems);
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
     } else {
