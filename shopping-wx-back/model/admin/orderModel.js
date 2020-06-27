@@ -13,21 +13,22 @@ var orderSchema = new mongoose.Schema({
   userDetail: Object,
   addressDetail: Object,
   time_end: String, // 支付完成时间
-  orderStatus: { type: String, default: "none" },
+  orderStatus: { type: String, default: "none" }, // 订单状态
   mess: { type: String, default: "" }, // 下单备注
   size: { type: String, default: "" }, // 尺寸
   unpidData: { type: Object, default: {} }, // 支付微信参数
-  refoundData: { type: Object, default: {} }, // 支付微信参数
+  refoundData: { type: Object, default: {} }, // 退款-微信参数
   mailOrder: { type: String, default: "" }, // 快递单号
   mailRemark: { type: String, default: "" }, // 快递备注
   couponId: { type: String, default: "" },
   original_fee: { type: Number, default: "" }, // 原价(元)
+  applyAfterDetail: { type: Object, default: {} }, // 售后详情
 }, { collection: "orderList", versionKey: false });
 var orderModel = db.model("orderList", orderSchema);
 
 exports.orderModel = orderModel;
 
-/* orderStatus说明 */
+/* orderStatus 说明 */
 
 /*
 * none 初始化
@@ -41,6 +42,7 @@ exports.orderModel = orderModel;
 * refund 已退款成功
 * unrefund 退款失败
 * canceled 取消订单（未付款）
+* applyAfter 申请售后
 *
 * */
 
@@ -48,6 +50,18 @@ exports.orderModel = orderModel;
 /*
 * original_fee 原价(元)
 * total_fee 成交价(分)
+* */
+
+/* 售后详情字段说明-applyAfterDetail */
+/*
+* applyType：1 => 退货 2 => 换货
+* returnGoods={}：退货信息 applyType=1
+* exchangeGoods={}：换货信息 applyType=2
 *
+* mailOrder：快递单号-用户
+* mailRemark：快递备注-用户
+*
+* manuMail：换货厂商快递单号
+* manuMailRemark：换货厂商备注
 *
 * */

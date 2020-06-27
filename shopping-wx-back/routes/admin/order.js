@@ -37,20 +37,6 @@ router.post('/orderList', async (ctx) => {
   }, "获取数据成功");
 })
 
-/* 创建订单 */
-/* param: userId、price
- * */
-router.post('/creatOrder', async (ctx) => {
-  var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['userId', 'price'], param)) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
-  }
-  param.created_time = Date.parse(new Date());
-  param.update_time = Date.parse(new Date());
-  var item = await orderModel.create(param)
-  ctx.body = commons.jsonBack(1, item, "");
-})
-
 /* 确认提交订单给商家 undeliver => deliver */
 /* param: out_trade_no
  * */
@@ -72,6 +58,9 @@ router.post('/checkOrderToBus', async (ctx) => {
   if (!orderItems) {
     ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
   } else {
+    await commons.pushOrderStatusLog(param.out_trade_no, "undeliver", "deliver", {
+      created_time: Date.parse(new Date()),
+    })
     ctx.body = commons.jsonBack(1, orderItems, "录入数据成功");
   }
 })
@@ -99,6 +88,11 @@ router.post('/setMail', async (ctx) => {
   if (!orderItems) {
     ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
   } else {
+    await commons.pushOrderStatusLog(param.out_trade_no, orderItem.orderStatus, "delivered", {
+      created_time: Date.parse(new Date()),
+      mailOrder: param.mailOrder,
+      mailRemark: param.mailRemark,
+    })
     ctx.body = commons.jsonBack(1, orderItems, "录入数据成功");
   }
 })

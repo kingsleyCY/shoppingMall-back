@@ -120,7 +120,7 @@ var wx = {
     return Math.random().toString().substr(2, 10) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 10);
   },
   /* 申请退款 */
-  async applyRefound(orderId, userId, refundDesc) {
+  async applyRefound(orderId, userId, refundDesc, reduce_fee) {
     let that = this;
     const { orderModel } = require('../../model/admin/orderModel');
     const orderItem = await orderModel.findOne({ out_trade_no: orderId, userId: userId })
@@ -136,17 +136,22 @@ var wx = {
     // const transaction_id = orderItem.transaction_id; // 微信订单号
     const out_trade_no = orderItem.out_trade_no; // 商户订单号
     const out_refund_no = this.setOrderCode(); // 退单号
-    const total_fee = orderItem.total_fee;
-    const refund_fee = orderItem.total_fee;
+    const total_fee = orderItem.total_fee; // 交易金额
+    var reduce_fee = reduce_fee || 0;
+    reduce_fee = reduce_fee * 100;
+    if (reduce_fee >= total_fee) {
+      return "减少运费金额小于总金额！"
+    }
+    const refund_fee = orderItem.total_fee - reduce_fee;
     const refund_desc = refundDesc || "测试退单";
     const notify_url = this.wxrefundurl;
-    const sign = this.refundSignjsapi(mchkey, appid, mch_id, nonce_str, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc);
-    console.log(sign);
+    const sign = this.refundSignjsapi(mchkey, appid, mch_id, nonce_str, notify_url, out_trade_no, out_refund_no, total_fee, refund_fee, refund_desc);
 
     var formData = "<xml>";
     formData += "<appid>" + appid + "</appid>";
     formData += "<mch_id>" + mch_id + "</mch_id>";
     formData += "<nonce_str>" + nonce_str + "</nonce_str>";
+    formData += "<notify_url>" + notify_url + "</notify_url>";
     formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
     formData += "<out_refund_no>" + out_refund_no + "</out_refund_no>";
     formData += "<total_fee>" + total_fee + "</total_fee>";
@@ -193,6 +198,30 @@ var wx = {
       orderStatus
     }, { new: true })
     return res
+  },
+  /* 添加订单状态变化日志 */
+  async pushOrderStatusLog(out_trade_no, from, to, obj) {
+    const that = this
+    const { orderLogModel } = require('../../model/admin/orderLogModel');
+    var orderItem = await orderLogModel.findOne({ out_trade_no });
+    if (orderItem) {
+      orderItem = JSON.parse(JSON.stringify(orderItem));
+      var orderLog = orderItem.orderLog;
+      var fromItem = that.orderStatusArr.filter(v => {
+        return v.value === from
+      })[0]
+      var toItem = that.orderStatusArr.filter(v => {
+        return v.value === to
+      })[0]
+      orderLog.push({
+        from,
+        to,
+        obj,
+        fromZh: fromItem ? fromItem.label : "--",
+        toZh: toItem ? toItem.label : "--",
+      });
+      await orderLogModel.findOneAndUpdate({ out_trade_no }, { orderLog })
+    }
   }
 }
 module.exports = wx

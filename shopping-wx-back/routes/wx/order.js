@@ -14,7 +14,6 @@ const xmlreader = require("xmlreader");
 * */
 router.post("/payment", async (ctx) => {
     var param = JSON.parse(JSON.stringify(ctx.request.body));
-    console.log(param);
     var orderItem = null
     if (param.out_trade_no) {
       if (!commons.judgeParamExists(['out_trade_no', 'userId'], param)) {
@@ -156,6 +155,13 @@ router.post("/payment", async (ctx) => {
           out_trade_no: param.out_trade_no,
           userId: param.userId
         }, orderObj, { new: true });
+        await commons.pushOrderStatusLog(param.out_trade_no, "none", "unpaid", {
+          total_fee,
+          original_fee,
+          size: param.size || orderItem.size,
+          addressId: addressItem.id,
+          created_time: Date.parse(new Date()),
+        })
       } else {
         var newOrderItem = {
           created_time: Date.parse(new Date()),
@@ -176,6 +182,13 @@ router.post("/payment", async (ctx) => {
           unpidData
         }
         await orderModel.create(newOrderItem);
+        await commons.pushOrderStatusLog(out_trade_no, "none", "unpaid", {
+          total_fee,
+          original_fee,
+          size: param.size || (orderItem && orderItem.size) || "",
+          addressId: addressItem.id,
+          created_time: Date.parse(new Date()),
+        })
       }
       ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
     }
@@ -215,8 +228,10 @@ router.post("/paymentBack", async (ctx) => {
     }
     const out_trade_no = xml.attach[0];
     var orderItem = await orderModel.findOneAndUpdate({ out_trade_no }, obj, { new: true });
+    await commons.pushOrderStatusLog(out_trade_no, "unpaid", "undeliver", {
+      created_time: Date.parse(new Date()),
+    })
     if (orderItem) {
-      logger.error(orderItem.commodityId);
       await shoppingModel.findOneAndUpdate({
         id: orderItem.commodityId
       }, { $inc: { saleNum: 1 } }, { new: true });
@@ -246,6 +261,9 @@ router.post("/applyRefound", async (ctx) => {
   }
   if (orderItem.orderStatus === "unpaid") {
     await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, { orderStatus: "canceled" }, { new: true });
+    await commons.pushOrderStatusLog(param.out_trade_no, "unpaid", "canceled", {
+      created_time: Date.parse(new Date()),
+    })
     ctx.body = commons.jsonBack(1, {}, "取消订单成功！");
   } else if (orderItem.orderStatus === "undeliver") {
     var res = await commons.applyRefound(param.out_trade_no, param.userId, "测试退款")
@@ -253,6 +271,9 @@ router.post("/applyRefound", async (ctx) => {
       ctx.body = commons.jsonBack(1003, {}, res);
     } else {
       if (res.out_refund_no) {
+        await commons.pushOrderStatusLog(param.out_trade_no, "undeliver", "refund", {
+          created_time: Date.parse(new Date()),
+        })
         ctx.body = commons.jsonBack(1, {}, "退款成功！");
       } else {
         ctx.body = commons.jsonBack(1003, {}, "退款失败！");
@@ -333,6 +354,9 @@ router.post("/sureReceipt", async (ctx) => {
       userId: param.userId,
       out_trade_no: param.out_trade_no
     }, { orderStatus: "over" }, { new: true });
+    await commons.pushOrderStatusLog(param.out_trade_no, "delivered", "over", {
+      created_time: Date.parse(new Date()),
+    })
     ctx.body = commons.jsonBack(1, orderItems, "");
   } else {
     ctx.body = commons.jsonBack(1003, {}, "该订单状态错误！");

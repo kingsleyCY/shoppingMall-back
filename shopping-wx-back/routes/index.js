@@ -20,6 +20,7 @@ const adminCommodity = require('./admin/commodity');
 const adminOrder = require('./admin/order');
 const adminUser = require('./admin/userList');
 const adminCoupon = require('./admin/coupon');
+const afterSales = require('./admin/afterSales');
 
 router.use('/admin/activity', adminActivity.routes(), adminActivity.allowedMethods());
 router.use('/admin/classify', adminClassify.routes(), adminClassify.allowedMethods());
@@ -27,5 +28,6 @@ router.use('/admin/commodity', adminCommodity.routes(), adminCommodity.allowedMe
 router.use('/admin/order', adminOrder.routes(), adminOrder.allowedMethods());
 router.use('/admin/userList', adminUser.routes(), adminUser.allowedMethods());
 router.use('/admin/coupon', adminCoupon.routes(), adminCoupon.allowedMethods());
+router.use('/admin/afterSales', afterSales.routes(), afterSales.allowedMethods());
 
 module.exports = router

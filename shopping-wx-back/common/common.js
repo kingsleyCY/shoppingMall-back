@@ -12,6 +12,39 @@ class baseCommon {
     for (let key in localData) {
       this[key] = localData[key]
     }
+    this.orderStatusArr = [
+      {
+        label: "待支付",
+        value: "unpaid"
+      }, {
+        label: "已支付成功",
+        value: "paid"
+      }, {
+        label: "已支付失败",
+        value: "paiderror"
+      }, {
+        label: "待发货-未提交",
+        value: "undeliver"
+      }, {
+        label: "待发货-已提交",
+        value: "deliver"
+      }, {
+        label: "已发货",
+        value: "delivered"
+      }, {
+        label: "已完成",
+        value: "over"
+      }, {
+        label: "已退款成功",
+        value: "refund"
+      }, {
+        label: "退款失败",
+        value: "unrefund"
+      }, {
+        label: "取消订单（未付款）",
+        value: "canceled"
+      }
+    ]
   }
   jsonBack(code, date, mess) {
     return {
