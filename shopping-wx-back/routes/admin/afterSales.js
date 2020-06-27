@@ -13,7 +13,7 @@ router.post('/applyAfter', async (ctx) => {
   var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no })
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
-  } else if (orderItem.orderStatus !== "delivered" || orderItem.orderStatus !== "over") {
+  } else if (orderItem.orderStatus !== "delivered" && orderItem.orderStatus !== "over") {
     ctx.throw(200, commons.jsonBack(1003, {}, "该订单现无法申请售后！"))
   }
   if (param.applyType !== 1 && param.applyType !== 2) {
