@@ -112,7 +112,7 @@
                   width="80">
                 <template slot-scope="scope">
           <span :class="[scope.row.orderStatus, 'orde-status']">
-            {{computedStatus(scope.row.orderStatus)}}
+            {{common.computedStatus(scope.row.orderStatus)}}
           </span>
                 </template>
               </el-table-column>
@@ -279,30 +279,6 @@
           this.orderTable = [];
           this.orderPage.total = 0;
         })
-      },
-      computedStatus(type) {
-        switch (type) {
-          case "none":
-            return "初始化";
-          case "unpaid":
-            return "待支付";
-          case "paid":
-            return "已支付成功";
-          case "paiderror":
-            return "已支付失败";
-          case "undeliver":
-            return "待发货/未提交";
-          case "deliver":
-            return "待发货/已提交";
-          case "delivered":
-            return "已发货";
-          case "over":
-            return "已完成";
-          case "refund":
-            return "已退款成功";
-          case "unrefund":
-            return "退款失败";
-        }
       },
       timeTransfer(data) {
         function add0(m) {

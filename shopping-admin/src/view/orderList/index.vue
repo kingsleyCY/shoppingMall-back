@@ -84,7 +84,7 @@
           width="80">
           <template slot-scope="scope">
           <span :class="[scope.row.orderStatus, 'orde-status']">
-            {{computedStatus(scope.row.orderStatus)}}
+            {{common.computedStatus(scope.row.orderStatus)}}
           </span>
           </template>
         </el-table-column>
@@ -252,39 +252,7 @@
           totalFeeMax: "",
           phone: "",
         },
-        orderStatusArr: [
-          {
-            label: "待支付",
-            value: "unpaid"
-          }, {
-            label: "已支付成功",
-            value: "paid"
-          }, {
-            label: "已支付失败",
-            value: "paiderror"
-          }, {
-            label: "待发货-未提交",
-            value: "undeliver"
-          }, {
-            label: "待发货-已提交",
-            value: "deliver"
-          }, {
-            label: "已发货",
-            value: "delivered"
-          }, {
-            label: "已完成",
-            value: "over"
-          }, {
-            label: "已退款成功",
-            value: "refund"
-          }, {
-            label: "退款失败",
-            value: "unrefund"
-          }, {
-            label: "取消订单（未付款）",
-            value: "canceled"
-          }
-        ],
+        orderStatusArr: common.orderStatusArr,
         visible: false
       }
     },
@@ -329,16 +297,6 @@
       handleCurrentChange(val) {
         this.pageData.page = val
         this.getOrderList()
-      },
-      computedStatus(type) {
-        var item = this.orderStatusArr.filter(v => {
-          return type === v.value
-        })[0]
-        if (item) {
-          return item.label
-        } else {
-          return ""
-        }
       },
       openMailModel(row) {
         this.maildialogVisible = true;
