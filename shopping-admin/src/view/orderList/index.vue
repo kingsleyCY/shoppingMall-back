@@ -211,7 +211,7 @@
             </el-button>
             <!--完成订单-售后-->
             <el-button type="text" size="small"
-                       v-if="(scope.row.orderStatus==='refund' && scope.row.applyAfterDetail.applyType === 1) || (scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && scope.row.applyAfterDetail.exchangeGoods && scope.row.applyAfterDetail.manuMail)"
+                       v-if="(scope.row.orderStatus==='refund' && scope.row.applyAfterDetail.applyType === 1) || (scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && scope.row.applyAfterDetail.exchangeGoods && scope.row.applyAfterDetail.exchangeGoods.manuMail)"
                        @click="overOrderMethods(scope.row)">
               完成订单
             </el-button>
