@@ -194,13 +194,13 @@
             </el-button>
             <!--退/换货录入客户物流信息-->
             <el-button type="text" size="small" v-if="scope.row.orderStatus==='applyAfter'"
-                       @click="openMailModel(scope.row)">
+                       @click="openMailModel(scope.row, 'mailOrder')">
               修改用户物流
             </el-button>
             <!--退货退款-->
             <el-button type="text" size="small"
                        v-if="(scope.row.orderStatus==='applyAfter' || scope.row.orderStatus==='unrefund') && scope.row.applyAfterDetail && scope.row.applyAfterDetail.applyType === 1 && scope.row.applyAfterDetail.returnGoods && scope.row.applyAfterDetail.returnGoods.mailOrder"
-                       @click="openApplyRefoundModel(scope.row, 'mailOrder')">
+                       @click="openApplyRefoundModel(scope.row)">
               退货退款
             </el-button>
             <!--换货物流信息-->
@@ -377,6 +377,7 @@
           if (this.checkedItem.orderStatus === "deliver") {
             requestMethods = setMail
           } else if (this.checkedItem.orderStatus === "applyAfter") {
+            console.log(this.mailType);
             if (this.mailType === 'mailOrder') {
               requestMethods = afterSalesSetMail
             } else if (this.mailType === 'manuMail') {
