@@ -216,15 +216,21 @@ var wx = {
       orderLog.push({
         from,
         to,
-        obj,
         fromZh: fromItem ? fromItem.label : "--",
         toZh: toItem ? toItem.label : "--",
+        detail: obj,
       });
       await orderLogModel.findOneAndUpdate({ out_trade_no }, { orderLog })
     } else {
       await orderLogModel.create({
         out_trade_no: out_trade_no,
-        orderLog: orderLog
+        orderLog: [{
+          from,
+          to,
+          fromZh: fromItem ? fromItem.label : "--",
+          toZh: toItem ? toItem.label : "--",
+          detail: obj,
+        }]
       })
     }
   }
