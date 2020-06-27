@@ -252,7 +252,6 @@
           totalFeeMax: "",
           phone: "",
         },
-        orderStatusArr: common.orderStatusArr,
         visible: false
       }
     },
@@ -359,6 +358,11 @@
         this.searchForm.totalFeeMin = "";
         this.searchForm.totalFeeMax = "";
         this.searchForm.phone = "";
+      }
+    },
+    computed: {
+      orderStatusArr() {
+        return this.common.orderStatusArr
       }
     }
   }
