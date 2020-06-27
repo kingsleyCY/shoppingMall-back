@@ -204,7 +204,6 @@ var wx = {
     const that = this
     const { orderLogModel } = require('../../model/admin/orderLogModel');
     var orderItem = await orderLogModel.findOne({ out_trade_no });
-    orderItem = JSON.parse(JSON.stringify(orderItem));
     var fromItem = that.orderStatusArr.filter(v => {
       return v.value === from
     })[0]
@@ -212,6 +211,7 @@ var wx = {
       return v.value === to
     })[0]
     if (orderItem) {
+      orderItem = JSON.parse(JSON.stringify(orderItem));
       var orderLog = orderItem.orderLog;
       orderLog.push({
         from,
