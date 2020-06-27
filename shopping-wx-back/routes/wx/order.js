@@ -1,5 +1,6 @@
 const router = require('koa-router')();
 const { userModel } = require('../../model/userModel');
+const addressModel = require('../../model/addressModel');
 const { shoppingModel } = require('../../model/commodityModel');
 const { orderModel } = require('../../model/admin/orderModel');
 const { couponModel } = require('../../model/admin/couponModel');
@@ -173,9 +174,9 @@ router.post("/payment", async (ctx) => {
           commodityId: commodItem.id,
           userId: userItem.userId,
           addressId: addressItem.id,
-          commodityDetail: commodItem,
-          userDetail: userItem,
-          addressDetail: addressItem,
+          // commodityDetail: commodItem,
+          // userDetail: userItem,
+          // addressDetail: addressItem,
           orderStatus: "unpaid",
           mess: param.mess || (orderItem && orderItem.mess) || "",
           size: param.size || (orderItem && orderItem.size) || "",
@@ -317,13 +318,30 @@ router.post("/getOrderList", async (ctx) => {
   }
   var list = await orderModel.find({
     userId: param.userId,
-    // orderStatus: param.status
     orderStatus: { $in: statusList }
   }, {
     userDetail: 0,
     unpidData: 0
   }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await orderModel.find({ userId: param.userId, orderStatus: { $in: statusList } });
+  list = JSON.parse(JSON.stringify(list));
+  // 添加订单对应详情 commodityDetail、userDetail、addressDetail
+  for (let i = 0; i < list.length; i++) {
+    var detail = await commons.getRedis("shop-" + list[i].commodityId);
+    if (!detail) {
+      detail = await shoppingModel.findOne({ id: list[i].commodityId })
+    } else {
+      detail = JSON.parse(detail)
+    }
+    list[i].commodityDetail = detail
+    var addreDetail = await commons.getRedis("addre-" + list[i].addressId);
+    if (!addreDetail) {
+      addreDetail = await addressModel.model.findOne({ id: list[i].addressId })
+    } else {
+      addreDetail = JSON.parse(addreDetail)
+    }
+    list[i].addressDetail = addreDetail
+  }
   ctx.body = commons.jsonBack(1, {
     list: list,
     total: total.length,

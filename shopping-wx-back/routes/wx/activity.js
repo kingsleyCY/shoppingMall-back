@@ -45,7 +45,7 @@ router.post('/joinActivity', async (ctx) => {
       joinStatus: 1,
       isWins: 2, // 0未中奖 1中奖 2未开奖
       isWinsText: "未开奖",
-      actitvtyItem: JSON.stringify(actitvtyItem)
+      // actitvtyItem: JSON.stringify(actitvtyItem)
     }
     // 修改用户 参与活动数据
     await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList }, { new: true })
@@ -92,8 +92,12 @@ router.post('/activited', async (ctx) => {
         newActivityList[key].isWinsText = "未开奖"
       }
     }
-    await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList: newActivityList })
     ctx.body = commons.jsonBack(1, { activityList: newActivityList }, "获取成功");
+    var newActivityLists = JSON.parse(JSON.stringify(newActivityList));
+    for (let key in newActivityLists) {
+      newActivityLists[key]['actitvtyItem'] = null
+    }
+    await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList: newActivityLists })
   } else {
     ctx.throw(200, commons.jsonBack(1001, {}, "此用户不存在"))
   }

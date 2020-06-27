@@ -281,7 +281,7 @@
       fillForm(detail) {
         this.ruleForm.title = detail.title
         this.ruleForm.logo = detail.logo
-        this.ruleForm.classifyId = detail.classifyId.split("-")
+        this.ruleForm.classifyId = detail.classifyId === "-1" ? [detail.classifyId] : detail.classifyId.split("-")
         this.ruleForm.introduction = detail.introduction
         this.ruleForm.imgList = detail.imgList
         this.ruleForm.originPrice = detail.originPrice

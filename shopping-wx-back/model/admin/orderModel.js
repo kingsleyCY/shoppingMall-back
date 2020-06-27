@@ -9,9 +9,9 @@ var orderSchema = new mongoose.Schema({
   userId: String,
   // userId: mongoose.Schema.Types.ObjectId,
   addressId: String,
-  commodityDetail: Object,
-  userDetail: Object,
-  addressDetail: Object,
+  // commodityDetail: Object,
+  // userDetail: Object,
+  // addressDetail: Object,
   time_end: String, // 支付完成时间
   orderStatus: { type: String, default: "none" }, // 订单状态
   mess: { type: String, default: "" }, // 下单备注

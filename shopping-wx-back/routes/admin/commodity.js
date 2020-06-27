@@ -1,9 +1,7 @@
 const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
-const xlsx = require('node-xlsx');
 const xlsxs = require('xlsx');
-const fs = require("fs");
 
 /* 商品列表-admin */
 /*
@@ -17,6 +15,7 @@ router.post('/commodityList', async (ctx) => {
   }
   const reg = new RegExp(param.title, 'i') //不区分大小写
   var search = {
+    isShow: 1,
     $or: [
       { title: { '$regex': reg } }
     ],
@@ -58,19 +57,21 @@ router.post('/addCommodity', async (ctx) => {
   }
   if (id) {
     param.update_time = Date.parse(new Date())
-    await shoppingModel.findOneAndUpdate({ id }, param)
-    var item = await shoppingModel.findOne({ id })
+    var item = await shoppingModel.findOneAndUpdate({ id }, param, { new: true });
     ctx.body = commons.jsonBack(1, item, "修改成功！");
+    commons.setRedis("shop-" + id, JSON.stringify(item))
   } else {
     await client.incr('commodityId');
-    param.id = await new Promise((resolve, reject) => {
+    /*param.id = await new Promise((resolve, reject) => {
       client.get("commodityId", function (err, data) {
         resolve(data);
       })
-    })
+    })*/
+    param.id = await commons.getRedis("commodityId")
     param.created_time = Date.parse(new Date())
     var item = await shoppingModel.create(param)
     ctx.body = commons.jsonBack(1, item, "添加成功！");
+    commons.setRedis("shop-" + param.id, JSON.stringify(item))
   }
 })
 
@@ -80,19 +81,28 @@ router.get('/commodityDetail', async (ctx) => {
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  const item = await shoppingModel.findOne({ id: param.id })
-  ctx.body = commons.jsonBack(1, item, "获取成功！");
+  var detail = await commons.getRedis("shop-" + param.id);
+  if (!detail) {
+    detail = await shoppingModel.findOne({ id: param.id })
+  } else {
+    detail = JSON.parse(detail)
+  }
+  ctx.body = commons.jsonBack(1, detail, "获取成功！");
 })
 
 /* 删除商品 */
+/*
+* param：id
+* */
 router.post('/deleCommodity', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   // const item = await shoppingModel.deleteOne({ id: param.id })
-  const item = await shoppingModel.remove({ id: { $in: param.id } })
+  const item = await shoppingModel.updateMany({ id: { $in: param.id } }, { isShow: 0 })
   ctx.body = commons.jsonBack(1, item, "操作成功！");
+  commons.delRedis("shop", param.id);
 })
 
 /* 更新首页数据 */
@@ -157,11 +167,15 @@ router.post('/batchMoveCommdity', async (ctx) => {
   if (!classifyItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此分类"))
   }
-  var list = await shoppingModel.updateMany({ id: { $in: param.ids } }, {
+  await shoppingModel.updateMany({ id: { $in: param.ids } }, {
     classifyId: param.classifyId,
     classifyName: classifyItem.title
-  })
+  });
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
+  var list = await shoppingModel.find({ id: { $in: param.ids } })
+  for (let i = 0; i < list.length; i++) {
+    commons.setRedis("shop-" + list[i].id, JSON.stringify(list[i]));
+  }
 })
 
 

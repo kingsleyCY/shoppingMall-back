@@ -25,9 +25,13 @@ router.post('/addAddress', async (ctx) => {
           resolve(data);
         })
       })
-      count === 0 ? param.isDefault = 1 : param.isDefault = 0;
+      // count === 0 ? param.isDefault = 1 : param.isDefault = 0;
+      if (count === 0) {
+        await userModel.findOneAndUpdate({ userId: param.userId }, { defaultAddress: param.id })
+      }
       let address = await addressModel.creatAddress(param)
       ctx.body = commons.jsonBack(1, address, "添加地址成功");
+      commons.setRedis("addre-" + address.id, JSON.stringify(address))
     }
   }
 })
@@ -69,6 +73,7 @@ router.post('/deleAddress', async (ctx) => {
     })
     if (list.n == 1 && list.deletedCount == 1) {
       ctx.body = commons.jsonBack(1, {}, "删除地址成功");
+      commons.delRedis("addre", [param.id]);
     } else {
       ctx.body = commons.jsonBack(1004, {}, "无该地址信息");
     }
@@ -97,7 +102,8 @@ router.post('/updateAddress', async (ctx) => {
     delete updateObj.userId
     delete updateObj.addressId
     let newAdr = await addressModel.updateAddress(findObj, updateObj)
-    ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！")
+    ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！");
+    commons.setRedis("addre-" + newAdr.id, JSON.stringify(newAdr))
   }
 })
 
@@ -111,10 +117,15 @@ router.post('/setDefaultAddress', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
     var userItem = await userModel.findOne({ userId: param.userId })
+    var addreItem = await addressModel.model.findOne({ id: param.addressId })
     if (!userItem) {
       ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户！"))
+    } else if (!addreItem) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此地址信息！"))
+    } else if (addreItem.userId !== param.userId) {
+      ctx.throw(200, commons.jsonBack(1003, {}, "此地址不属于此用户！"))
     }
-    let findObj = {
+    /*let findObj = {
       userId: param.userId
     }
     await addressModel.model.updateMany(findObj, { $set: { "isDefault": 0 } })
@@ -122,7 +133,9 @@ router.post('/setDefaultAddress', async (ctx) => {
       userId: param.userId,
       id: param.addressId,
     }, { $set: { "isDefault": 1 } }, { new: true })
-    ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！")
+    ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！")*/
+    await addressModel.model.findOneAndUpdate({ userId: param.userId }, { defaultAddress: param.addressId })
+    ctx.body = commons.jsonBack(1, {}, "更新数据成功！")
   }
 })
 

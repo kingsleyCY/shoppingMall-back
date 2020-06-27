@@ -5,6 +5,7 @@ var localData = fs.readFileSync("./common/data.json", 'utf-8');
 localData = JSON.parse(localData)
 
 var wx = require("./module/wx");
+var redis = require("./module/redis");
 var floatObj = require("./module/floatObj");
 
 class baseCommon {
@@ -276,6 +277,9 @@ class baseCommon {
       status: 3
     }, { new: true });
   }
+}
+for (let key in redis) {
+  baseCommon.prototype[key] = redis[key]
 }
 for (let key in wx) {
   baseCommon.prototype[key] = wx[key]
