@@ -1,5 +1,7 @@
 const router = require('koa-router')();
 const { orderModel } = require('../../model/admin/orderModel');
+const { userModel } = require('../../model/userModel');
+const addressModel = require('../../model/addressModel');
 
 /* 查询订单 */
 /*
@@ -25,10 +27,29 @@ router.post('/orderList', async (ctx) => {
     $lte: Number(param.totalFeeMax) * 100
   } : "";
   param.phone ? search['userDetail.phoneNumber'] = param.phone : "";
-  console.log(search);
 
-  const list = await orderModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var list = await orderModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await orderModel.find(search);
+  list = JSON.parse(JSON.stringify(list));
+  // 添加订单对应详情 commodityDetail、userDetail、addressDetail
+  for (let i = 0; i < list.length; i++) {
+    var detail = await commons.getRedis("shop-" + list[i].commodityId);
+    if (!detail) {
+      detail = await shoppingModel.findOne({ id: list[i].commodityId })
+    } else {
+      detail = JSON.parse(detail)
+    }
+    list[i].commodityDetail = detail
+    var addreDetail = await commons.getRedis("addre-" + list[i].addressId);
+    if (!addreDetail) {
+      addreDetail = await addressModel.model.findOne({ id: list[i].addressId })
+    } else {
+      addreDetail = JSON.parse(addreDetail)
+    }
+    list[i].addressDetail = addreDetail
+    var userDetail = await userModel.findOne({ userId: list[i].userId })
+    list[i].userDetail = userDetail
+  }
   ctx.body = commons.jsonBack(1, {
     list,
     total: total.length,
