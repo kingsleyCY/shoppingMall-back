@@ -377,9 +377,9 @@
           if (this.checkedItem.orderStatus === "deliver") {
             requestMethods = setMail
           } else if (this.checkedItem.orderStatus === "applyAfter") {
-            if (type === 'mailOrder') {
+            if (this.mailType === 'mailOrder') {
               requestMethods = afterSalesSetMail
-            } else if (type === 'manuMail') {
+            } else if (this.mailType === 'manuMail') {
               requestMethods = setExchangeMail
             }
           } else {
