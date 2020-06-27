@@ -209,6 +209,12 @@
                        @click="openMailModel(scope.row, 'manuMail')">
               修改换货物流
             </el-button>
+            <!--完成订单-售后-->
+            <el-button type="text" size="small"
+                       v-if="(scope.row.orderStatus==='refund' && scope.row.applyAfterDetail.applyType === 1) || (scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && scope.row.applyAfterDetail.exchangeGoods && scope.row.applyAfterDetail.manuMail)"
+                       @click="overOrderMethods(scope.row)">
+              完成订单
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -257,7 +263,8 @@
     setMail,
     afterSalesSetMail,
     applyRefound,
-    setExchangeMail
+    setExchangeMail,
+    overOrder
   } from "@/api/request"
 
   export default {
@@ -431,6 +438,28 @@
             if (res.code === 1) {
               this.$message.success(res.mess)
               this.refounddialogVisible = false;
+              this.getOrderList();
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(reds => {
+            this.$message.error("操作失败")
+          })
+        })
+      },
+      overOrderMethods(row) {
+        this.$confirm('确认完成此订单, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var param = {
+            out_trade_no: row.out_trade_no,
+            remark: "完成订单"
+          }
+          overOrder(param).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
               this.getOrderList();
             } else {
               this.$message.error(res.mess)

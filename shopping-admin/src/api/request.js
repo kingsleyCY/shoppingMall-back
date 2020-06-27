@@ -289,3 +289,11 @@ export function setExchangeMail(param) {
     data: param
   })
 }
+
+export function overOrder(param) {
+  return instance({
+    url: '/admin/afterSales/overOrder',
+    method: 'post',
+    data: param
+  })
+}
