@@ -204,15 +204,15 @@ var wx = {
     const that = this
     const { orderLogModel } = require('../../model/admin/orderLogModel');
     var orderItem = await orderLogModel.findOne({ out_trade_no });
+    orderItem = JSON.parse(JSON.stringify(orderItem));
+    var fromItem = that.orderStatusArr.filter(v => {
+      return v.value === from
+    })[0]
+    var toItem = that.orderStatusArr.filter(v => {
+      return v.value === to
+    })[0]
     if (orderItem) {
-      orderItem = JSON.parse(JSON.stringify(orderItem));
       var orderLog = orderItem.orderLog;
-      var fromItem = that.orderStatusArr.filter(v => {
-        return v.value === from
-      })[0]
-      var toItem = that.orderStatusArr.filter(v => {
-        return v.value === to
-      })[0]
       orderLog.push({
         from,
         to,
@@ -221,6 +221,11 @@ var wx = {
         toZh: toItem ? toItem.label : "--",
       });
       await orderLogModel.findOneAndUpdate({ out_trade_no }, { orderLog })
+    } else {
+      await orderLogModel.create({
+        out_trade_no: out_trade_no,
+        orderLog: orderLog
+      })
     }
   }
 }
