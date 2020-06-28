@@ -190,7 +190,11 @@ var wx = {
     })
     var orderStatus = ""
     if (res.out_refund_no) {
-      orderStatus = "refund"
+      if (orderItem.orderStatus === "applyAfter") {
+        orderStatus = "applyAfter"
+      } else {
+        orderStatus = "refund"
+      }
     } else {
       orderStatus = "unrefund"
     }
@@ -198,7 +202,7 @@ var wx = {
       refoundData: res,
       orderStatus
     }
-    orderItem.applyAfterStatus === "backing" ? obj.applyAfterStatus = orderStatus : "";
+    orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "backing" ? obj.applyAfterStatus = "refund" : "";
     await orderModel.findOneAndUpdate({ out_trade_no: orderId, userId: userId }, obj, { new: true })
     return res
   },
