@@ -44,7 +44,7 @@ router.post('/addCommodity', async (ctx) => {
   if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice', 'sizeCollet'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  if (Object.keys(param.sizeCollet).length === 0) {
+  if (param.sizeCollet.length === 0) {
     ctx.throw(200, commons.jsonBack(1003, {}, "商品码数集合不能为空！"))
   }
   param.isHot ? param.isHot = 1 : param.isHot = 0

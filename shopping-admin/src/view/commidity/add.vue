@@ -46,14 +46,22 @@
         </div>
       </el-form-item>
       <el-form-item label="尺码：" class="size-box">
-        <i class="el-icon-circle-plus-outline" @click="addSize"></i>
+        <!--<i class="el-icon-circle-plus-outline" @click="addSize"></i>
         <div v-for="(item, index) in ruleForm.sizeCollet" :key="index">
           尺码：
           <el-input v-model="item[0]" placeholder="请输入尺码" type="number"></el-input>
           数量：
           <el-input v-model="item[1]" placeholder="请输入数量" type="number"></el-input>
           <i class="el-icon-remove-outline" @click="deleteSize(index)"></i>
-        </div>
+        </div>-->
+        <el-select v-model="ruleForm.sizeCollet" multiple placeholder="请选择" class="size-select">
+          <el-option
+            v-for="item in sizeArr"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="cancel">取消</el-button>
@@ -128,7 +136,7 @@
           isExplosive: "",
           isNews: "",
           isRebate: "",
-          sizeCollet: [[]]
+          sizeCollet: []
         },
         rules: {
           title: ""
@@ -141,7 +149,8 @@
         cascaderProps: {
           value: "id",
           label: "title",
-        }
+        },
+        sizeArr: [35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44, 44.5, 45, 45.5, 46, 46.5, 47]
       }
     },
     created() {
@@ -238,31 +247,12 @@
           this.$message.info("未填写尺码数据")
           return
         }
-        let sizeFlag = false
-        let sizeCollet = {}
-        for (let i = 0; i < this.ruleForm.sizeCollet.length; i++) {
-          let item = this.ruleForm.sizeCollet[i];
-          if (!item[0] || !item[1]) {
-            sizeFlag = true
-            break;
-          }
-          if (item[1] % 1 !== 0 || item[1] <= 0) {
-            sizeFlag = true
-            break;
-          }
-          if (item[0] % 0.5 !== 0 || item[0] <= 0) {
-            sizeFlag = true
-            break;
-          }
-          sizeCollet[item[0]] = item[1];
-        }
-        if (sizeFlag) {
+        if (this.ruleForm.sizeCollet.length <= 0) {
           this.$message.info("尺码数据填写数据有误！")
-          return
         }
         var param = JSON.parse(JSON.stringify(this.ruleForm));
         param.classifyId = this.ruleForm.classifyId[this.ruleForm.classifyId.length - 1]
-        param.sizeCollet = sizeCollet
+        param.sizeCollet = this.ruleForm.sizeCollet
         if (this.editId) {
           param.id = this.editId
         }
@@ -291,12 +281,7 @@
         this.ruleForm.isExplosive = detail.isExplosive ? true : false
         this.ruleForm.isNews = detail.isNews ? true : false
         this.ruleForm.isRebate = detail.isRebate ? true : false
-        var sizeCollet = detail.sizeCollet ? detail.sizeCollet : {};
-        let newsizeCollet = []
-        for (var key in sizeCollet) {
-          newsizeCollet.push([key, sizeCollet[key]])
-        }
-        this.ruleForm.sizeCollet = newsizeCollet
+        this.ruleForm.sizeCollet = Array.isArray(detail.sizeCollet) ? detail.sizeCollet : []
       },
       deleteSize(index) {
         if (this.ruleForm.sizeCollet.length <= 1) {
@@ -351,7 +336,7 @@
     }
     .size-box {
       .el-input {
-        width: 100px;
+        width: 500px;
       }
       i {
         font-size: 16px;

@@ -23,7 +23,7 @@ var shoppingSchema = new mongoose.Schema({
   newsIndex: { type: Number, default: 0 },
   isRebate: { type: Number, default: 0 }, // 是否为折扣
   rebateIndex: { type: Number, default: 0 },
-  sizeCollet: { type: Object, default: {} }, // 商品码数集合
+  sizeCollet: { type: Array, default: [] }, // 商品码数集合
   isDelete: { type: Number, default: 0 }, // 是否显示
 }, { collection: "shoppingList", versionKey: false });
 var shoppingModel = db.model("shoppingList", shoppingSchema);
