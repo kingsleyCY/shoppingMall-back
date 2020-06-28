@@ -1,6 +1,7 @@
 const router = require('koa-router')();
 const { orderModel } = require('../../model/admin/orderModel');
 const { userModel } = require('../../model/userModel');
+const { shoppingModel } = require('../../model/commodityModel');
 const addressModel = require('../../model/addressModel');
 
 /* 查询订单 */
