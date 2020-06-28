@@ -19,7 +19,10 @@ router.post('/getWareByClassify', async (ctx) => {
   if (!commons.judgeParamExists(['classifyId', 'page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
   }
-  var list = await shoppingModel.find({ classifyId: param.classifyId }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  var list = await shoppingModel.find({
+    classifyId: param.classifyId,
+    isDelete: { $ne: 1 },
+  }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await shoppingModel.find({ classifyId: param.classifyId });
   ctx.body = commons.jsonBack(1, {
     list: list,
@@ -31,9 +34,9 @@ router.post('/getWareByClassify', async (ctx) => {
 
 /* 获取首页数据 */
 router.get('/getIndexData', async (ctx) => {
-  var bannerList = await shoppingModel.find({ "isBanner": 1 }).sort({ 'bannerIndex': -1 })
-  var hotList = await shoppingModel.find({ "isHot": 1 }).sort({ 'bannerIndex': -1 })
-  var explosiveList = await shoppingModel.find({ "isExplosive": 1 }).sort({ 'bannerIndex': -1 })
+  var bannerList = await shoppingModel.find({ "isBanner": 1, isDelete: { $ne: 1 } }).sort({ 'bannerIndex': -1 })
+  var hotList = await shoppingModel.find({ "isHot": 1, isDelete: { $ne: 1 } }).sort({ 'bannerIndex': -1 })
+  var explosiveList = await shoppingModel.find({ "isExplosive": 1, isDelete: { $ne: 1 } }).sort({ 'bannerIndex': -1 })
   // var rebateList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
   ctx.body = commons.jsonBack(1, {
     bannerList, hotList, explosiveList
@@ -52,7 +55,7 @@ router.post('/getNewCommodity', async (ctx) => {
   } else {
     param.page <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "页数不能小于1")) : ""
     param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
-    var commodityList = await shoppingModel.find({ "isNews": 1 }).sort({ 'newsIndex': -1 })
+    var commodityList = await shoppingModel.find({ "isNews": 1, isDelete: { $ne: 1 } }).sort({ 'newsIndex': -1 })
     /*.skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize))*/
     var skipList = []
     var startIndex = (param.page - 1) * param.pageSize
@@ -78,7 +81,7 @@ router.post('/getRebate', async (ctx) => {
   } else {
     param.page <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "页数不能小于1")) : ""
     param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
-    var commodityList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
+    var commodityList = await shoppingModel.find({ "isRebate": 1, isDelete: { $ne: 1 } }).sort({ 'rebateIndex': -1 })
     var skipList = []
     var startIndex = (param.page - 1) * param.pageSize
     commodityList ? skipList = commodityList.slice(startIndex, startIndex + param.pageSize + 1) : ""

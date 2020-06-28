@@ -15,7 +15,7 @@ router.post('/commodityList', async (ctx) => {
   }
   const reg = new RegExp(param.title, 'i') //不区分大小写
   var search = {
-    isShow: 1,
+    isDelete: { $ne: 1 },
     $or: [
       { title: { '$regex': reg } }
     ],
@@ -100,7 +100,7 @@ router.post('/deleCommodity', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   // const item = await shoppingModel.deleteOne({ id: param.id })
-  const item = await shoppingModel.updateMany({ id: { $in: param.id } }, { isShow: 0 })
+  const item = await shoppingModel.updateMany({ id: { $in: param.id } }, { isDelete: 1 })
   ctx.body = commons.jsonBack(1, item, "操作成功！");
   commons.delRedis("shop", param.id);
 })
