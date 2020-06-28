@@ -19,6 +19,9 @@ router.post('/applyAfter', async (ctx) => {
   if (param.applyType !== 1 && param.applyType !== 2) {
     ctx.throw(200, commons.jsonBack(1003, {}, "申请售后状态错误！"))
   }
+  if (orderItem.applyAfterDetail.applyType) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该订单已申请过售后，无法再次申请！"))
+  }
 
   var applyAfterDetail = {
     applyType: param.applyType,
@@ -69,7 +72,7 @@ router.post('/setMail', async (ctx) => {
   } else if (orderItem.orderStatus !== "applyAfter") {
     ctx.throw(200, commons.jsonBack(1003, {}, "该订单现无法录入客户物流信息！"))
   }
-  if (orderItem.applyAfterDetail) {
+  if (orderItem.orderStatus === "applyAfter" && ["applying", "backing"].indexOf(orderItem.applyAfterStatus) >= 0) {
     if (orderItem.applyAfterDetail.applyType === 1) {
       var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
         "applyAfterDetail.returnGoods.mailOrder": param.mailOrder,
@@ -112,7 +115,10 @@ router.post('/applyRefound', async (ctx) => {
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
-  if (orderItem && (orderItem.orderStatus === "applyAfter" || orderItem.orderStatus === "unrefund") && orderItem.applyAfterDetail && orderItem.applyAfterDetail.applyType === 1) {
+  if (
+    orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "backing" &&
+    orderItem.applyAfterDetail.applyType === 1
+  ) {
     var res = await commons.applyRefound(param.out_trade_no, orderItem.userId, "测试退款", 15);
     if (typeof res === "string") {
       ctx.body = commons.jsonBack(1003, {}, res);
@@ -150,7 +156,7 @@ router.post('/setExchangeMail', async (ctx) => {
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
-  if (orderItem && orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail && orderItem.applyAfterDetail.applyType === 2) {
+  if (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail.applyType === 2 && ["backing", "reMailing"].indexOf(orderItem.applyAfterStatus) >= 0) {
     var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
       "applyAfterDetail.exchangeGoods.manuMail": param.mailOrder,
       "applyAfterDetail.exchangeGoods.manuMailRemark": param.mailRemark,
@@ -185,8 +191,8 @@ router.post('/overOrder', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
   if (
-    (orderItem.orderStatus === "refund" && orderItem.applyAfterDetail.applyType === 1) ||
-    (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail.applyType === 2 && orderItem.applyAfterDetail.exchangeGoods && orderItem.applyAfterDetail.exchangeGoods.manuMail)
+    (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "refund") ||
+    (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "reMailing")
   ) {
     var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
       orderStatus: "over",

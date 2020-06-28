@@ -19,15 +19,26 @@ router.post('/applyAfter', async (ctx) => {
   if (param.applyType !== 1 && param.applyType !== 2) {
     ctx.throw(200, commons.jsonBack(1003, {}, "申请售后状态错误！"))
   }
+  if (orderItem.applyAfterDetail.applyType) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该订单已申请过售后，无法再次申请！"))
+  }
 
   var applyAfterDetail = {
     applyType: param.applyType,
     applyRemark: param.applyRemark,
   }
   if (param.applyType === 1) {
-    applyAfterDetail.returnGoods = {}
+    applyAfterDetail.returnGoods = {
+      mailOrder: "",
+      mailRemark: ""
+    }
   } else if (param.applyType === 2) {
-    applyAfterDetail.exchangeGoods = {}
+    applyAfterDetail.exchangeGoods = {
+      mailOrder: "",
+      mailRemark: "",
+      manuMail: "",
+      manuMailRemark: "",
+    }
   }
   var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
     applyAfterDetail,

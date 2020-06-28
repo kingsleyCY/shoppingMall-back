@@ -192,26 +192,32 @@
                        @click="openMailModel(scope.row)">
               录入/修改物流信息
             </el-button>
+            <!--申请售后-->
+            <el-button type="text" size="small" @click="openApplyAfterModel(scope.row)"
+                       v-if="(scope.row.orderStatus === 'delivered' || scope.row.orderStatus === 'over') && !scope.row.applyAfterDetail">
+              申请售后
+            </el-button>
             <!--退/换货录入客户物流信息-->
-            <el-button type="text" size="small" v-if="scope.row.orderStatus==='applyAfter'"
+            <el-button type="text" size="small"
+                       v-if="scope.row.orderStatus === 'applyAfter' && ['applying', 'backing'].indexOf(scope.row.applyAfterStatus) >= 0"
                        @click="openMailModel(scope.row, 'mailOrder')">
               修改用户物流
             </el-button>
             <!--退货退款-->
             <el-button type="text" size="small"
-                       v-if="(scope.row.orderStatus==='applyAfter' || scope.row.orderStatus==='unrefund') && scope.row.applyAfterDetail && scope.row.applyAfterDetail.applyType === 1 && scope.row.applyAfterDetail.returnGoods && scope.row.applyAfterDetail.returnGoods.mailOrder"
+                       v-if="scope.row.orderStatus==='applyAfter' && scope.row.applyAfterStatus === 'backing' && scope.row.applyAfterDetail.applyType === 1"
                        @click="openApplyRefoundModel(scope.row)">
               退货退款
             </el-button>
             <!--换货物流信息-->
             <el-button type="text" size="small"
-                       v-if="scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && scope.row.applyAfterDetail.exchangeGoods && scope.row.applyAfterDetail.exchangeGoods.mailOrder"
+                       v-if="scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && ['backing', 'reMailing'].indexOf(scope.row.applyAfterStatus) >= 0"
                        @click="openMailModel(scope.row, 'manuMail')">
               修改换货物流
             </el-button>
             <!--完成订单-售后-->
             <el-button type="text" size="small"
-                       v-if="(scope.row.orderStatus==='refund' && scope.row.applyAfterDetail.applyType === 1) || (scope.row.orderStatus==='applyAfter' && scope.row.applyAfterDetail.applyType === 2 && scope.row.applyAfterDetail.exchangeGoods && scope.row.applyAfterDetail.exchangeGoods.manuMail)"
+                       v-if="(scope.row.orderStatus==='applyAfter' && scope.row.applyAfterStatus === 'refund') || (scope.row.orderStatus==='applyAfter' && scope.row.applyAfterStatus === 'reMailing')"
                        @click="overOrderMethods(scope.row)">
               完成订单
             </el-button>
@@ -253,6 +259,25 @@
         <el-button type="primary" @click="applyRefoundMethods">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="申请售后" :visible.sync="applydialogVisible" width="30%">
+      <el-form ref="form" label-width="80px">
+        <el-form-item label="申请类型">
+          <el-select v-model="applyForm.applyType" placeholder="请选择申请类型">
+            <el-option label="退货" :value="1"></el-option>
+            <el-option label="换货" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <el-form ref="form" label-width="80px">
+        <el-form-item label="申请备注">
+          <el-input type="textarea" v-model="applyForm.applyRemark"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="applydialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitApplyAfter">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -264,7 +289,7 @@
     afterSalesSetMail,
     applyRefound,
     setExchangeMail,
-    overOrder
+    overOrder, applyAfter
   } from "@/api/request"
 
   export default {
@@ -297,7 +322,12 @@
         },
         visible: false,
         refounddialogVisible: false,
-        refoundRemark: ""
+        refoundRemark: "",
+        applydialogVisible: false,
+        applyForm: {
+          applyType: 1,
+          applyRemark: ""
+        }
       }
     },
     mounted() {
@@ -414,6 +444,42 @@
           }
         }).catch(reds => {
           this.$message.error("操作失败")
+        })
+      },
+      openApplyAfterModel(row) {
+        this.applydialogVisible = true;
+        this.checkedItem = row;
+        this.applyForm = {
+          applyType: 1,
+          applyRemark: ""
+        }
+      },
+      submitApplyAfter() {
+        if (!this.applyForm.applyType || !this.applyForm.applyRemark) {
+          this.$message.info("表单必填")
+          return
+        }
+        this.$confirm('确认申请售后此订单, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var param = {
+            out_trade_no: this.checkedItem.out_trade_no,
+            applyType: this.applyForm.applyType,
+            applyRemark: this.applyForm.applyRemark
+          }
+          applyAfter(param).then(res => {
+            if (res.code === 1) {
+              this.applydialogVisible = false;
+              this.$message.success(res.mess)
+              this.getOrderList();
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(reds => {
+            this.$message.error("操作失败")
+          })
         })
       },
       openApplyRefoundModel(row) {

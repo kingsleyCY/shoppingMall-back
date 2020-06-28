@@ -297,3 +297,11 @@ export function overOrder(param) {
     data: param
   })
 }
+
+export function applyAfter(param) {
+  return instance({
+    url: '/admin/afterSales/applyAfter',
+    method: 'post',
+    data: param
+  })
+}
