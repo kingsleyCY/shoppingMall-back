@@ -40,6 +40,7 @@ router.post('/applyAfter', async (ctx) => {
   var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
     applyAfterDetail,
     orderStatus: "applyAfter",
+    applyAfterStatus: "applying"
   }, { new: true });
   if (!orderItems) {
     ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
@@ -72,15 +73,16 @@ router.post('/setMail', async (ctx) => {
     if (orderItem.applyAfterDetail.applyType === 1) {
       var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
         "applyAfterDetail.returnGoods.mailOrder": param.mailOrder,
-        "applyAfterDetail.returnGoods.mailRemark": param.mailRemark
+        "applyAfterDetail.returnGoods.mailRemark": param.mailRemark,
+        applyAfterStatus: "backing"
       }, { new: true });
     } else if (orderItem.applyAfterDetail.applyType === 2) {
       var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
         "applyAfterDetail.exchangeGoods.mailOrder": param.mailOrder,
-        "applyAfterDetail.exchangeGoods.mailRemark": param.mailRemark
+        "applyAfterDetail.exchangeGoods.mailRemark": param.mailRemark,
+        applyAfterStatus: "backing"
       }, { new: true });
     }
-    console.log(orderItems);
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
     } else {
@@ -151,7 +153,8 @@ router.post('/setExchangeMail', async (ctx) => {
   if (orderItem && orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail && orderItem.applyAfterDetail.applyType === 2) {
     var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
       "applyAfterDetail.exchangeGoods.manuMail": param.mailOrder,
-      "applyAfterDetail.exchangeGoods.manuMailRemark": param.mailRemark
+      "applyAfterDetail.exchangeGoods.manuMailRemark": param.mailRemark,
+      applyAfterStatus: "reMailing"
     }, { new: true });
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
@@ -186,7 +189,8 @@ router.post('/overOrder', async (ctx) => {
     (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterDetail.applyType === 2 && orderItem.applyAfterDetail.exchangeGoods && orderItem.applyAfterDetail.exchangeGoods.manuMail)
   ) {
     var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
-      orderStatus: "over"
+      orderStatus: "over",
+      applyAfterStatus: "over"
     }, { new: true });
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");

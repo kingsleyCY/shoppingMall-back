@@ -7,29 +7,25 @@ var orderSchema = new mongoose.Schema({
   transaction_id: { type: String, default: "" }, // 微信支付订单号
   commodityId: String,
   userId: String,
-  // userId: mongoose.Schema.Types.ObjectId,
   addressId: String,
-  // commodityDetail: Object,
-  // userDetail: Object,
-  // addressDetail: Object,
   time_end: String, // 支付完成时间
   orderStatus: { type: String, default: "none" }, // 订单状态
   mess: { type: String, default: "" }, // 下单备注
   size: { type: String, default: "" }, // 尺寸
-  unpidData: { type: Object, default: {} }, // 支付微信参数
+  // unpidData: { type: Object, default: {} }, // 支付微信参数
   refoundData: { type: Object, default: {} }, // 退款-微信参数
   mailOrder: { type: String, default: "" }, // 快递单号
   mailRemark: { type: String, default: "" }, // 快递备注
   couponId: { type: String, default: "" },
   original_fee: { type: Number, default: "" }, // 原价(元)
   applyAfterDetail: { type: Object, default: {} }, // 售后详情
+  applyAfterStatus: { type: String, default: "" }, // 申请售后状态
 }, { collection: "orderList", versionKey: false });
 var orderModel = db.model("orderList", orderSchema);
 
 exports.orderModel = orderModel;
 
 /* orderStatus 说明 */
-
 /*
 * none 初始化
 * unpaid 待支付
@@ -43,7 +39,6 @@ exports.orderModel = orderModel;
 * unrefund 退款失败
 * canceled 取消订单（未付款）
 * applyAfter 申请售后
-*
 * */
 
 /* 金额说明 */
@@ -64,4 +59,14 @@ exports.orderModel = orderModel;
 * manuMail：换货厂商快递单号
 * manuMailRemark：换货厂商备注
 *
+* */
+
+/* applyAfterStatus 说明 */
+/*
+* applying 申请售后中
+* backing 客户物流中
+* reMailing 厂商物流中
+* refund 已退款
+* unrefund 退款失败
+* over 已完成
 * */

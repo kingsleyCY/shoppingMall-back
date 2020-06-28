@@ -194,10 +194,12 @@ var wx = {
     } else {
       orderStatus = "unrefund"
     }
-    await orderModel.findOneAndUpdate({ out_trade_no: orderId, userId: userId }, {
+    var obj = {
       refoundData: res,
       orderStatus
-    }, { new: true })
+    }
+    orderItem.applyAfterStatus === "backing" ? obj.applyAfterStatus = orderStatus : "";
+    await orderModel.findOneAndUpdate({ out_trade_no: orderId, userId: userId }, obj, { new: true })
     return res
   },
   /* 添加订单状态变化日志 */

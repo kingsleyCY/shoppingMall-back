@@ -145,7 +145,6 @@ router.post("/payment", async (ctx) => {
           total_fee,
           original_fee,
           sign,
-          unpidData,
           addressId: addressItem.id,
           addressDetail: addressItem,
           mess: param.mess || orderItem.mess,
@@ -178,8 +177,7 @@ router.post("/payment", async (ctx) => {
           // addressDetail: addressItem,
           orderStatus: "unpaid",
           mess: param.mess || (orderItem && orderItem.mess) || "",
-          size: param.size || (orderItem && orderItem.size) || "",
-          unpidData
+          size: param.size || (orderItem && orderItem.size) || ""
         }
         await orderModel.create(newOrderItem);
         await commons.pushOrderStatusLog(out_trade_no, "none", "unpaid", {
@@ -192,8 +190,7 @@ router.post("/payment", async (ctx) => {
       }
       ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
     }
-  }
-)
+  })
 
 /* 支付成功回调 */
 /* unpaid => undeliver */

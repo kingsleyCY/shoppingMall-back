@@ -32,6 +32,7 @@ router.post('/applyAfter', async (ctx) => {
   var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
     applyAfterDetail,
     orderStatus: "applyAfter",
+    applyAfterStatus: "applying"
   }, { new: true });
   if (!orderItems) {
     ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
