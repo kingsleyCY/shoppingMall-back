@@ -13,13 +13,9 @@ router.post('/complaintSuggest', async (ctx) => {
     let suggestList = await suggestModel.find({ "userId": param.userId }).sort({ 'created_time': -1 })
     let lastSuggest = suggestList[0]
     if (!lastSuggest || (Date.parse(new Date()) - lastSuggest.created_time > 48 * 60 * 60 * 1000)) {
-      await client.incr('suggestId');
+      // await client.incr('suggestId');
       let data = JSON.parse(JSON.stringify(param))
-      data.id = await new Promise((resolve, reject) => {
-        client.get("suggestId", function (err, data) {
-          resolve(data);
-        })
-      })
+      data.id = commons.generateIds();
       data.created_time = Date.parse(new Date())
       let suggest = await suggestModel.create(data)
       ctx.body = commons.jsonBack(1, suggest, "提交成功！");

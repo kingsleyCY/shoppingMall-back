@@ -14,7 +14,7 @@ var addressSchema = new mongoose.Schema({
 var addressModel = db.model("addressList", addressSchema);
 
 exports.creatAddress = async function (param) {
-  await client.incr('addressId');
+  // await client.incr('addressId');
   const user = await new Promise((resolve, reject) => {
     addressModel.create(param, function (err, doc) {
       if (err) throw err

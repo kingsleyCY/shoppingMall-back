@@ -1,4 +1,4 @@
-var ip = "119.3.77.140"
+var ip = commons.spbill_create_ip;
 var mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false)
 var redis = require("redis");

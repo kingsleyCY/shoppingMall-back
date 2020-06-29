@@ -40,7 +40,7 @@ router.post('/loginWx', async (ctx) => {
     if (openid && session_key) {
       const phoneNumber = commons.decryptData(session_key, param.iv, param.encryptedData)
       let user = {
-        userId: commons.generateId(),
+        userId: commons.generateIds(),
         created_time: Date.parse(new Date()),
         openId: openid,
         phoneNumber: phoneNumber,

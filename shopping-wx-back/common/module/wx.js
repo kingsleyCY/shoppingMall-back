@@ -112,13 +112,6 @@ var wx = {
     string = string.substr(1);
     return string;
   },
-  /* 生成商户订单号 out_trade_no */
-  setOrderCode() {
-    const en_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'w', 'v', 'u', 'x', 'y', 'z']
-    let num1 = Math.floor(Math.random() * en_arr.length + 1);
-    let num2 = Math.floor(Math.random() * en_arr.length + 1);
-    return Math.random().toString().substr(2, 10) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 10);
-  },
   /* 申请退款 */
   async applyRefound(orderId, userId, refundDesc, reduce_fee) {
     let that = this;
@@ -135,7 +128,7 @@ var wx = {
     const nonce_str = this.createNonceStr();
     // const transaction_id = orderItem.transaction_id; // 微信订单号
     const out_trade_no = orderItem.out_trade_no; // 商户订单号
-    const out_refund_no = this.setOrderCode(); // 退单号
+    const out_refund_no = commons.generateIds(); // 退单号
     const total_fee = orderItem.total_fee; // 交易金额
     var reduce_fee = reduce_fee || 0;
     reduce_fee = reduce_fee * 100;

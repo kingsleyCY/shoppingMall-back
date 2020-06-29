@@ -1,8 +1,10 @@
 var fs = require("fs");
 const schedule = require("node-schedule");
+const { v1 } = require("uuid");
 
 var localData = fs.readFileSync("./common/data.json", 'utf-8');
-localData = JSON.parse(localData)
+var reg = new RegExp(/\/\*(.|\r\n)*\*\//, "g")
+localData = JSON.parse(localData.replace(reg, ""))
 
 var wx = require("./module/wx");
 var redis = require("./module/redis");
@@ -67,12 +69,9 @@ class baseCommon {
       mess: mess
     }
   }
-  /* 生成随机用户ID */
-  generateId() {
-    const en_arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'w', 'v', 'u', 'x', 'y', 'z']
-    let num1 = Math.floor(Math.random() * en_arr.length + 1);
-    let num2 = Math.floor(Math.random() * en_arr.length + 1);
-    return (Math.random() * 10000000).toString(16).substr(0, 4) + (en_arr[num1] ? en_arr[num1] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num2] ? en_arr[num2] : 'a') + Math.random().toString().substr(2, 5);
+  /* 生成随机ID */
+  generateIds() {
+    return v1();
   }
   /* 生成活动码 */
   activityCode() {

@@ -61,13 +61,13 @@ router.post('/addCommodity', async (ctx) => {
     ctx.body = commons.jsonBack(1, item, "修改成功！");
     commons.setRedis("shop-" + id, JSON.stringify(item))
   } else {
-    await client.incr('commodityId');
+    // await client.incr('commodityId');
     /*param.id = await new Promise((resolve, reject) => {
       client.get("commodityId", function (err, data) {
         resolve(data);
       })
     })*/
-    param.id = await commons.getRedis("commodityId")
+    param.id = commons.generateIds();
     param.created_time = Date.parse(new Date())
     var item = await shoppingModel.create(param)
     ctx.body = commons.jsonBack(1, item, "添加成功！");

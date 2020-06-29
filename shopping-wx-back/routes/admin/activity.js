@@ -54,12 +54,8 @@ router.post('/creatActivity', async (ctx) => {
       prizeId: param.prizeId,
       prizeDeatil: prizeItem,
     }
-    await client.incr('activityId');
-    obj.id = await new Promise((resolve, reject) => {
-      client.get("activityId", function (err, data) {
-        resolve(data);
-      })
-    })
+    // await client.incr('activityId');
+    obj.id = commons.generateIds();
     obj.status = 0;
     obj.update_time = Date.parse(new Date());
     obj.created_time = Date.parse(new Date());
