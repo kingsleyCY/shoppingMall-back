@@ -1,6 +1,6 @@
 var suggestSchema = new mongoose.Schema({
   created_time: Number,
-  id: Number,
+  id: String,
   content: String,
   userId: String,
   type: Number
