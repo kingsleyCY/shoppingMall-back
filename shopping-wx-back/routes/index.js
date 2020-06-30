@@ -24,6 +24,7 @@ const adminUser = require('./admin/userList');
 const adminCoupon = require('./admin/coupon');
 const adminAfterSales = require('./admin/afterSales');
 const adminSizeCollet = require('./admin/sizeCollet');
+const adminSuggestList = require('./admin/suggestList');
 
 router.use('/admin/activity', adminActivity.routes(), adminActivity.allowedMethods());
 router.use('/admin/classify', adminClassify.routes(), adminClassify.allowedMethods());
@@ -33,5 +34,6 @@ router.use('/admin/userList', adminUser.routes(), adminUser.allowedMethods());
 router.use('/admin/coupon', adminCoupon.routes(), adminCoupon.allowedMethods());
 router.use('/admin/afterSales', adminAfterSales.routes(), adminAfterSales.allowedMethods());
 router.use('/admin/sizeCollet', adminSizeCollet.routes(), adminSizeCollet.allowedMethods());
+router.use('/admin/suggest', adminSuggestList.routes(), adminSuggestList.allowedMethods());
 
 module.exports = router

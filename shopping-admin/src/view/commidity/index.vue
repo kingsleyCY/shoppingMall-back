@@ -25,8 +25,14 @@
         <el-checkbox v-model="item.checked" @click.native.stop.self="checkedCommodity(item)"
                      class="checkbox"></el-checkbox>
         <img :src="item.logo" alt="">
-        <p>{{item.title}}</p>
-        <div class="introduction">{{item.introduction}}</div>
+        <el-tooltip effect="dark" :content="item.title" placement="top">
+          <p class="title">
+            {{item.title}}
+          </p>
+        </el-tooltip>
+        <el-tooltip effect="dark" :content="item.introduction" placement="top">
+          <div class="introduction">{{item.introduction}}</div>
+        </el-tooltip>
         <div class="price">
           <span>原价：￥{{item.originPrice}}</span>
           <span>优惠价￥{{item.presentPrice}}</span>
@@ -178,7 +184,7 @@
             cancelButtonText: '取消',
             type: 'warning'
           }).then(() => {
-            deleCommodity({id: arr}).then(res => {
+            deleCommodity({ id: arr }).then(res => {
               if (res.code === 1) {
                 this.$message.success(res.mess)
                 this.getList()
@@ -223,7 +229,7 @@
         }
       },
       submitBatchMove() {
-        var param = {ids: this.selectArr}
+        var param = { ids: this.selectArr }
         if (this.batchMoveValue.length > 0) {
           param.classifyId = this.batchMoveValue[this.batchMoveValue.length - 1]
         }
@@ -289,6 +295,13 @@
       img {
         width: 100%;
         height: 150px;
+      }
+      .title {
+        display: inline-block;
+        white-space: nowrap;
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .introduction {
         overflow: hidden;

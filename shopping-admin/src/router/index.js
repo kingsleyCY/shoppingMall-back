@@ -56,6 +56,12 @@ const mainRouter = [
     tilte: '优惠券列表',
     component: resolve => require(['@/view/couponList'], resolve),
   },
+  {
+    path: 'suggest',
+    name: 'suggest',
+    tilte: '投诉建议',
+    component: resolve => require(['@/view/suggest'], resolve),
+  },
 ]
 
 

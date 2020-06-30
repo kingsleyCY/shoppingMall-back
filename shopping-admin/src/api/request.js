@@ -313,3 +313,11 @@ export function getCollet(param) {
     data: param
   })
 }
+
+export function getSuggestList(param) {
+  return instance({
+    url: '/admin/suggest/getSuggestList',
+    method: 'post',
+    data: param
+  })
+}
