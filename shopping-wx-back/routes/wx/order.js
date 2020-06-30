@@ -35,6 +35,9 @@ router.post("/payment", async (ctx) => {
   if (!userItem || !commodItem || !addressItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
   }
+  if (commodItem.isDelete === 1) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该商品已被删除！"))
+  }
   var money = commodItem.overPrice;
   // 判断优惠券可用性
   const nowDate = Date.parse(new Date());

@@ -20,11 +20,7 @@ router.post('/addAddress', async (ctx) => {
       ctx.body = commons.jsonBack(1003, {}, "未查询到此用户！");
     } else {
       param.created_time = Date.parse(new Date())
-      param.id = await new Promise((resolve, reject) => {
-        client.get("addressId", function (err, data) {
-          resolve(data);
-        })
-      })
+      param.id = commons.generateIds();
       // count === 0 ? param.isDefault = 1 : param.isDefault = 0;
       if (count === 0) {
         await userModel.findOneAndUpdate({ userId: param.userId }, { defaultAddress: param.id })

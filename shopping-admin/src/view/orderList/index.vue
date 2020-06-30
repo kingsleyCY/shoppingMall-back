@@ -153,11 +153,13 @@
           label="地址详情"
           min-width="150">
           <template slot-scope="scope">
-            {{scope.row.addressDetail.provinceName
+            <span v-if="scope.row.addressDetail">
+              {{scope.row.addressDetail.provinceName
             +'/'+scope.row.addressDetail.cityName+"/"+scope.row.addressDetail.countyName +'/'+
             scope.row.addressDetail.detailInfo}}<br>
             {{scope.row.addressDetail.telNumber}}<br>
             {{scope.row.addressDetail.userName}}
+            </span>
           </template>
         </el-table-column>
         <el-table-column
