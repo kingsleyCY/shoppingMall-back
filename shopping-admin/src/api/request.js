@@ -234,6 +234,14 @@ export function setMail(param) {
   })
 }
 
+export function exportOrder(param) {
+  return instance({
+    url: '/admin/order/exportOrder',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getCounponList(param) {
   return instance({
     url: '/admin/coupon/getCounponList',

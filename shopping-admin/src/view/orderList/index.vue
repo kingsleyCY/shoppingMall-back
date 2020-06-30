@@ -8,12 +8,9 @@
                        :key="index"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="openMoreSearch">更多查询条件</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="formSearch">查询</el-button>
-        </el-form-item>
+        <el-button type="primary" @click="openMoreSearch" size="mini">更多查询条件</el-button>
+        <el-button type="primary" @click="formSearch" size="mini">查询</el-button>
+        <el-button type="primary" @click="openExportModel" size="mini">导出表格</el-button>
         <el-popover
           placement="right"
           width="600"
@@ -280,6 +277,20 @@
         <el-button type="primary" @click="submitApplyAfter">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="导出" :visible.sync="exportdialogVisible" width="40%">
+      <el-form ref="exportForm" label-width="80px">
+        <el-select v-model="exportForm.orderStatus" placeholder="选择订单状态">
+          <el-option :label="item.label" :value="item.value" v-for="(item,index) in orderStatusArr"
+                     :key="index"></el-option>
+        </el-select>
+      </el-form>
+      <el-checkbox v-if="exportForm.orderStatus === 'undeliver'" v-model="exportForm.checked">是否转为待发货(已提交给商家)
+      </el-checkbox>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="exportdialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitExport">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -288,7 +299,7 @@
     getOrderList, checkOrderToBus,
     setMail, afterSalesSetMail,
     applyRefound, setExchangeMail,
-    overOrder, applyAfter
+    overOrder, applyAfter, exportOrder
   } from "@/api/request"
 
   export default {
@@ -326,6 +337,11 @@
         applyForm: {
           applyType: 1,
           applyRemark: ""
+        },
+        exportdialogVisible: false,
+        exportForm: {
+          orderStatus: "",
+          checked: true
         }
       }
     },
@@ -549,6 +565,54 @@
         this.searchForm.totalFeeMin = "";
         this.searchForm.totalFeeMax = "";
         this.searchForm.phone = "";
+      },
+      openExportModel() {
+        this.exportdialogVisible = true
+        this.exportForm.checked = true
+        this.exportForm.orderStatus = "undeliver"
+      },
+      submitExport() {
+        exportOrder({
+          orderStatus: this.exportForm.orderStatus,
+          isNext: this.exportForm.checked
+        }).then(res => {
+          this.exportdialogVisible = false
+          if (res.code === 1) {
+            this.tableToExcel(res.data)
+            if (this.exportForm.orderStatus === "undeliver" && this.exportForm.checked) {
+              this.getOrderList()
+            }
+          } else {
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+          this.$message.error("操作失败")
+        })
+      },
+      tableToExcel(jsonData) {
+        //要导出的json数据
+        //列标题，逗号隔开，每一个逗号就是隔开一个单元格
+        let zhArr = ['订单创建时间', '支付时间', '订单号', '微信订单号', '备注', '尺码', '支付金额', '商品分类名称', '商品名称', '收件人', '地址预留号码', '省', '市', '区', '地址详情', '用户手机号', 'userId'];
+        var str = zhArr.join(',');
+        str += "\n"
+        // let str = `姓名,电话,邮箱\n`;
+        //增加\t为了不让表格显示科学计数法或者其他格式
+        for (let i = 0; i < jsonData.length; i++) {
+          for (let item in jsonData[i]) {
+            str += `${jsonData[i][item] + '\t'},`;
+          }
+          str += '\n';
+        }
+        //encodeURIComponent解决中文乱码
+        let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(str);
+        //通过创建a标签实现
+        var link = document.createElement("a");
+        link.href = uri;
+        //对下载的文件命名
+        link.download = (this.exportForm.orderStatus + "--订单数据.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
     },
     computed: {

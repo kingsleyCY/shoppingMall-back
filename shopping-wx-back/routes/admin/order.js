@@ -119,5 +119,95 @@ router.post('/setMail', async (ctx) => {
   }
 })
 
+/* 导出对应状态订单 */
+/*
+* param：orderStatus（isNext）
+* */
+router.post('/exportOrder', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['orderStatus'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  let exceldata = await orderModel.find({ orderStatus: param.orderStatus }).sort({ '_id': -1 });
+  exceldata = JSON.parse(JSON.stringify(exceldata));
+  for (let i = 0; i < exceldata.length; i++) {
+    var detail = await commons.getRedis("shop-" + exceldata[i].commodityId);
+    if (!detail) {
+      detail = await shoppingModel.findOne({ id: exceldata[i].commodityId })
+    } else {
+      detail = JSON.parse(detail)
+    }
+    exceldata[i].commodityDetail = detail
+    var addreDetail = await commons.getRedis("addre-" + exceldata[i].addressId);
+    if (!addreDetail) {
+      addreDetail = await addressModel.model.findOne({ id: exceldata[i].addressId })
+    } else {
+      addreDetail = JSON.parse(addreDetail)
+    }
+    exceldata[i].addressDetail = addreDetail
+    var userDetail = await userModel.findOne({ userId: exceldata[i].userId })
+    exceldata[i].userDetail = userDetail
+  }
+  var list = exceldata.map(v => {
+    return {
+      created_time: commons.timeTransfer(v.created_time),
+      time_end: v.time_end.slice(0, 4) + "-" + v.time_end.slice(4, 6) + "-" + v.time_end.slice(6, 8) + " " + v.time_end.slice(8, 10) + ":" + v.time_end.slice(10, 12) + ":" + v.time_end.slice(12, 14),
+      out_trade_no: v.out_trade_no,
+      transaction_id: v.transaction_id,
+      mess: v.mess,
+      size: v.size,
+      original_fee: v.original_fee,
+      classifyName: v.commodityDetail.classifyName,
+      commoditytitle: v.commodityDetail.title,
+      addressUserName: v.addressDetail.userName,
+      addressPhone: v.addressDetail.telNumber,
+      provinceName: v.addressDetail.provinceName,
+      cityName: v.addressDetail.cityName,
+      countyName: v.addressDetail.countyName,
+      detailInfo: v.addressDetail.detailInfo,
+      userPhone: v.userDetail.phoneNumber,
+      userId: v.userDetail.userId
+    }
+  })
+  ctx.body = commons.jsonBack(1, list, "获取数据成功");
+  if (param.orderStatus === "undeliver" && param.isNext) {
+    console.log(11111111111);
+    exceldata.forEach(async function (v, i) {
+      await orderModel.findOneAndUpdate({ out_trade_no: v.out_trade_no }, {
+        orderStatus: "deliver",
+      }, { new: true });
+      await commons.pushOrderStatusLog(v.out_trade_no, "undeliver", "deliver", {
+        created_time: Date.parse(new Date()),
+      })
+    })
+  }
+  /*let enArr = ['created_time', 'time_end', 'out_trade_no', 'transaction_id', 'mess', 'size', 'original_fee', 'classifyName', 'commoditytitle', 'addressUserName', 'addressPhone', 'provinceName', 'cityName', 'countyName', 'detailInfo', 'userPhone', 'userId'];
+  let zhArr = ['订单创建时间', '支付时间', '订单号', '微信订单号', '备注', '尺码', '支付金额', '商品分类名称', '商品名称', '收件人', '地址预留号码', '省', '市', '区', '地址详情', '用户手机号', 'userId'];
+  let conf = {};
+  conf.name = "order";//表格名
+  let alldata = new Array();
+  for (let i = 0; i < list.length; i++) {
+    let arr = new Array();
+    for (let j = 0; j < enArr.length; j++) {
+      arr.push(exceldata[i][enArr[j]]);
+    }
+    alldata.push(arr);
+  }
+  // 决定列名和类型
+  conf.cols.map((v, i) => {
+    return {
+      caption: zhArr[i],
+      type: 'string',
+      width: 200
+    }
+  })
+  conf.rows = alldata; // 填充数据
+  let result = nodeExcel.execute(conf);
+  let data = new Buffer(result, 'binary');
+  ctx.set('Content-Type', 'application/vnd.openxmlformats');
+  ctx.set("Content-Disposition", "attachment; filename=" + "Report.xlsx");
+  ctx.body = data;*/
+})
+
 
 module.exports = router

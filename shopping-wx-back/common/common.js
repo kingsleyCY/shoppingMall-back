@@ -128,7 +128,10 @@ class baseCommon {
   judgeParamExists(arr, body) {
     let flag = true
     for (let i = 0; i < arr.length; i++) {
-      if (!body[arr[i]] && body[arr[i]] !== 0) {
+      /*if (!body[arr[i]] && body[arr[i]] !== 0) {
+        flag = false
+      }*/
+      if (typeof body[arr[i]] === "undefined") {
         flag = false
       }
     }
