@@ -305,3 +305,11 @@ export function applyAfter(param) {
     data: param
   })
 }
+
+export function getCollet(param) {
+  return instance({
+    url: '/admin/sizeCollet/getCollet',
+    method: 'post',
+    data: param
+  })
+}

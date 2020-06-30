@@ -46,22 +46,30 @@
         </div>
       </el-form-item>
       <el-form-item label="尺码：" class="size-box">
-        <!--<i class="el-icon-circle-plus-outline" @click="addSize"></i>
-        <div v-for="(item, index) in ruleForm.sizeCollet" :key="index">
-          尺码：
-          <el-input v-model="item[0]" placeholder="请输入尺码" type="number"></el-input>
-          数量：
-          <el-input v-model="item[1]" placeholder="请输入数量" type="number"></el-input>
-          <i class="el-icon-remove-outline" @click="deleteSize(index)"></i>
-        </div>-->
-        <el-select v-model="ruleForm.sizeCollet" multiple placeholder="请选择" class="size-select">
-          <el-option
-            v-for="item in sizeArr"
-            :key="item"
-            :label="item"
-            :value="item">
-          </el-option>
-        </el-select>
+        <el-radio-group v-model="ruleForm.sizeColletType">
+          <el-radio :label="1">选择</el-radio>
+          <el-radio :label="2">自定义</el-radio>
+        </el-radio-group>
+        <div v-if="ruleForm.sizeColletType === 1">
+          <el-select v-model="ruleForm.sizeColletId" class="size-select">
+            <el-option
+              v-for="(item, index) in sizeColletArr"
+              :key="index"
+              :label="item.label + '-' + item.data.join(',')"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </div>
+        <div v-else="ruleForm.sizeColletType === 2">
+          <el-select v-model="ruleForm.sizeCollet" multiple class="size-select">
+            <el-option
+              v-for="item in sizeArr"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
+        </div>
       </el-form-item>
       <el-form-item>
         <el-button @click="cancel">取消</el-button>
@@ -97,7 +105,7 @@
 </template>
 
 <script>
-  import { getClassifyList, addCommodity, commodityDetail } from '@/api/request'
+  import { getClassifyList, addCommodity, commodityDetail, getCollet } from '@/api/request'
 
   const OSS = require('ali-oss');
 
@@ -136,7 +144,9 @@
           isExplosive: "",
           isNews: "",
           isRebate: "",
-          sizeCollet: []
+          sizeColletType: 1,
+          sizeCollet: [],
+          sizeColletId: "",
         },
         rules: {
           title: ""
@@ -150,7 +160,8 @@
           value: "id",
           label: "title",
         },
-        sizeArr: [35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44, 44.5, 45, 45.5, 46, 46.5, 47]
+        sizeColletArr: [],
+        sizeArr: [],
       }
     },
     created() {
@@ -161,7 +172,8 @@
         // stsToken: oss_obj.SecurityToken,
         bucket: "lioncc",
       });
-      this.getClassifyList()
+      this.getClassifyList();
+      this.getSizeCollet();
       this.editId = this.$route.query.id
       if (this.editId) {
         commodityDetail(this.editId).then(res => {
@@ -179,6 +191,12 @@
       getClassifyList() {
         getClassifyList().then(res => {
           this.treeData = res.data
+        })
+      },
+      getSizeCollet() {
+        getCollet().then(res => {
+          this.sizeColletArr = res.data.model
+          this.sizeArr = res.data.arr
         })
       },
       openImgModel(flag) {
@@ -243,14 +261,22 @@
           this.$message.info("未填写完整")
           return
         }
-        if (this.ruleForm.sizeCollet.length <= 0) {
-          this.$message.info("未填写尺码数据")
+        var param = JSON.parse(JSON.stringify(this.ruleForm));
+        if (param.sizeColletType === 1) {
+          if (!param.sizeColletId) {
+            this.$message.info("未填写尺码数据1")
+            return
+          }
+          delete param['sizeCollet']
+        } else if (param.sizeColletType === 2) {
+          if (param.sizeCollet.length <= 0) {
+            this.$message.info("未填写尺码数据2")
+            return
+          }
+          delete param['sizeColletId']
+        } else {
           return
         }
-        if (this.ruleForm.sizeCollet.length <= 0) {
-          this.$message.info("尺码数据填写数据有误！")
-        }
-        var param = JSON.parse(JSON.stringify(this.ruleForm));
         param.classifyId = this.ruleForm.classifyId[this.ruleForm.classifyId.length - 1]
         param.sizeCollet = this.ruleForm.sizeCollet
         if (this.editId) {
@@ -281,7 +307,15 @@
         this.ruleForm.isExplosive = detail.isExplosive ? true : false
         this.ruleForm.isNews = detail.isNews ? true : false
         this.ruleForm.isRebate = detail.isRebate ? true : false
-        this.ruleForm.sizeCollet = Array.isArray(detail.sizeCollet) ? detail.sizeCollet : []
+        if (detail.sizeColletId && detail.sizeColletId !== "0") {
+          this.$set(this.ruleForm, "sizeColletType", 1)
+          this.ruleForm.sizeColletId = detail.sizeColletId
+          this.$set(this.ruleForm, "sizeCollet", [])
+        } else {
+          this.$set(this.ruleForm, "sizeColletType", 2)
+          this.ruleForm.sizeColletId = ""
+          this.ruleForm.sizeCollet = detail.sizeCollet
+        }
       },
       deleteSize(index) {
         if (this.ruleForm.sizeCollet.length <= 1) {

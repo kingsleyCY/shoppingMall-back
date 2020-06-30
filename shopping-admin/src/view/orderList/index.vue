@@ -283,12 +283,9 @@
 
 <script>
   import {
-    getOrderList,
-    checkOrderToBus,
-    setMail,
-    afterSalesSetMail,
-    applyRefound,
-    setExchangeMail,
+    getOrderList, checkOrderToBus,
+    setMail, afterSalesSetMail,
+    applyRefound, setExchangeMail,
     overOrder, applyAfter
   } from "@/api/request"
 
