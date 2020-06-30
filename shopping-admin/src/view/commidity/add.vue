@@ -73,7 +73,7 @@
       </el-form-item>
       <el-form-item>
         <el-button @click="cancel">取消</el-button>
-        <el-button type="primary" @click="submitForm">确认</el-button>
+        <el-button type="primary" @click="submitForm" :loading="loading">确认</el-button>
       </el-form-item>
     </el-form>
 
@@ -113,6 +113,7 @@
     name: "addcommidity",
     data() {
       return {
+        loading: false,
         editId: "",
         editRow: null,
         option: {
@@ -282,11 +283,14 @@
         if (this.editId) {
           param.id = this.editId
         }
+        this.loading = true
         addCommodity(param).then(res => {
+          this.loading = false
           if (res.code === 1) {
             this.$message.success(res.mess)
             this.fillForm(res.data)
           } else {
+            this.loading = false
             this.$message.error(res.mess)
           }
         })
