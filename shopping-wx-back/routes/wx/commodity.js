@@ -104,7 +104,7 @@ router.post('/getSingleDetail', async (ctx) => {
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
 
-/* 获取单个商品详情 */
+/* 搜索商品 */
 /*
 * param: page、pageSize
 * opparam: title
@@ -116,6 +116,7 @@ router.post('/searchCommodity', async (ctx) => {
   }
   const reg = new RegExp(param.title, 'i') //不区分大小写
   var search = {
+    isDelete: { $ne: 1 },
     $or: [
       { title: { '$regex': reg } }
     ],
