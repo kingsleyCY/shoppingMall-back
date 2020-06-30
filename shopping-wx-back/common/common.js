@@ -114,6 +114,16 @@ class baseCommon {
     let num8 = Math.floor(Math.random() * en_arr.length + 1);
     return (en_arr[num1] ? en_arr[num1] : 'a') + (en_arr[num2] ? en_arr[num2] : 'a') + (en_arr[num3] ? en_arr[num3] : 'a') + (en_arr[num4] ? en_arr[num4] : 'a') + (new Date()).getTime().toString().substr(0, 10) + (en_arr[num5] ? en_arr[num5] : 'a') + (en_arr[num6] ? en_arr[num6] : 'a') + (en_arr[num7] ? en_arr[num7] : 'a') + (en_arr[num8] ? en_arr[num8] : 'a')
   }
+  /* 生成订单号 */
+  random_No() {
+    var randomLen = 6
+    var random_no = "";
+    for (var i = 0; i < randomLen; i++) {
+      random_no += Math.floor(Math.random() * 10);
+    }
+    random_no = new Date().getTime().toString(16) + random_no;
+    return random_no;
+  }
   /* 判断参数存在性 */
   judgeParamExists(arr, body) {
     let flag = true
