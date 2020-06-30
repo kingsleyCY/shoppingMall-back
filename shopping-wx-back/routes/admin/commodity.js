@@ -58,7 +58,11 @@ router.post('/addCommodity', async (ctx) => {
   } else {
     param.sizeColletId = 0
   }
-  console.log(param);
+  var sizeCollet = param.sizeCollet.map(v => {
+    return Number(v)
+  })
+  sizeCollet = sizeCollet.sort();
+  param.sizeCollet = sizeCollet;
   if (param.classifyId) {
     var classifyItem = await classifyModel.findOne({ id: param.classifyId })
     classifyItem ? param.classifyName = classifyItem.title : ""
