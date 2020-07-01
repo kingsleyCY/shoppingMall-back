@@ -317,6 +317,36 @@ class baseCommon {
       status: 3
     }, { new: true });
   }
+  /* 排序商品列表 */
+  sortList(sortBy, sortType) {
+    var key = "_id"
+    switch (sortBy) {
+      case "sortIndex":
+        key = "sortIndex";
+        break;
+      case "saleNume":
+        key = "saleNum";
+        break;
+      case "seeNum":
+        key = "consultNum";
+        break;
+      default:
+        key = "_id"
+    }
+    var sortType = -1 // sequence 由近到远 由大到小
+    switch (sortType) {
+      case "sequence":
+        sortType = -1;
+        break;
+      case "reverse":
+        sortType = 1;
+        break;
+      default:
+        sortType = -1;
+    }
+
+    return { [key]: sortType }
+  }
 }
 for (let key in redis) {
   baseCommon.prototype[key] = redis[key]

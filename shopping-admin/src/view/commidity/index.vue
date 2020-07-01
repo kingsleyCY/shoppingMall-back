@@ -9,6 +9,24 @@
           <el-cascader size="mini" :props="cascaderProps" v-model="search.classifyId" :options="treeData"
                        clearable></el-cascader>
         </el-form-item>
+        <el-form-item label="排序：">
+          <el-select v-model="search.sortBy" placeholder="请选择排序方式" clearable>
+            <el-option
+              v-for="(item, index) in sortArr"
+              :key="item.val"
+              :label="item.label"
+              :value="item.val">
+            </el-option>
+          </el-select>
+          <el-select v-model="search.sortType" placeholder="请选择排序方式" clearable>
+            <el-option
+              v-for="(item, index) in sortTypeArr"
+              :key="item.val"
+              :label="item.label"
+              :value="item.val">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="searchList" size="mini">搜索</el-button>
         </el-form-item>
@@ -18,6 +36,7 @@
     <el-button type="primary" @click="deleCommodity" size="mini">删除选中</el-button>
     <el-button type="primary" @click="openBathExport" size="mini">批量上传</el-button>
     <el-button type="primary" @click="batchMove" size="mini">批量移动</el-button>
+    <el-button type="primary" @click="toSort" size="mini">排序</el-button>
     <el-button type="primary" @click="selectAll" size="mini">全选</el-button>
     <el-button type="primary" @click="reverseSelect" size="mini">反选</el-button>
     <ul class="list-box">
@@ -38,6 +57,10 @@
           <span>优惠价￥{{item.presentPrice}}</span>
         </div>
         <div class="over-price">实际价格：￥{{item.overPrice}}</div>
+        <div class="num">
+          <span>销售量：{{item.saleNum}}</span>
+          <span>查看量：{{item.consultNum}}</span>
+        </div>
       </li>
     </ul>
     <el-pagination
@@ -100,6 +123,30 @@
     data() {
       return {
         selectArr: [],
+        sortArr: [
+          {
+            val: "sortIndex",
+            label: "自定义序号"
+          },
+          {
+            val: "saleNume",
+            label: "销售量"
+          },
+          {
+            val: "seeNum",
+            label: "查看量"
+          },
+        ],
+        sortTypeArr: [
+          {
+            val: "sequence",
+            label: "正序"
+          },
+          {
+            val: "reverse",
+            label: "倒序"
+          },
+        ],
         pageData: {
           page: 1,
           pageSize: 10,
@@ -107,7 +154,9 @@
         },
         search: {
           classifyId: [],
-          title: ""
+          title: "",
+          sortBy: "",
+          sortType: "",
         },
         commodityList: [],
         treeData: [],
@@ -137,7 +186,9 @@
         if (this.search.classifyId.length > 0) {
           param.classifyId = this.search.classifyId[this.search.classifyId.length - 1]
         }
-        param.title = this.search.title.trim()
+        param.title = this.search.title.trim();
+        param.sortBy = this.search.sortBy;
+        param.sortType = this.search.sortType;
         getCommodityList(param).then(res => {
           this.commodityList = res.data.list
           this.pageData.total = res.data.total
@@ -164,6 +215,9 @@
       },
       addCommodity() {
         this.$router.push('/admin_html/addcommidity')
+      },
+      toSort() {
+        this.$router.push('/admin_html/sortcommidity')
       },
       editCommodity(id) {
         this.$router.push('/admin_html/addcommidity?id=' + id)
@@ -262,14 +316,15 @@
     width: 100%;
     list-style: none;
     li {
-      width: 180px;
-      height: 250px;
+      width: 200px;
+      height: 265px;
       overflow: hidden;
       display: inline-block;
       margin: 10px 15px;
       border: 1px solid #d7d7d7;
       cursor: pointer;
       position: relative;
+      font-size: 12px;
       .checkbox {
         position: absolute;
         left: 0;
@@ -302,6 +357,7 @@
         width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
+        padding: 0 5px;
       }
       .introduction {
         overflow: hidden;
@@ -311,6 +367,7 @@
         -webkit-box-orient: vertical;
         height: 32px;
         font-size: 12px;
+        padding: 0 5px;
       }
       .price {
         display: flex;
@@ -318,10 +375,19 @@
         justify-content: space-between;
         align-items: center;
         font-size: 12px;
+        padding: 0 5px;
         padding-top: 5px;
       }
       .over-price {
         font-size: 12px;
+        padding: 0 5px;
+      }
+      .num {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 5px;
       }
     }
   }

@@ -15,6 +15,13 @@ const mainRouter = [
     hidden: true
   },
   {
+    path: 'sortcommidity',
+    name: 'sortcommidity',
+    tilte: '商品排序',
+    component: resolve => require(['@/view/commidity/sort'], resolve),
+    hidden: true
+  },
+  {
     path: 'classify',
     name: 'classify',
     tilte: '分类管理',

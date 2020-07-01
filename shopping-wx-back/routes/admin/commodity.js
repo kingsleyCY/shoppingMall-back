@@ -6,7 +6,7 @@ const xlsxs = require('xlsx');
 /* 商品列表-admin */
 /*
 * param: page、pageSize
-* opparam: title、classifyId
+* opparam: title、classifyId、sortBy、sortType
 * */
 router.post('/commodityList', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
@@ -20,9 +20,10 @@ router.post('/commodityList', async (ctx) => {
       { title: { '$regex': reg } }
     ],
   }
-  param.classifyId ? search.classifyId = param.classifyId : ""
-  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
-  var total = await shoppingModel.find(search)
+  param.classifyId ? search.classifyId = param.classifyId : "";
+  const sortObj = commons.sortList(param.sortBy, param.sortType);
+  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort(sortObj)
+  const total = await shoppingModel.find(search)
   ctx.body = commons.jsonBack(1, {
     list,
     total: total.length,

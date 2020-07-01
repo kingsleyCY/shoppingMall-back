@@ -26,6 +26,7 @@ var shoppingSchema = new mongoose.Schema({
   sizeCollet: { type: Array, default: [] }, // 商品码数集合
   sizeColletId: { type: String, default: "" }, // 商品码数集合ID
   isDelete: { type: Number, default: 0 }, // 是否显示
+  sortIndex: { type: Number, default: 0 }, // 排序
 }, { collection: "shoppingList", versionKey: false });
 var shoppingModel = db.model("shoppingList", shoppingSchema);
 

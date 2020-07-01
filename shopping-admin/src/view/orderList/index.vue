@@ -112,7 +112,7 @@
         <el-table-column
           prop="size"
           label="尺码"
-          width="80">
+          width="50">
         </el-table-column>
         <el-table-column
           prop="transaction_id"
@@ -126,7 +126,7 @@
         </el-table-column>
         <el-table-column
           label="用户手机号"
-          min-width="100">
+          min-width="110">
           <template slot-scope="scope">
             {{scope.row.userDetail.phoneNumber}}
           </template>
@@ -135,8 +135,10 @@
           label="商品名称"
           min-width="100">
           <template slot-scope="scope">
-            ID：{{scope.row.commodityId}}<br>
-            {{scope.row.commodityDetail.classifyName +'/'+scope.row.commodityDetail.title}}
+            <span v-if="scope.row.commodityDetail">
+              {{scope.row.commodityDetail.classifyName +'/'+scope.row.commodityDetail.title}}
+            </span>
+            <span v-else>--</span>
           </template>
         </el-table-column>
         <el-table-column

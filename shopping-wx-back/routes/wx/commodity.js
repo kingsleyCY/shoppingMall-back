@@ -2,7 +2,7 @@ const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
 
-/* 获取商品分类及列表 */
+/* 获取商品分类列表 */
 router.get('/getBaseClassify', async (ctx) => {
   var comClassify = JSON.parse(JSON.stringify(await classifyModel.find({ id: { $ne: "-1" } }).sort({ sort: -1 })));
   ctx.body = commons.jsonBack(1, {
@@ -13,16 +13,18 @@ router.get('/getBaseClassify', async (ctx) => {
 /* 分类获取列表 */
 /*
 * param：classifyId、page、pageSize
+* opparam: sortBy、sortType
 * */
 router.post('/getWareByClassify', async (ctx) => {
   var param = ctx.request.body;
   if (!commons.judgeParamExists(['classifyId', 'page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
   }
+  const sortObj = commons.sortList(param.sortBy, param.sortType);
   var list = await shoppingModel.find({
     classifyId: param.classifyId,
     isDelete: { $ne: 1 },
-  }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
+  }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort(sortObj);
   var total = await shoppingModel.find({ classifyId: param.classifyId });
   ctx.body = commons.jsonBack(1, {
     list: list,
@@ -107,7 +109,7 @@ router.post('/getSingleDetail', async (ctx) => {
 /* 搜索商品 */
 /*
 * param: page、pageSize
-* opparam: title
+* opparam: title、sortBy、sortType
 * */
 router.post('/searchCommodity', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
@@ -121,7 +123,8 @@ router.post('/searchCommodity', async (ctx) => {
       { title: { '$regex': reg } }
     ],
   }
-  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 })
+  const sortObj = commons.sortList(param.sortBy, param.sortType);
+  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort(sortObj)
   var total = await shoppingModel.find(search)
   ctx.body = commons.jsonBack(1, {
     list,
