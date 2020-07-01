@@ -191,5 +191,21 @@ router.post('/batchMoveCommdity', async (ctx) => {
   }
 })
 
+/* 修改排序 */
+/*
+* param：classifyId、sortJson
+* */
+router.post('/setSortIndex', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['classifyId', 'sortJson'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var list = JSON.parse(param.sortJson);
+  for (let i = 0; i < list.length; i++) {
+    await shoppingModel.findOneAndUpdate({ id: list[i].id }, { sortIndex: list[i].sortIndex })
+  }
+  ctx.body = commons.jsonBack(1, {}, "操作成功！");
+})
+
 
 module.exports = router

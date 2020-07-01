@@ -12,10 +12,10 @@
       </el-form>
     </div>
     <el-button @click="cancel" size="mini">取消</el-button>
-    <el-button type="primary" @click="" size="mini">确定</el-button>
-    <div>
-      <SlickList :lockToContainerEdges="true" axis="y" lockAxis="" v-model="commodityList" class="sortable-list" @input="getChangeLists">
-        <SlickItem v-for="(item, index) in commodityList" class="sortable-item" :index="index" :key="index">
+    <el-button type="primary" @click="submitSort" size="mini" :loading="loading">确定</el-button>
+    <div class="sortable-box">
+      <SlickList :lockToContainerEdges="true" axis="xy" lockAxis="xy" v-model="commodityList" class="sortable-list">
+        <SlickItem v-for="(item, index) in commodityList" class="sortable-item" :index="index" :key="item.id">
           <div>
             <img :src="item.logo" alt="">
             <p>{{ item.title }}</p>
@@ -29,7 +29,8 @@
 <script>
   import {
     getCommodityList,
-    getClassifyList
+    getClassifyList,
+    setSortIndex
   } from '@/api/request';
   import { SlickList, SlickItem } from 'vue-slicksort';
 
@@ -50,11 +51,17 @@
           value: "id",
           label: "title",
         },
-        commodityList:[],
+        commodityList: [],
+        loading: false
       }
     },
     mounted() {
-      this.getClassifyList()
+      this.getClassifyList();
+      this.$nextTick(() => {
+        var height = document.getElementsByClassName('right-content')[0].clientHeight - 120;
+        document.getElementsByClassName('sortable-list')[0].style.height = height + "px";
+      })
+
     },
     methods: {
       cancel() {
@@ -88,11 +95,40 @@
           this.treeData = res.data;
         })
       },
-      getChangeList (val) {
-        console.log(val, 'val')
-      },
-      getChangeLists (vals) {
-        console.log(vals, 'vals')
+      submitSort() {
+        this.$confirm('此操作将保存当前排序, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var list = this.commodityList.map((v, i) => {
+            return {
+              id: v.id,
+              sortIndex: this.commodityList.length - i
+            }
+          })
+          var param = {}
+          if (this.search.classifyId.length > 0) {
+            param.classifyId = this.search.classifyId[this.search.classifyId.length - 1]
+            param.sortJson = JSON.stringify(list)
+          } else {
+            this.$message.error("请选择分类")
+            return
+          }
+          this.loading = true
+          setSortIndex(param).then(res => {
+            this.loading = false
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.searchList()
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(res => {
+            this.loading = false
+            this.$message.error("操作失败")
+          })
+        })
       }
     },
     components: {
@@ -103,19 +139,4 @@
 </script>
 
 <style scoped lang="scss">
-  .sortable-list {
-    .sortable-item {
-      width: 200px;
-      height: 265px;
-      overflow: hidden;
-      display: inline-block;
-      border: 1px solid #d7d7d7;
-      font-size: 12px;
-      img {
-        display: block;
-        width: 100%;
-        height: auto;
-      }
-    }
-  }
 </style>

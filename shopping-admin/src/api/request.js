@@ -88,6 +88,14 @@ export function addCommodity(param) {
   })
 }
 
+export function setSortIndex(param) {
+  return instance({
+    url: '/admin/commodity/setSortIndex',
+    method: 'POST',
+    data: param
+  })
+}
+
 export function bathExportCommodity(param) {
   return instance({
     url: '/admin/commodity/bathExportCommodity',
