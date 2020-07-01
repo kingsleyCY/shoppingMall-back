@@ -333,19 +333,19 @@ class baseCommon {
       default:
         key = "_id"
     }
-    var sortType = -1 // sequence 由近到远 由大到小
+    var sortTypeKey = -1 // sequence 由近到远 由大到小
     switch (sortType) {
       case "sequence":
-        sortType = -1;
+        sortTypeKey = -1;
         break;
       case "reverse":
-        sortType = 1;
+        sortTypeKey = 1;
         break;
       default:
-        sortType = -1;
+        sortTypeKey = -1;
     }
 
-    return { [key]: sortType }
+    return { [key]: sortTypeKey }
   }
 }
 for (let key in redis) {
