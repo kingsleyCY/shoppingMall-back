@@ -337,3 +337,35 @@ export function getSuggestList(param) {
     data: param
   })
 }
+
+export function pushMessList(param) {
+  return instance({
+    url: '/admin/mess/pushMessList',
+    method: 'post',
+    data: param
+  })
+}
+
+export function addPushMess(param) {
+  return instance({
+    url: '/admin/mess/addPushMess',
+    method: 'post',
+    data: param
+  })
+}
+
+export function delPushMess(param) {
+  return instance({
+    url: '/admin/mess/delPushMess',
+    method: 'post',
+    data: param
+  })
+}
+
+export function changPushMessStatus(param) {
+  return instance({
+    url: '/admin/mess/changPushMessStatus',
+    method: 'post',
+    data: param
+  })
+}

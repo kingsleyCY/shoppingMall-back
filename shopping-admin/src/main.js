@@ -33,8 +33,7 @@ Vue.directive("image", {
   }
 })
 
-var app = new Vue({
+new Vue({
   render: h => h(App),
   router
 }).$mount('#app')
-console.log(app);

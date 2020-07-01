@@ -69,6 +69,12 @@ const mainRouter = [
     tilte: '投诉建议',
     component: resolve => require(['@/view/suggest'], resolve),
   },
+  {
+    path: 'pushMess',
+    name: 'pushMess',
+    tilte: '消息推送',
+    component: resolve => require(['@/view/pushMess'], resolve),
+  },
 ]
 
 
