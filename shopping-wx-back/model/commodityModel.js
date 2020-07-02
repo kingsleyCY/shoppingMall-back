@@ -15,7 +15,7 @@ var shoppingSchema = new mongoose.Schema({
   originPrice: { type: Number, default: 0 }, // 原价
   presentPrice: { type: Number, default: 0 }, // 优惠价
   overPrice: { type: Number, default: 0 }, // 实际价格
-  isHot: { type: Number, default: 0 }, // 是否热款
+  /*isHot: { type: Number, default: 0 }, // 是否热款
   hotIndex: { type: Number, default: 0 },
   isExplosive: { type: Number, default: 0 }, // 是否爆款
   explosiveIndex: { type: Number, default: 0 },
@@ -24,7 +24,7 @@ var shoppingSchema = new mongoose.Schema({
   isNews: { type: Number, default: 0 }, // 是否为新品
   newsIndex: { type: Number, default: 0 },
   isRebate: { type: Number, default: 0 }, // 是否为折扣
-  rebateIndex: { type: Number, default: 0 },
+  rebateIndex: { type: Number, default: 0 },*/
   sizeCollet: { type: Array, default: [] }, // 商品码数集合
   sizeColletId: { type: String, default: "" }, // 商品码数集合ID
   isDelete: { type: Number, default: 0 }, // 是否显示

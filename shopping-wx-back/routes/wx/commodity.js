@@ -1,6 +1,7 @@
 const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
+const { baseConfigModel } = require('../../model/baseConfigModel');
 
 /* 获取商品分类列表 */
 router.get('/getBaseClassify', async (ctx) => {
@@ -25,7 +26,10 @@ router.post('/getWareByClassify', async (ctx) => {
     classifyId: param.classifyId,
     isDelete: { $ne: 1 },
   }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort(sortObj);
-  var total = await shoppingModel.find({ classifyId: param.classifyId });
+  var total = await shoppingModel.find({
+    classifyId: param.classifyId,
+    isDelete: { $ne: 1 },
+  });
   ctx.body = commons.jsonBack(1, {
     list: list,
     total: total.length,
@@ -35,14 +39,29 @@ router.post('/getWareByClassify', async (ctx) => {
 });
 
 /* 获取首页数据 */
+/* banner 热款 爆款 */
 router.get('/getIndexData', async (ctx) => {
-  var bannerList = await shoppingModel.find({ "isBanner": 1, isDelete: { $ne: 1 } }).sort({ 'bannerIndex': -1 })
-  var hotList = await shoppingModel.find({ "isHot": 1, isDelete: { $ne: 1 } }).sort({ 'bannerIndex': -1 })
-  var explosiveList = await shoppingModel.find({ "isExplosive": 1, isDelete: { $ne: 1 } }).sort({ 'bannerIndex': -1 })
-  // var rebateList = await shoppingModel.find({ "isRebate": 1 }).sort({ 'rebateIndex': -1 })
-  ctx.body = commons.jsonBack(1, {
-    bannerList, hotList, explosiveList
-  }, "获取数据成功");
+  var data = await baseConfigModel.findOne({ type: "commodity" });
+  var obj = {
+    bannerList: [], hotList: [], explosiveList: []
+  }
+  var keyList = ["bannerList", "hotList", "explosiveList"];
+  if (data) {
+    for (let key in keyList) {
+      for (let i = 0; i < data[keyList[key]].length; i++) {
+        var shopItem = await commons.getRedis("shop-" + data[keyList[key]][i]);
+        if (!shopItem) {
+          shopItem = await shoppingModel.findOne({ isDelete: { $ne: 1 }, id: data[keyList[key]][i] });
+        } else {
+          shopItem = JSON.parse(shopItem);
+        }
+        if (shopItem) {
+          obj[keyList[key]].push(shopItem);
+        }
+      }
+    }
+  }
+  ctx.body = commons.jsonBack(1, obj, "获取数据成功");
 })
 
 /* 获取新品数据 */
@@ -54,21 +73,30 @@ router.post('/getNewCommodity', async (ctx) => {
   var param = ctx.request.body;
   if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
-  } else {
-    param.page <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "页数不能小于1")) : ""
-    param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
-    var commodityList = await shoppingModel.find({ "isNews": 1, isDelete: { $ne: 1 } }).sort({ 'newsIndex': -1 })
-    /*.skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize))*/
-    var skipList = []
-    var startIndex = (param.page - 1) * param.pageSize
-    commodityList ? skipList = commodityList.slice(startIndex, startIndex + param.pageSize + 1) : ""
-    ctx.body = commons.jsonBack(1, {
-      list: skipList,
-      page: param.page,
-      pageSize: param.pageSize,
-      total: commodityList.length
-    }, "获取数据成功");
   }
+  var data = await baseConfigModel.findOne({ type: "commodity" });
+  var list = [];
+  if (data) {
+    const ids = data.newsList.slice(param.pageSize * (param.page - 1), param.pageSize + 1)
+    for (let i = 0; i < ids.length; i++) {
+      var shopItem = await commons.getRedis("shop-" + ids[i]);
+      if (!shopItem) {
+        shopItem = await shoppingModel.findOne({ id: ids[i] });
+      } else {
+        shopItem = JSON.parse(shopItem);
+      }
+      if (shopItem) {
+        list.push(shopItem);
+      }
+    }
+  }
+
+  ctx.body = commons.jsonBack(1, {
+    list: list,
+    page: param.page,
+    pageSize: param.pageSize,
+    total: data.newsList.length
+  }, "获取数据成功");
 })
 
 /* 获取折扣款数据 */
@@ -80,20 +108,30 @@ router.post('/getRebate', async (ctx) => {
   var param = ctx.request.body;
   if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
-  } else {
-    param.page <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "页数不能小于1")) : ""
-    param.pageSize <= 0 ? ctx.throw(200, commons.jsonBack(1003, {}, "条数不能小于1")) : ""
-    var commodityList = await shoppingModel.find({ "isRebate": 1, isDelete: { $ne: 1 } }).sort({ 'rebateIndex': -1 })
-    var skipList = []
-    var startIndex = (param.page - 1) * param.pageSize
-    commodityList ? skipList = commodityList.slice(startIndex, startIndex + param.pageSize + 1) : ""
-    ctx.body = commons.jsonBack(1, {
-      list: skipList,
-      page: param.page,
-      pageSize: param.pageSize,
-      total: commodityList.length
-    }, "获取数据成功");
   }
+  var data = await baseConfigModel.findOne({ type: "commodity" });
+  var list = [];
+  if (data) {
+    const ids = data.rebateList.slice(param.pageSize * (param.page - 1), param.pageSize + 1)
+    for (let i = 0; i < ids.length; i++) {
+      var shopItem = await commons.getRedis("shop-" + ids[i]);
+      if (!shopItem) {
+        shopItem = await shoppingModel.findOne({ id: ids[i] });
+      } else {
+        shopItem = JSON.parse(shopItem);
+      }
+      if (shopItem) {
+        list.push(shopItem);
+      }
+    }
+  }
+
+  ctx.body = commons.jsonBack(1, {
+    list: list,
+    page: param.page,
+    pageSize: param.pageSize,
+    total: data.rebateList.length
+  }, "获取数据成功");
 })
 
 /* 获取单个商品详情 */
@@ -103,6 +141,9 @@ router.post('/getRebate', async (ctx) => {
 router.post('/getSingleDetail', async (ctx) => {
   const id = ctx.request.body.id
   var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
+  if (singleDetail.isDelete === 1) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该商品已被删除"))
+  }
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
 

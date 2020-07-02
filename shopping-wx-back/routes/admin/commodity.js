@@ -2,6 +2,7 @@ const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
 const { sizeModel } = require('../../model/admin/sizeModel');
+const { baseConfigModel } = require('../../model/baseConfigModel');
 const xlsxs = require('xlsx');
 
 /* 商品列表-admin */
@@ -36,8 +37,7 @@ router.post('/commodityList', async (ctx) => {
 /* 添加商品-admin */
 /*
 * param: title、logo、introduction、classifyId、imgList、originPrice、presentPrice、overPrice、sizeCollet/sizeColletId
-* opparam：id、isHot、isExplosive、isNews、isRebate
-* await client.incr('addressId');
+* opparam：id
 * */
 router.post('/addCommodity', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
@@ -46,10 +46,10 @@ router.post('/addCommodity', async (ctx) => {
   if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  param.isHot ? param.isHot = 1 : param.isHot = 0
+  /*param.isHot ? param.isHot = 1 : param.isHot = 0
   param.isExplosive ? param.isExplosive = 1 : param.isExplosive = 0
   param.isNews ? param.isNews = 1 : param.isNews = 0
-  param.isRebate ? param.isRebate = 1 : param.isRebate = 0
+  param.isRebate ? param.isRebate = 1 : param.isRebate = 0*/
   if (param.sizeColletId) {
     var sizeColletList = await sizeModel.find()
     param.sizeCollet = sizeColletList.filter(v => {
@@ -105,7 +105,22 @@ router.post('/deleCommodity', async (ctx) => {
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  // const item = await shoppingModel.deleteOne({ id: param.id })
+  var data = await baseConfigModel.findOne({ type: "commodity" });
+  if (data) {
+    data = JSON.parse(JSON.stringify(data));
+    for (let i = 0; i < param.id.length; i++) {
+      for (let key in data) {
+        if (!Array.isArray(data[key])) {
+          continue
+        }
+        const index = data[key].indexOf(param.id[i]);
+        if (index >= 0) {
+          data[key].splice(index, 1);
+          await baseConfigModel.findOneAndUpdate({ type: "commodity" }, { [key]: data[key] })
+        }
+      }
+    }
+  }
   const item = await shoppingModel.updateMany({ id: { $in: param.id } }, { isDelete: 1 })
   ctx.body = commons.jsonBack(1, item, "操作成功！");
   commons.delRedis("shop", param.id);
@@ -123,26 +138,33 @@ router.post('/updateIndexList', async (ctx) => {
   if (param.ids.length <= 0) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  let idArr = param.ids.map(v => {
-    return v.id
-  })
   let key = ""
   if (param.type === 'banner') {
-    key = "isBanner"
+    key = "bannerList"
   } else if (param.type === 'hot') {
-    key = "isHot"
+    key = "hotList"
   } else if (param.type === 'explosive') {
-    key = "isExplosive"
+    key = "explosiveList"
   } else if (param.type === 'news') {
-    key = "isNews"
+    key = "newsList"
   } else if (param.type === 'rebate') {
-    key = "isRebate"
+    key = "rebateList"
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  await shoppingModel.updateMany({ [key]: 1 }, { $set: { [key]: 0 } })
-  await shoppingModel.updateMany({ id: { $in: idArr } }, { $set: { [key]: 1 } })
+  var commodity = await baseConfigModel.findOne({ type: "commodity" })
+  if (!commodity) {
+    await baseConfigModel.create({ type: "commodity" })
+  }
+  await baseConfigModel.findOneAndUpdate({ type: "commodity" }, { [key]: param.ids })
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
+})
+
+/* 获取首页数据 */
+router.post('/getIndexList', async (ctx) => {
+  var data = await baseConfigModel.findOne({ type: "commodity" })
+  data ? "" : data = { hotList: [], explosiveList: [], bannerList: [], newsList: [], rebateList: [] };
+  ctx.body = commons.jsonBack(1, data, "操作成功！");
 })
 
 /* 上传xlsx 批量导入商品 */

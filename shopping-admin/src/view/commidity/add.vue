@@ -30,12 +30,12 @@
       <el-form-item label="实际价格：" prop="overPrice">
         <el-input v-model="ruleForm.overPrice"></el-input>
       </el-form-item>
-      <el-form-item label="" prop="overPrice">
+      <!--<el-form-item label="" prop="overPrice">
         <el-checkbox v-model="ruleForm.isHot">是否热款</el-checkbox>
         <el-checkbox v-model="ruleForm.isExplosive">是否爆款</el-checkbox>
         <el-checkbox v-model="ruleForm.isNews">是否为新品</el-checkbox>
         <el-checkbox v-model="ruleForm.isRebate">是否为折扣款</el-checkbox>
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item label="图片合集：">
         <div>
           <el-button type="primary" @click="openImgModel('imgList')">上传图片</el-button>
@@ -141,10 +141,10 @@
           originPrice: "",
           presentPrice: "",
           overPrice: "",
-          isHot: "",
+          /*isHot: "",
           isExplosive: "",
           isNews: "",
-          isRebate: "",
+          isRebate: "",*/
           sizeColletType: 1,
           sizeCollet: [],
           sizeColletId: "",
@@ -307,10 +307,10 @@
         this.ruleForm.originPrice = detail.originPrice
         this.ruleForm.presentPrice = detail.presentPrice
         this.ruleForm.overPrice = detail.overPrice
-        this.ruleForm.isHot = detail.isHot ? true : false
+        /*this.ruleForm.isHot = detail.isHot ? true : false
         this.ruleForm.isExplosive = detail.isExplosive ? true : false
         this.ruleForm.isNews = detail.isNews ? true : false
-        this.ruleForm.isRebate = detail.isRebate ? true : false
+        this.ruleForm.isRebate = detail.isRebate ? true : false*/
         if (detail.sizeColletId && detail.sizeColletId !== "0") {
           this.$set(this.ruleForm, "sizeColletType", 1)
           this.ruleForm.sizeColletId = detail.sizeColletId
