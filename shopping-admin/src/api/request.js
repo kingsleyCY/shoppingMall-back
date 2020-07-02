@@ -154,6 +154,14 @@ export function updateIndexList(param) {
   })
 }
 
+export function commodityAddition(param) {
+  return instance({
+    url: '/admin/commodity/commodityAddition',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getCustomer(param) {
   return instance({
     url: '/admin/userList/getCustomer',

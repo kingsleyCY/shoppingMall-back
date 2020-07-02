@@ -36,6 +36,7 @@
     <el-button type="primary" @click="deleCommodity" size="mini">删除选中</el-button>
     <el-button type="primary" @click="openBathExport" size="mini">批量上传</el-button>
     <el-button type="primary" @click="batchMove" size="mini">批量移动</el-button>
+    <el-button type="primary" @click="bathSetAdd" size="mini">批量设置增加量</el-button>
     <el-button type="primary" @click="toSort" size="mini">排序</el-button>
     <el-button type="primary" @click="selectAll" size="mini">全选</el-button>
     <el-button type="primary" @click="reverseSelect" size="mini">反选</el-button>
@@ -60,6 +61,10 @@
         <div class="num">
           <span>销售量：{{item.saleNum}}</span>
           <span>查看量：{{item.consultNum}}</span>
+        </div>
+        <div class="num">
+          <span>销售量增加：{{item.addSaleNum}}</span>
+          <span>查看量增加：{{item.addConsultNum}}</span>
         </div>
       </li>
     </ul>
@@ -106,6 +111,25 @@
         <el-button type="primary" @click="submitBatchMove">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      title="修改增加量"
+      :visible.sync="batchSetAddVisible"
+      width="350px">
+      <div>
+        <el-form ref="form" :model="batchSetAddForm" label-width="80px">
+          <el-form-item label="销售量">
+            <el-input v-model="batchSetAddForm.addSaleNum"></el-input>
+          </el-form-item>
+          <el-form-item label="查看量">
+            <el-input v-model="batchSetAddForm.addConsultNum"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="batchSetAddVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitAddSet">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -115,7 +139,8 @@
     deleCommodity,
     getClassifyList,
     bathExportCommodity,
-    batchMoveCommdity
+    batchMoveCommdity,
+    commodityAddition
   } from '@/api/request'
 
   export default {
@@ -167,7 +192,12 @@
         bathdialogVisible: false,
         bathFile: null,
         batchMoveVisible: false,
-        batchMoveValue: []
+        batchMoveValue: [],
+        batchSetAddVisible: false,
+        batchSetAddForm: {
+          addSaleNum: "",
+          addConsultNum: "",
+        }
       }
     },
     mounted() {
@@ -307,6 +337,40 @@
           this.$set(item, "checked", !item.checked)
         })
       },
+      bathSetAdd() {
+        var arr = []
+        this.commodityList.forEach(v => {
+          if (v.checked) {
+            arr.push(v.id)
+          }
+        });
+        this.selectArr = arr
+        if (arr.length < 0) {
+          this.$message.error("请选择")
+          return
+        }
+        this.batchSetAddVisible = true;
+        this.batchSetAddForm = {
+          addSaleNum: "",
+          addConsultNum: ""
+        }
+      },
+      submitAddSet() {
+        var param = { ids: this.selectArr }
+        this.batchSetAddForm.addSaleNum ? param.addSaleNum = this.batchSetAddForm.addSaleNum : "";
+        this.batchSetAddForm.addConsultNum ? param.addConsultNum = this.batchSetAddForm.addConsultNum : "";
+        commodityAddition(param).then(res => {
+          if (res.code === 1) {
+            this.$message.success(res.mess)
+            this.batchSetAddVisible = false;
+            this.getList()
+          } else {
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+          this.$message.error("操作失败")
+        })
+      }
     }
   }
 </script>
@@ -317,7 +381,7 @@
     list-style: none;
     li {
       width: 200px;
-      height: 265px;
+      height: 280px;
       overflow: hidden;
       display: inline-block;
       margin: 10px 15px;

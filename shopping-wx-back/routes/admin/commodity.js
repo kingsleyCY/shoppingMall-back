@@ -207,5 +207,24 @@ router.post('/setSortIndex', async (ctx) => {
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 
+/* 修改销售量/查看量 增加 */
+/*
+* param：ids addSaleNum addConsultNum
+* */
+router.post('/commodityAddition', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['ids'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  if (!param.addSaleNum && !param.addConsultNum) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var obj = {};
+  param.addSaleNum ? obj.addSaleNum = param.addSaleNum : "";
+  param.addConsultNum ? obj.addConsultNum = param.addConsultNum : "";
+  await shoppingModel.updateMany({ id: { $in: param.ids } }, obj);
+  ctx.body = commons.jsonBack(1, {}, "操作成功！");
+})
+
 
 module.exports = router
