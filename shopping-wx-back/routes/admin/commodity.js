@@ -1,6 +1,7 @@
 const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
+const { sizeModel } = require('../../model/admin/sizeModel');
 const xlsxs = require('xlsx');
 
 /* 商品列表-admin */
@@ -45,17 +46,15 @@ router.post('/addCommodity', async (ctx) => {
   if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  /*if (param.sizeCollet.length === 0) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "商品码数集合不能为空！"))
-  }*/
   param.isHot ? param.isHot = 1 : param.isHot = 0
   param.isExplosive ? param.isExplosive = 1 : param.isExplosive = 0
   param.isNews ? param.isNews = 1 : param.isNews = 0
   param.isRebate ? param.isRebate = 1 : param.isRebate = 0
   if (param.sizeColletId) {
-    param.sizeCollet = commons.sizeCollet.filter(v => {
+    var sizeColletList = await sizeModel.find()
+    param.sizeCollet = sizeColletList.filter(v => {
       return v.id === param.sizeColletId
-    })[0].data
+    })[0].sizes
   } else {
     param.sizeColletId = 0
   }
@@ -74,12 +73,6 @@ router.post('/addCommodity', async (ctx) => {
     ctx.body = commons.jsonBack(1, item, "修改成功！");
     commons.setRedis("shop-" + id, JSON.stringify(item))
   } else {
-    // await client.incr('commodityId');
-    /*param.id = await new Promise((resolve, reject) => {
-      client.get("commodityId", function (err, data) {
-        resolve(data);
-      })
-    })*/
     param.id = commons.generateIds();
     param.created_time = Date.parse(new Date())
     var item = await shoppingModel.create(param)

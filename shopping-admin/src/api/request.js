@@ -100,7 +100,7 @@ export function bathExportCommodity(param) {
   return instance({
     url: '/admin/commodity/bathExportCommodity',
     method: 'post',
-    headers: {"Content-Type": "multipart/form-data"},
+    headers: { "Content-Type": "multipart/form-data" },
     data: param
   })
 }
@@ -110,7 +110,7 @@ export function commodityDetail(id) {
   return instance({
     url: '/admin/commodity/commodityDetail',
     method: 'GET',
-    params: {id}
+    params: { id }
   })
 }
 
@@ -330,14 +330,6 @@ export function applyAfter(param) {
   })
 }
 
-export function getCollet(param) {
-  return instance({
-    url: '/admin/sizeCollet/getCollet',
-    method: 'post',
-    data: param
-  })
-}
-
 export function getSuggestList(param) {
   return instance({
     url: '/admin/suggest/getSuggestList',
@@ -370,9 +362,23 @@ export function delPushMess(param) {
   })
 }
 
-export function changPushMessStatus(param) {
+export function addCollet(param) {
   return instance({
-    url: '/admin/mess/changPushMessStatus',
+    url: '/admin/sizeCollet/addCollet',
+    method: 'post',
+    data: param
+  })
+}
+export function getCollet(param) {
+  return instance({
+    url: '/admin/sizeCollet/getCollet',
+    method: 'post',
+    data: param
+  })
+}
+export function delCollet(param) {
+  return instance({
+    url: '/admin/sizeCollet/delCollet',
     method: 'post',
     data: param
   })

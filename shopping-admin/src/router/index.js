@@ -75,6 +75,12 @@ const mainRouter = [
     tilte: '消息推送',
     component: resolve => require(['@/view/pushMess'], resolve),
   },
+  {
+    path: 'sizeCollet',
+    name: 'sizeCollet',
+    tilte: '尺码集合',
+    component: resolve => require(['@/view/sizeCollet'], resolve),
+  },
 ]
 
 

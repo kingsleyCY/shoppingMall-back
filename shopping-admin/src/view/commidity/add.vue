@@ -55,7 +55,7 @@
             <el-option
               v-for="(item, index) in sizeColletArr"
               :key="index"
-              :label="item.label + '-' + item.data.join(',')"
+              :label="item.title + '-' + item.sizes.join(',')"
               :value="item.id">
             </el-option>
           </el-select>
