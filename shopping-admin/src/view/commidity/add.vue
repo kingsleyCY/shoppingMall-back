@@ -168,8 +168,8 @@
     created() {
       this.client = new OSS({
         region: "oss-cn-beijing",
-        accessKeyId: "LTAItgsu4ay1NGxG",
-        accessKeySecret: "jghqG85XZnvMs0u2vvgejo7DLuGV2b",
+        accessKeyId: "",
+        accessKeySecret: "",
         // stsToken: oss_obj.SecurityToken,
         bucket: "lioncc",
       });
