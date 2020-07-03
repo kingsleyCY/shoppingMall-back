@@ -68,8 +68,12 @@ router.post('/setQrcode', async (ctx) => {
   if (!commons.judgeParamExists(['id'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
   }
+  var userItem = await userModel.findOne({ userId: param.id })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"));
+  }
   var access_token = await getAccesstoken();
-  var qrCode = await setQrcode(access_token.access_token, param.id);
+  var qrCode = await setQrcode(access_token.access_token, userItem.phoneNumber);
   await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url, isProxy: 1 }, { new: true });
   ctx.body = commons.jsonBack(1, { url: qrCode.url }, "获取数据成功");
 })
