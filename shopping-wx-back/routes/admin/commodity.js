@@ -46,15 +46,16 @@ router.post('/addCommodity', async (ctx) => {
   if (!commons.judgeParamExists(['title', 'logo', 'introduction', 'classifyId', 'imgList', 'originPrice'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  /*param.isHot ? param.isHot = 1 : param.isHot = 0
-  param.isExplosive ? param.isExplosive = 1 : param.isExplosive = 0
-  param.isNews ? param.isNews = 1 : param.isNews = 0
-  param.isRebate ? param.isRebate = 1 : param.isRebate = 0*/
   if (param.sizeColletId) {
     var sizeColletList = await sizeModel.find()
-    param.sizeCollet = sizeColletList.filter(v => {
+    var sizeColletItem = sizeColletList.filter(v => {
       return v.id === param.sizeColletId
-    })[0].sizes
+    })[0]
+    if (sizeColletItem) {
+      param.sizeCollet = sizeColletItem.sizes
+    } else {
+      ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此尺码集合"))
+    }
   } else {
     param.sizeColletId = 0
   }

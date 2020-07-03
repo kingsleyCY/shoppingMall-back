@@ -255,7 +255,7 @@
         this.ruleForm.logo = ""
       },
       deleimgList(index) {
-        this.ruleForm.imgList = this.ruleForm.imgList.splice(index - 1, 1)
+        this.ruleForm.imgList.splice(index, 1)
       },
       submitForm() {
         if (!this.ruleForm.title || !this.ruleForm.logo || !this.ruleForm.introduction || this.ruleForm.classifyId.length <= 0 || !this.ruleForm.originPrice || !this.ruleForm.presentPrice || !this.ruleForm.overPrice) {
