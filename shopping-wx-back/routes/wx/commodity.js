@@ -2,6 +2,7 @@ const router = require('koa-router')();
 const { shoppingModel } = require('../../model/commodityModel');
 const { classifyModel } = require('../../model/admin/classifyModel');
 const { baseConfigModel } = require('../../model/baseConfigModel');
+const { messageModel } = require('../../model/admin/messageModel');
 
 /* 获取商品分类列表 */
 router.get('/getBaseClassify', async (ctx) => {
@@ -61,6 +62,13 @@ router.get('/getIndexData', async (ctx) => {
       }
     }
   }
+  var messList = await messageModel.find({ isDel: 0, isShow: 1 }, { content: 1, id: 1, _id: 0 });
+  if (messList.length > 0) {
+    obj.broadcast = messList[0].content
+  } else {
+    obj.broadcast = ""
+  }
+
   ctx.body = commons.jsonBack(1, obj, "获取数据成功");
 })
 
