@@ -64,6 +64,8 @@
         </div>
         <div class="num">
           <span>销售量增加：{{item.addSaleNum}}</span>
+        </div>
+        <div class="num">
           <span>查看量增加：{{item.addConsultNum}}</span>
         </div>
       </li>
@@ -381,7 +383,7 @@
     list-style: none;
     li {
       width: 200px;
-      height: 280px;
+      height: 300px;
       overflow: hidden;
       display: inline-block;
       margin: 10px 15px;
