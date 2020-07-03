@@ -31,6 +31,7 @@ router.post('/getWareByClassify', async (ctx) => {
     classifyId: param.classifyId,
     isDelete: { $ne: 1 },
   });
+  list = totalNum(list)
   ctx.body = commons.jsonBack(1, {
     list: list,
     total: total.length,
@@ -99,6 +100,8 @@ router.post('/getNewCommodity', async (ctx) => {
     }
   }
 
+  list = totalNum(list)
+
   ctx.body = commons.jsonBack(1, {
     list: list,
     page: param.page,
@@ -134,6 +137,8 @@ router.post('/getRebate', async (ctx) => {
     }
   }
 
+  list = totalNum(list)
+
   ctx.body = commons.jsonBack(1, {
     list: list,
     page: param.page,
@@ -152,6 +157,7 @@ router.post('/getSingleDetail', async (ctx) => {
   if (singleDetail.isDelete === 1) {
     ctx.throw(200, commons.jsonBack(1003, {}, "该商品已被删除"))
   }
+  singleDetail = totalNum(singleDetail)
   ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
 
@@ -172,9 +178,10 @@ router.post('/searchCommodity', async (ctx) => {
       { title: { '$regex': reg } }
     ],
   }
-  const sortObj = commons.sortList(param.sortBy, param.sortType);
-  const list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort(sortObj)
+  var sortObj = commons.sortList(param.sortBy, param.sortType);
+  var list = await shoppingModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort(sortObj)
   var total = await shoppingModel.find(search)
+  list = totalNum(list)
   ctx.body = commons.jsonBack(1, {
     list,
     total: total.length,
@@ -182,6 +189,21 @@ router.post('/searchCommodity', async (ctx) => {
     pageSize: param.pageSize,
   }, "获取数据成功");
 })
+
+function totalNum(list) {
+  var lists = JSON.parse(JSON.stringify(list))
+  if (Array.isArray(lists)) {
+    lists.forEach(v => {
+      v.totalSale = v.saleNum + v.addSaleNum;
+      v.totalConsult = v.consultNum + v.addConsultNum;
+    })
+  } else {
+    lists.totalSale = lists.saleNum + lists.addSaleNum;
+    lists.totalConsult = lists.consultNum + lists.addConsultNum;
+  }
+
+  return lists
+}
 
 
 module.exports = router
