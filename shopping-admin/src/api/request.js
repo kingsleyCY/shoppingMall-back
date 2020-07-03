@@ -370,6 +370,14 @@ export function delPushMess(param) {
   })
 }
 
+export function changPushMessStatus(param) {
+  return instance({
+    url: '/admin/mess/changPushMessStatus',
+    method: 'post',
+    data: param
+  })
+}
+
 export function addCollet(param) {
   return instance({
     url: '/admin/sizeCollet/addCollet',
