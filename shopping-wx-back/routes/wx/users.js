@@ -53,7 +53,7 @@ router.post('/loginWx', async (ctx) => {
       }
       if (param.recommendId) {
         var recommenUser = await userModel.findOne({ phoneNumber: param.recommendId });
-        recommenUser ? user.recommendId = recommenUser.userId : "";
+        recommenUser ? user.recommendId = param.recommendId : "";
       }
       var oldUser = await userModel.findOne({ openId: openid, phoneNumber })
       var userDeatil = null
