@@ -128,7 +128,7 @@
           label="用户手机号"
           min-width="110">
           <template slot-scope="scope">
-            {{scope.row.userDetail.phoneNumber}}
+            {{scope.row.userDetail?scope.row.userDetail.phoneNumber:"--"}}
           </template>
         </el-table-column>
         <el-table-column
