@@ -18,7 +18,7 @@ var wx = {
 
     var pc = new WXBizDataCrypt(appId, sessionKey)
     commons.logger("WXBizDataCrypt", WXBizDataCrypt)
-    commons.logger("pc", pc)
+    commons.logger("pc", JSON.stringify(pc))
 
     var data = pc.decryptData(encryptedData, iv)
 
