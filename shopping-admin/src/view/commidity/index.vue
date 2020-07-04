@@ -71,6 +71,7 @@
       </li>
     </ul>
     <el-pagination
+      v-if="!listLoading"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pageData.page"
@@ -149,6 +150,7 @@
     name: "commidity",
     data() {
       return {
+        listLoading: false,
         selectArr: [],
         sortArr: [
           {
@@ -208,6 +210,7 @@
     },
     methods: {
       searchList() {
+        this.pageData.page = 1
         this.getList()
       },
       getList() {
@@ -221,14 +224,16 @@
         param.title = this.search.title.trim();
         param.sortBy = this.search.sortBy;
         param.sortType = this.search.sortType;
+        this.listLoading = true
         getCommodityList(param).then(res => {
+          this.listLoading = false
           this.commodityList = res.data.list
           this.pageData.total = res.data.total
           this.commodityList.forEach(item => {
             this.$set(item, "checked", false)
           });
         }).catch(res => {
-
+          this.listLoading = false
         })
       },
       getClassifyList() {
