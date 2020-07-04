@@ -1,5 +1,5 @@
 exports.needValidUrl = [
-  '/shop/complaintSuggest',
+  /*'/shop/complaintSuggest',
   '/shop/getUserInfo',
   '/shop/getCounponList',
   '/shop/bindCouponByCode',
@@ -13,5 +13,5 @@ exports.needValidUrl = [
   '/shop/payment',
   '/shop/applyRefound',
   '/shop/sureReceipt',
-  '/shop/applyAfter',
+  '/shop/applyAfter',*/
 ]
