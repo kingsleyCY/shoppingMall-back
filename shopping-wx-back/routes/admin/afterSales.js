@@ -119,7 +119,7 @@ router.post('/applyRefound', async (ctx) => {
     orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "backing" &&
     orderItem.applyAfterDetail.applyType === 1
   ) {
-    var res = await commons.applyRefound(param.out_trade_no, orderItem.userId, "测试退款", 15);
+    var res = await commons.applyRefound(param.out_trade_no, orderItem.userId, "订单退款", 15);
     if (typeof res === "string") {
       ctx.body = commons.jsonBack(1003, {}, res);
     } else {

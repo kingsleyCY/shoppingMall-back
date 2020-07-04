@@ -85,7 +85,7 @@ router.post("/payment", async (ctx) => {
   const mchkey = commons.mchkey;
   const nonce_str = commons.createNonceStr();
   const timestamp = commons.createTimeStamp();
-  const body = '测试微信支付';
+  const body = commodItem.title;
   const out_trade_no = orderItem ? orderItem.out_trade_no : commons.random_No(); // 商户订单
   const attach = out_trade_no;
   const total_fee = commons.getmoney(money);
@@ -97,7 +97,7 @@ router.post("/payment", async (ctx) => {
   //组装xml数据
   var formData = "<xml>";
   formData += "<appid>" + appid + "</appid>";  //appid
-  formData += "<body><![CDATA[" + "测试微信支付" + "]]></body>";
+  formData += "<body><![CDATA[" + body + "]]></body>";
   formData += "<mch_id>" + mch_id + "</mch_id>";  //商户号
   formData += "<nonce_str>" + nonce_str + "</nonce_str>"; //随机字符串，不长于32位。
   formData += "<notify_url>" + notify_url + "</notify_url>";
@@ -266,7 +266,7 @@ router.post("/applyRefound", async (ctx) => {
     })
     ctx.body = commons.jsonBack(1, {}, "取消订单成功！");
   } else if (orderItem.orderStatus === "undeliver") {
-    var res = await commons.applyRefound(param.out_trade_no, param.userId, "测试退款")
+    var res = await commons.applyRefound(param.out_trade_no, param.userId, "订单退款")
     if (typeof res === "string") {
       ctx.body = commons.jsonBack(1003, {}, res);
     } else {
