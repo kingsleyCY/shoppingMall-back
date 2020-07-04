@@ -6,13 +6,19 @@ const fs = require("fs");
 
 var wx = {
   /* 解析手机号 */
-  decryptData(session_key, iv, encryptedData) {
+  decryptData(session_key, i_v, encrypted_Data) {
     var appId = this.wx_appid
     var sessionKey = session_key
-    var encryptedData = encryptedData
-    var iv = iv
+    var encryptedData = encrypted_Data
+    var iv = i_v
+    commons.logger("wx_appid", this.wx_appid)
+    commons.logger("sessionKey", sessionKey)
+    commons.logger("iv", iv)
+    commons.logger("encryptedData", encryptedData)
 
     var pc = new WXBizDataCrypt(appId, sessionKey)
+    commons.logger("WXBizDataCrypt", WXBizDataCrypt)
+    commons.logger("pc", pc)
 
     var data = pc.decryptData(encryptedData, iv)
 
