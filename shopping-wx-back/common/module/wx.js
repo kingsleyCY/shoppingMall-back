@@ -239,6 +239,23 @@ var wx = {
         }]
       })
     }
+  },
+  /* 修改订单orderSettlement */
+  async changeOrderIntegral(orderItem) {
+    var order = JSON.parse(JSON.stringify(orderItem))
+    if (!order.orderSettlement.isIntegral) {
+      const userModel = require('../../model/userModel');
+      const orderModel = require('../../model/admin/orderModel');
+      var userItem = await userModel.findOne({ userId: order.userId });
+      if (userItem) {
+        var integral = this.add((userItem.integral || 0), (order.total_fee / 100));
+        await userModel.findOneAndUpdate({ userId: order.userId }, { integral }, { new: true })
+        await orderModel.findOneAndUpdate({
+          userId: order.userId,
+          out_trade_no: order.out_trade_no
+        }, { "orderSettlement.isIntegral": true })
+      }
+    }
   }
 }
 module.exports = wx

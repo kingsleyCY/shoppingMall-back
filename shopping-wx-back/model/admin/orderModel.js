@@ -19,6 +19,7 @@ var orderSchema = new mongoose.Schema({
   original_fee: { type: Number, default: "" }, // 原价(元)
   applyAfterDetail: { type: Object, default: {} }, // 售后详情
   applyAfterStatus: { type: String, default: "" }, // 申请售后状态
+  orderSettlement: { type: Object, default: {} }, // 订单结算状态
 }, { collection: "orderList", versionKey: false });
 var orderModel = db.model("orderList", orderSchema);
 
@@ -68,4 +69,9 @@ exports.orderModel = orderModel;
 * refund 已退款
 * unrefund 退款失败
 * over 已完成
+* */
+
+/* orderSettlement说明 */
+/*
+* isIntegral 是否加积分
 * */
