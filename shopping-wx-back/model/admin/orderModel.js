@@ -12,7 +12,6 @@ var orderSchema = new mongoose.Schema({
   orderStatus: { type: String, default: "none" }, // 订单状态
   mess: { type: String, default: "" }, // 下单备注
   size: { type: String, default: "" }, // 尺寸
-  // unpidData: { type: Object, default: {} }, // 支付微信参数
   refoundData: { type: Object, default: {} }, // 退款-微信参数
   mailOrder: { type: String, default: "" }, // 快递单号
   mailRemark: { type: String, default: "" }, // 快递备注

@@ -41,7 +41,7 @@ app.use(async (ctx, next) => {
       ctx.status = 200;
       ctx.body = baseCommon.jsonBack(err.code, err.data, err.mess);
     } else {
-      this.logger("err", err)
+      commons.logger("err", err)
       ctx.body = baseCommon.jsonBack(1009, {}, "服务器响应失败");
     }
   });
