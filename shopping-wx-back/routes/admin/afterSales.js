@@ -194,10 +194,16 @@ router.post('/overOrder', async (ctx) => {
     (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "refund") ||
     (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "reMailing")
   ) {
-    var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
+    var newObj = {
       orderStatus: "over",
       applyAfterStatus: "over"
-    }, { new: true });
+    }
+    if (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "reMailing") {
+      var userItem = await userModel.findOne({ userId: orderItem.userId });
+      var integral = commons.add((userItem.integral || 0), (orderItem.total_fee / 100));
+      newObj.integral = integral;
+    }
+    var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, newObj, { new: true });
     if (!orderItems) {
       ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
     } else {
