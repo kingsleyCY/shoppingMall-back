@@ -16,7 +16,7 @@ var wx = {
 
     var data = pc.decryptData(encryptedData, iv)
 
-    console.log('解密后 data: ', data)
+    this.logger("解密后 data: -", data)
     return data.phoneNumber
   },
   //把金额转为分

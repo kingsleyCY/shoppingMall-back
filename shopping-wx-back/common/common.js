@@ -320,6 +320,10 @@ class baseCommon {
 
     return { [key]: sortTypeKey }
   }
+  /* logger */
+  logger(key, val) {
+    logger.error(key + "：" + val + "-" + this.timeTransfer(Date.parse(new Date())))
+  }
 }
 for (let key in redis) {
   baseCommon.prototype[key] = redis[key]

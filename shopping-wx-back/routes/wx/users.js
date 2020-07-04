@@ -22,27 +22,28 @@ router.post('/loginWx', async (ctx) => {
       js_code: param.code,
       grant_type: 'authorization_code'
     });
-    logger.error(content + Date.parse(new Date()))
+    commons.logger("content", content)
     const options = 'https://api.weixin.qq.com/sns/jscode2session?' + content;
-    let { openid, session_key } = await new Promise((resolve, reject) => {
+    var { openid, session_key } = await new Promise((resolve, reject) => {
       https.get(options, (result) => {
         result.setEncoding('utf8');
         result.on('data', (d) => {
-          logger.error(d + Date.parse(new Date()))
+          commons.logger("d-", d)
           resolve({
             openid: JSON.parse(d).openid,
             session_key: JSON.parse(d).session_key
           });
         });
       }).on('error', (e) => {
-        logger.error(e + Date.parse(new Date()))
+        commons.logger("e-", e)
         reject("")
       });
     })
-    logger.error(openid + Date.parse(new Date()))
-    logger.error(session_key + Date.parse(new Date()))
+    commons.logger("openid", openid)
+    commons.logger("session_key", session_key)
     if (openid && session_key) {
       const phoneNumber = commons.decryptData(session_key, param.iv, param.encryptedData)
+      commons.logger("phoneNumber", phoneNumber)
       let user = {
         userId: commons.generateIds(),
         created_time: Date.parse(new Date()),
