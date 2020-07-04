@@ -243,7 +243,7 @@ var wx = {
   /* 修改订单orderSettlement */
   async changeOrderIntegral(orderItem) {
     var order = JSON.parse(JSON.stringify(orderItem))
-    if (!order.orderSettlement.isIntegral) {
+    if (!order.orderSettlement || !order.orderSettlement.isIntegral) {
       const userModel = require('../../model/userModel');
       const orderModel = require('../../model/admin/orderModel');
       var userItem = await userModel.findOne({ userId: order.userId });
