@@ -3,14 +3,14 @@ const { orderModel } = require('../../model/admin/orderModel');
 
 /* 申请售后 */
 /*
-* param：out_trade_no、applyType、applyRemark
+* param：userId、out_trade_no、applyType、applyRemark
 * */
 router.post('/applyAfter', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['out_trade_no', "applyType", "applyRemark"], param)) {
+  if (!commons.judgeParamExists(['userId', 'out_trade_no', "applyType", "applyRemark"], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no })
+  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no, userId: param.userId })
   if (!orderItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   } else if (orderItem.orderStatus !== "delivered" && orderItem.orderStatus !== "over") {

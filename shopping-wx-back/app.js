@@ -53,15 +53,15 @@ app.use(async (ctx, next) => {
   var needValidUrl = baseConfig.needValidUrl
   if (needValidUrl.indexOf(ctx.request.path) >= 0) {
     const token = ctx.header.Authorization;
-    if (token && param && param.userId) {
+    if (token) {
       try {
         var decoded = jwt.verify(token, commons.jwtScret);
-        const user = await userModel.findUser({
+        const user = await userModel.findOne({
           openId: decoded.openId,
           userId: decoded.userId
         })
         if (!user) {
-          ctx.body = commons.jsonBack(1006, {}, "token验证失效！");
+          ctx.throw(200, commons.jsonBack(1006, {}, "token验证失效"))
         } else {
           if (param.userId === decoded.userId) {
             await next();
@@ -70,17 +70,17 @@ app.use(async (ctx, next) => {
           }
         }
       } catch (err) {
-        ctx.body = commons.jsonBack(1006, {}, "token验证失效！");
+        ctx.throw(200, commons.jsonBack(1006, {}, "token验证失效"))
       }
     } else {
-      ctx.body = commons.jsonBack(1006, {}, "参数缺少token和useID");
+      ctx.throw(200, commons.jsonBack(1006, {}, "参数缺少token"))
     }
   } else if (ctx.url.indexOf("/admin/") === 0 && ctx.url !== "/admin/userList/loginAdmin") {
     try {
       var token = ctx.header.authorization;
       var decoded = jwt.verify(token, commons.jwtScret);
     } catch (err) {
-      console.log(err);
+      // commons.logger("err", err);
       if (err.status === 200 && err.message === "OK") {
         ctx.throw(200, commons.jsonBack(err.code, {}, err.mess))
       } else {
@@ -93,19 +93,7 @@ app.use(async (ctx, next) => {
   }
 });
 
-// middlewares
-/*app.use(bodyparser({
-  enableTypes: ['json', 'form', 'text']
-}))*/
 app.use(KoaXmlBody());
-/*app.use(koaBody({
-  multipart: true,
-  formidable: {
-    maxFileSize: 200 * 1024 * 1024,    // 设置上传文件大小最大限制，默认2M
-    uploadDir: __dirname + '/uploads',
-    keepExtensions: true,
-  }
-}));*/
 app.use(bodyparser());
 app.use(json());
 app.use(logger());
