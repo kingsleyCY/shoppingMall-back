@@ -18,7 +18,7 @@ router.post('/orderList', async (ctx) => {
   let search = {}
   param.userId ? search.userId = param.userId : "";
   param.orderStatus ? search.orderStatus = param.orderStatus : "";
-  param.orderId ? search.orderId = param.orderId : "";
+  param.orderId ? search.out_trade_no = param.orderId : "";
   param.createStime && param.createEtime ? search.created_time = {
     $gte: param.createStime,
     $lte: param.createEtime
@@ -27,7 +27,7 @@ router.post('/orderList', async (ctx) => {
     $gte: Number(param.totalFeeMin) * 100,
     $lte: Number(param.totalFeeMax) * 100
   } : "";
-  param.phone ? search['userDetail.phoneNumber'] = param.phone : "";
+  param.phone ? search.phoneNumber = param.phone : "";
 
   var list = await orderModel.find(search).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
   var total = await orderModel.find(search);

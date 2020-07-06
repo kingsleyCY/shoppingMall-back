@@ -65,7 +65,7 @@
         <el-table-column
           prop="out_trade_no"
           label="订单ID"
-          width="150">
+          width="100">
         </el-table-column>
         <el-table-column
           label="创建时间"
@@ -117,11 +117,6 @@
         <el-table-column
           prop="transaction_id"
           label="微信支付订单号"
-          min-width="100">
-        </el-table-column>
-        <el-table-column
-          prop="userId"
-          label="userId"
           min-width="100">
         </el-table-column>
         <el-table-column
@@ -455,6 +450,26 @@
         checkOrderToBus(parm).then(res => {
           if (res.code === 1) {
             this.$message.success(res.mess);
+            var obj = {
+              created_time: common.timeTransfer(row.created_time),
+              time_end: row.time_end.slice(0, 4) + "-" + row.time_end.slice(4, 6) + "-" + row.time_end.slice(6, 8) + " " + row.time_end.slice(8, 10) + ":" + row.time_end.slice(10, 12) + ":" + row.time_end.slice(12, 14),
+              out_trade_no: row.out_trade_no,
+              transaction_id: row.transaction_id,
+              mess: row.mess,
+              size: row.size,
+              original_fee: row.original_fee,
+              classifyName: row.commodityDetail.classifyName,
+              commoditytitle: row.commodityDetail.title,
+              addressUserName: row.addressDetail.userName,
+              addressPhone: row.addressDetail.telNumber,
+              provinceName: row.addressDetail.provinceName,
+              cityName: row.addressDetail.cityName,
+              countyName: row.addressDetail.countyName,
+              detailInfo: row.addressDetail.detailInfo,
+              userPhone: row.userDetail.phoneNumber,
+              userId: row.userDetail.userId
+            }
+            this.tableToExcel([obj], row.commodityDetail.title)
             this.getOrderList();
           } else {
             this.$message.error(res.mess);
@@ -591,7 +606,7 @@
           this.$message.error("操作失败")
         })
       },
-      tableToExcel(jsonData) {
+      tableToExcel(jsonData, name) {
         //要导出的json数据
         //列标题，逗号隔开，每一个逗号就是隔开一个单元格
         let zhArr = ['订单创建时间', '支付时间', '订单号', '微信订单号', '备注', '尺码', '支付金额', '商品分类名称', '商品名称', '收件人', '地址预留号码', '省', '市', '区', '地址详情', '用户手机号', 'userId'];
@@ -611,7 +626,7 @@
         var link = document.createElement("a");
         link.href = uri;
         //对下载的文件命名
-        link.download = (this.exportForm.orderStatus + "--订单数据.csv");
+        link.download = (name ? name : this.exportForm.orderStatus + "--订单数据.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

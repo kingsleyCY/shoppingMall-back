@@ -284,6 +284,8 @@
           param.id = this.editId
         }
         this.loading = true
+        console.log(this.ruleForm.classifyId);
+        return
         addCommodity(param).then(res => {
           this.loading = false
           if (res.code === 1) {
@@ -302,6 +304,8 @@
         this.ruleForm.title = detail.title
         this.ruleForm.logo = detail.logo
         this.ruleForm.classifyId = detail.classifyId === "-1" ? [detail.classifyId] : detail.classifyId.split("-")
+        console.log(detail.classifyId.split("-"));
+
         this.ruleForm.introduction = detail.introduction
         this.ruleForm.imgList = detail.imgList
         this.ruleForm.originPrice = detail.originPrice
@@ -321,14 +325,8 @@
           this.ruleForm.sizeCollet = detail.sizeCollet
         }
       },
-      deleteSize(index) {
-        if (this.ruleForm.sizeCollet.length <= 1) {
-          return
-        }
-        this.ruleForm.sizeCollet.splice(index, 1)
-      },
-      addSize() {
-        this.ruleForm.sizeCollet.push([])
+      getClassifyArr(classifyId){
+
       }
     }
   }

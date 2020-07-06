@@ -8,6 +8,7 @@ var orderSchema = new mongoose.Schema({
   commodityId: String,
   userId: String,
   addressId: String,
+  phoneNumber: { type: String, default: "" }, // 用户手机号
   time_end: String, // 支付完成时间
   orderStatus: { type: String, default: "none" }, // 订单状态
   mess: { type: String, default: "" }, // 下单备注

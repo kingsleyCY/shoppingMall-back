@@ -175,9 +175,7 @@ router.post("/payment", async (ctx) => {
         commodityId: commodItem.id,
         userId: userItem.userId,
         addressId: addressItem.id,
-        // commodityDetail: commodItem,
-        // userDetail: userItem,
-        // addressDetail: addressItem,
+        phoneNumber: userItem.phoneNumber,
         orderStatus: "unpaid",
         mess: param.mess || (orderItem && orderItem.mess) || "",
         size: param.size || (orderItem && orderItem.size) || ""
