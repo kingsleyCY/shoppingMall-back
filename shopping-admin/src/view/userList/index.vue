@@ -33,11 +33,6 @@
         min-width="180">
       </el-table-column>
       <el-table-column
-        prop="openId"
-        label="openId"
-        min-width="180">
-      </el-table-column>
-      <el-table-column
         prop="integral"
         label="积分"
         min-width="180">

@@ -23,11 +23,6 @@
         min-width="180">
       </el-table-column>
       <el-table-column
-        prop="userId"
-        label="userId"
-        min-width="180">
-      </el-table-column>
-      <el-table-column
         prop="recommendId"
         label="推荐人ID"
         min-width="180">
