@@ -91,7 +91,7 @@
               <el-button type="text" size="small" v-if="scope.row.type === 2"
                          @click="bindUserModel(scope.row)">绑定用户
               </el-button>
-              <el-button type="text" size="small"
+              <el-button type="text" size="small" v-if="scope.row.type === 2"
                          @click="getbindUserModel(scope.row)">查看绑定用户数据
               </el-button>
             </template>
@@ -153,8 +153,35 @@
           </el-form-item>
         </el-form>
       </div>
-      <div v-if="contentType === 'usageIds'">
-        1
+      <div v-if="contentType === 'usageIds'" class="activity-content">
+        <el-table :data="tableData" border style="width: 100%">
+          <el-table-column
+            prop="date"
+            label="日期"
+            min-width="180">
+            <template slot-scope="scope">
+              {{timeTransfer(scope.row.created_time)}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="phoneNumber"
+            label="手机号"
+            min-width="180">
+          </el-table-column>
+          <el-table-column
+            prop="integral"
+            label="积分"
+            min-width="180">
+          </el-table-column>
+          <el-table-column
+            prop="qrCode"
+            label="qrCode"
+            min-width="100">
+            <template slot-scope="scope">
+              <img :src="scope.row.qrCode" v-image>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
     </el-drawer>
     <el-dialog
@@ -172,7 +199,14 @@
 </template>
 
 <script>
-  import { getCommodityList, getCounponList, createdCoupon, deleteCoupon, couponBindUser } from '@/api/request'
+  import {
+    getCommodityList,
+    getCounponList,
+    createdCoupon,
+    deleteCoupon,
+    couponBindUser,
+    getCouponBindUser
+  } from '@/api/request'
 
   export default {
     name: "couponList",
@@ -201,6 +235,7 @@
         },
         bindUserDialog: false,
         bindPhone: "",
+        tableData: []
       }
     },
     created() {
@@ -220,7 +255,7 @@
         })
       },
       getActiListMethods(type) {
-        let param = {type}
+        let param = { type }
         getCounponList(param).then(res => {
           if (res.code === 1) {
             this.couponList = res.data;
@@ -281,18 +316,8 @@
           this.$message.error("操作失败")
         })
       },
-      editCoupon(row) {
-        this.rowData = row;
-        this.form.title = row.title;
-        this.form.type = row.type;
-        this.form.useType = row.useType;
-        this.form.lotteryCode = row.lotteryCode;
-        this.form.fullFee = row.fullDecre.fullFee;
-        this.form.decre = row.fullDecre.decre;
-        row.timeRange && row.timeRange.sTime && row.timeRange.eTime ? this.form.timeRange = [row.timeRange.sTime, row.timeRange.eTime] : "";
-      },
       deleCoupon(row) {
-        deleteCoupon({id: row._id}).then(res => {
+        deleteCoupon({ id: row._id }).then(res => {
           if (res.code === 1) {
             this.$message.success("操作成功")
             this.handleClick()
@@ -324,9 +349,24 @@
           this.$message.error("操作失败")
         })
       },
-      getbindUserModel() {
-        this.contentType = "usageIds";
-        this.drawer = true;
+      getbindUserModel(row) {
+        var param = {
+          couponId: row._id,
+          page: 1,
+          pageSize: 1000,
+        }
+        getCouponBindUser(param).then(res => {
+          if (res.code === 1) {
+            this.tableData = res.data
+            this.contentType = "usageIds";
+            this.drawer = true;
+          } else {
+            this.tableData = []
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+          this.$message.error("获取失败")
+        })
       },
 
       timeTransfer(data) {
@@ -367,6 +407,14 @@
     }
     .activity-content {
       height: 100%;
+      overflow-y: auto;
+      padding: 10px 20px;
+      .el-table__body {
+        img {
+          display: block;
+          width: 100%;
+        }
+      }
     }
   }
 </style>

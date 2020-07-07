@@ -298,6 +298,14 @@ export function couponBindUser(param) {
   })
 }
 
+export function getCouponBindUser(param) {
+  return instance({
+    url: '/admin/coupon/getCouponBindUser',
+    method: 'post',
+    data: param
+  })
+}
+
 export function afterSalesSetMail(param) {
   return instance({
     url: '/admin/afterSales/setMail',

@@ -190,6 +190,30 @@ router.post('/couponBindUser', async (ctx) => {
   }
 })
 
+/* 查看优惠券绑定用户数据 */
+/*
+* param: couponId、page, pageSize
+* */
+router.post('/getCouponBindUser', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['couponId', 'page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var couponItem = await couponModel.findOne({ _id: mongoose.Types.ObjectId(param.couponId) })
+  couponItem = JSON.parse(JSON.stringify(couponItem))
+  if (!couponItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券"))
+  }
+  var usageIds = couponItem.usageIds;
+  var idsArr = couponItem.usageIds.slice((param.page - 1) * param.pageSize, param.page * param.pageSize);
+  var userList = []
+  for (let i = 0; i < idsArr.length; i++) {
+    let userItem = await userModel.findOne({ userId: idsArr[i] });
+    userList.push(userItem)
+  }
+  ctx.body = commons.jsonBack(1, userList, "获取成功");
+})
+
 
 async function setAllUserCoupon(couponItem) {
   await new Promise((resolve, reject) => {
