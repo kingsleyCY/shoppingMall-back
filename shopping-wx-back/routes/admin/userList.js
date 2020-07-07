@@ -32,7 +32,7 @@ router.post('/loginAdmin', async (ctx) => {
 /* 获取用户列表 */
 /*
 * param: listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表(id)
-* opparam: page, pageSize
+* opparam: page, pageSize, phoneNumber
 * */
 router.post('/getCustomer', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
@@ -48,6 +48,12 @@ router.post('/getCustomer', async (ctx) => {
     obj.isProxy = 1
   } else if (param.listType === "recommend") {
     obj.recommendId = param.id
+  }
+  if (param.phoneNumber) {
+    const reg = new RegExp(param.phoneNumber, 'i') //不区分大小写
+    obj['$or'] = [
+      { phoneNumber: { '$regex': reg } }
+    ]
   }
   const list = await userModel.find(obj).skip((params.page - 1) * params.pageSize).limit(Number(params.pageSize)).sort({ '_id': -1 })
   var total = await userModel.find(obj)

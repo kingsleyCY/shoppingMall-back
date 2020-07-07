@@ -54,6 +54,7 @@ router.post('/applyAfter', async (ctx) => {
       applyRemark: param.applyRemark,
     })
     ctx.body = commons.jsonBack(1, orderItems, "申请售后成功！");
+    commons.setUserData(param.userId)
   }
 })
 

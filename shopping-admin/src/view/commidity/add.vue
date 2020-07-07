@@ -303,18 +303,12 @@
       fillForm(detail) {
         this.ruleForm.title = detail.title
         this.ruleForm.logo = detail.logo
-        this.ruleForm.classifyId = detail.classifyId === "-1" ? [detail.classifyId] : detail.classifyId.split("-")
-        console.log(detail.classifyId.split("-"));
-
+        this.ruleForm.classifyId = detail.classifyId === "-1" ? [detail.classifyId] : this.getClassifyArr(detail.classifyId)
         this.ruleForm.introduction = detail.introduction
         this.ruleForm.imgList = detail.imgList
         this.ruleForm.originPrice = detail.originPrice
         this.ruleForm.presentPrice = detail.presentPrice
         this.ruleForm.overPrice = detail.overPrice
-        /*this.ruleForm.isHot = detail.isHot ? true : false
-        this.ruleForm.isExplosive = detail.isExplosive ? true : false
-        this.ruleForm.isNews = detail.isNews ? true : false
-        this.ruleForm.isRebate = detail.isRebate ? true : false*/
         if (detail.sizeColletId && detail.sizeColletId !== "0") {
           this.$set(this.ruleForm, "sizeColletType", 1)
           this.ruleForm.sizeColletId = detail.sizeColletId
@@ -325,8 +319,13 @@
           this.ruleForm.sizeCollet = detail.sizeCollet
         }
       },
-      getClassifyArr(classifyId){
-
+      getClassifyArr(classifyId) {
+        let arr = classifyId.split("-");
+        let arrs = []
+        for (let i = 0; i < arr.length; i++) {
+          arrs.push(arr.slice(0, i + 1).join("-"))
+        }
+        return arrs
       }
     }
   }

@@ -190,6 +190,7 @@ router.post("/payment", async (ctx) => {
       })
     }
     ctx.body = commons.jsonBack(1, unpidData, "请求支付参数成功！");
+    commons.setUserData(param.userId)
   }
 })
 
@@ -263,6 +264,7 @@ router.post("/applyRefound", async (ctx) => {
       created_time: Date.parse(new Date()),
     })
     ctx.body = commons.jsonBack(1, {}, "取消订单成功！");
+    commons.setUserData(param.userId)
   } else if (orderItem.orderStatus === "undeliver") {
     var res = await commons.applyRefound(param.out_trade_no, param.userId, "订单退款")
     if (typeof res === "string") {
@@ -273,6 +275,7 @@ router.post("/applyRefound", async (ctx) => {
           created_time: Date.parse(new Date()),
         })
         ctx.body = commons.jsonBack(1, {}, "退款成功！");
+        commons.setUserData(param.userId)
       } else {
         ctx.body = commons.jsonBack(1003, {}, "退款失败！");
       }
@@ -347,6 +350,7 @@ router.post("/getOrderList", async (ctx) => {
     page: param.page,
     pageSize: param.pageSize,
   }, "");
+  commons.setUserData(param.userId)
 })
 
 /* 确认收货 */
@@ -372,6 +376,7 @@ router.post("/sureReceipt", async (ctx) => {
       created_time: Date.parse(new Date()),
     })
     ctx.body = commons.jsonBack(1, orderItems, "");
+    commons.setUserData(param.userId)
   } else {
     ctx.body = commons.jsonBack(1003, {}, "该订单状态错误！");
   }

@@ -12,6 +12,7 @@ var userSchema = new mongoose.Schema({
   integral: { type: Number, default: 0 }, // 积分
   wxUserInfo: { type: Object, default: {} },
   couponList: { type: Array, default: [] }, //优惠券信息
+  lastActTime: { type: Number, default: '' }, // 最后活跃时间
 }, { collection: "userList", versionKey: false });
 var userModel = db.model("userList", userSchema);
 

@@ -3,14 +3,7 @@ const { activityModel } = require('../../model/admin/activityModel');
 const { userModel } = require('../../model/userModel');
 
 /* 获取当前活动列表 */
-/*
-* param:userId
-* */
 router.post('/getActivity', async (ctx) => {
-  var param = JSON.parse(JSON.stringify(ctx.request.body));
-  /*if (!commons.judgeParamExists(['userId'], param)) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
-  }*/
   var list = await activityModel.find({ "status": 2, "isDelete": 0 }).sort({ '_id': -1 })
   list = JSON.parse(JSON.stringify(list))
   for (var i = 0; i < list.length; i++) {
@@ -54,6 +47,7 @@ router.post('/joinActivity', async (ctx) => {
       activNun: (actitvtyItem.activNun ? actitvtyItem.activNun : 0) + 1
     })
     ctx.body = commons.jsonBack(1, { code }, "参与成功");
+    commons.setUserData(param.userId)
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "此活动不存在"))
   }
@@ -98,6 +92,7 @@ router.post('/activited', async (ctx) => {
       newActivityLists[key]['actitvtyItem'] = null
     }
     await userModel.findOneAndUpdate({ "userId": param.userId }, { activityList: newActivityLists })
+    commons.setUserData(param.userId)
   } else {
     ctx.throw(200, commons.jsonBack(1001, {}, "此用户不存在"))
   }

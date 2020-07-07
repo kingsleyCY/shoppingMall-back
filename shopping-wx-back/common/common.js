@@ -320,6 +320,17 @@ class baseCommon {
 
     return { [key]: sortTypeKey }
   }
+  /* 修改用户数据 */
+  async setUserData(userId, obj) {
+    const { userModel } = require('../model/userModel');
+    let data = {}
+    if (!obj) {
+      data.lastActTime = Date.parse(new Date())
+    } else {
+      data = obj;
+    }
+    await userModel.findOneAndUpdate({ userId }, data)
+  }
   /* logger */
   logger(key, val) {
     logger.error(key + "：" + val + "-" + this.timeTransfer(Date.parse(new Date())))

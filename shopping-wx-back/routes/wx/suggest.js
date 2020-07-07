@@ -19,6 +19,7 @@ router.post('/complaintSuggest', async (ctx) => {
       data.created_time = Date.parse(new Date())
       let suggest = await suggestModel.create(data)
       ctx.body = commons.jsonBack(1, suggest, "提交成功！");
+      commons.setUserData(param.userId)
     } else {
       ctx.body = commons.jsonBack(1005, {}, "您已提交过建议，48小时内只允许提交一次，感谢您的支持！");
     }

@@ -28,6 +28,7 @@ router.post('/addAddress', async (ctx) => {
       let address = await addressModel.creatAddress(param)
       ctx.body = commons.jsonBack(1, address, "添加地址成功");
       commons.setRedis("addre-" + address.id, JSON.stringify(address))
+      commons.setUserData(param.userId)
     }
   }
 })
@@ -47,6 +48,7 @@ router.post('/searchAddressList', async (ctx) => {
     }
     let addList = await addressModel.searchAddress({ userId: param.userId })
     ctx.body = commons.jsonBack(1, addList, "获取地址成功");
+    commons.setUserData(param.userId)
   }
 })
 
@@ -70,6 +72,7 @@ router.post('/deleAddress', async (ctx) => {
     if (list.n == 1 && list.deletedCount == 1) {
       ctx.body = commons.jsonBack(1, {}, "删除地址成功");
       commons.delRedis("addre", [param.id]);
+      commons.setUserData(param.userId)
     } else {
       ctx.body = commons.jsonBack(1004, {}, "无该地址信息");
     }
@@ -100,6 +103,7 @@ router.post('/updateAddress', async (ctx) => {
     let newAdr = await addressModel.updateAddress(findObj, updateObj)
     ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！");
     commons.setRedis("addre-" + newAdr.id, JSON.stringify(newAdr))
+    commons.setUserData(param.userId)
   }
 })
 
@@ -121,17 +125,9 @@ router.post('/setDefaultAddress', async (ctx) => {
     } else if (addreItem.userId !== param.userId) {
       ctx.throw(200, commons.jsonBack(1003, {}, "此地址不属于此用户！"))
     }
-    /*let findObj = {
-      userId: param.userId
-    }
-    await addressModel.model.updateMany(findObj, { $set: { "isDefault": 0 } })
-    let newAdr = await addressModel.model.findOneAndUpdate({
-      userId: param.userId,
-      id: param.addressId,
-    }, { $set: { "isDefault": 1 } }, { new: true })
-    ctx.body = commons.jsonBack(1, newAdr, "更新数据成功！")*/
     await addressModel.model.findOneAndUpdate({ userId: param.userId }, { defaultAddress: param.addressId })
     ctx.body = commons.jsonBack(1, {}, "更新数据成功！")
+    commons.setUserData(param.userId)
   }
 })
 

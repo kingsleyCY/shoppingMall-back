@@ -1,5 +1,13 @@
 <template>
   <div>
+    <el-form :inline="true" :model="formInline" class="demo-form-inline" size="mini">
+      <el-form-item label="手机号">
+        <el-input clearable v-model="formInline.phoneNumber" placeholder="手机号"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit">查询</el-button>
+      </el-form-item>
+    </el-form>
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column
         prop="date"
@@ -79,9 +87,9 @@
             </template>
           </el-table-column>
           <el-table-column
-              prop="orderStatus"
-              label="状态"
-              width="80">
+            prop="orderStatus"
+            label="状态"
+            width="80">
             <template slot-scope="scope">
           <span :class="[scope.row.orderStatus, 'orde-status']">
             {{common.computedStatus(scope.row.orderStatus)}}
@@ -89,8 +97,8 @@
             </template>
           </el-table-column>
           <el-table-column
-              label="尺码"
-              min-width="50">
+            label="尺码"
+            min-width="50">
             <template slot-scope="scope">
               {{scope.row.size}}
             </template>
@@ -104,17 +112,17 @@
             </template>
           </el-table-column>
           <el-table-column
-              prop="total_fee"
-              label="商品详情"
-              min-width="150">
+            prop="total_fee"
+            label="商品详情"
+            min-width="150">
             <template slot-scope="scope">
               {{scope.row.commodityDetail.title}}
             </template>
           </el-table-column>
           <el-table-column
-              prop="total_fee"
-              label="地址详情"
-              min-width="200">
+            prop="total_fee"
+            label="地址详情"
+            min-width="200">
             <template slot-scope="scope">
               {{scope.row.addressDetail.provinceName
               +'/'+scope.row.addressDetail.cityName+"/"+scope.row.addressDetail.countyName +'/'+
@@ -124,9 +132,9 @@
             </template>
           </el-table-column>
           <el-table-column
-              prop="mess"
-              label="备注"
-              min-width="150">
+            prop="mess"
+            label="备注"
+            min-width="150">
           </el-table-column>
         </el-table>
         <el-pagination
@@ -150,6 +158,9 @@
     name: "userList",
     data() {
       return {
+        formInline: {
+          phoneNumber: ""
+        },
         tableData: [],
         pageData: {
           page: 1,
@@ -167,13 +178,20 @@
       }
     },
     mounted() {
-      this.getCustomer()
+      this.getCustomerMethods()
     },
     methods: {
-      getCustomer() {
+      onSubmit() {
+        this.pageData.page = 1
+        this.getCustomerMethods()
+      },
+      getCustomerMethods() {
         let param = {
           page: this.pageData.page,
           pageSize: this.pageData.pageSize
+        }
+        if (this.formInline.phoneNumber) {
+          param.phoneNumber = this.formInline.phoneNumber
         }
         getCustomer(param).then(res => {
           this.tableData = res.data.list;
@@ -185,20 +203,22 @@
       handleSizeChange(val) {
         this.pageData.pageSize = val
         this.pageData.page = 1
-        this.getCustomer()
+        this.getCustomerMethods()
       },
       handleCurrentChange(val) {
         this.pageData.page = val
-        this.getCustomer()
+        this.getCustomerMethods()
       },
       setQrcode(id) {
-        setQrcode({id}).then(res => {
+        setQrcode({ id }).then(res => {
           if (res.code === 1) {
             this.$message.success(res.mess)
-            this.getCustomer()
+            this.getCustomerMethods()
           } else {
             this.$message.error(res.mess)
           }
+        }).catch(res => {
+          this.$message.error("操作失败")
         })
       },
       toDetail(row) {

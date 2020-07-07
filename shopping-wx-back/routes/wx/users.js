@@ -94,6 +94,7 @@ router.post("/getUserInfo", async (ctx) => {
   }
   if (userItem) {
     ctx.body = commons.jsonBack(1, userItem, "同步用户信息成功！");
+    commons.setUserData(param.userId)
   } else {
     ctx.body = commons.jsonBack(1003, {}, "未查询到此用户信息！");
   }
@@ -115,6 +116,7 @@ router.post("/getCounponList", async (ctx) => {
   var counponList = await couponModel.find({ _id: { $in: userItem.couponList } });
 
   ctx.body = commons.jsonBack(1, counponList, "获取优惠券信息成功！");
+  commons.setUserData(param.userId)
 })
 
 /* 用户传递code 绑定优惠券 */
@@ -145,6 +147,7 @@ router.post("/bindCouponByCode", async (ctx) => {
   var userItems = await userModel.findOneAndUpdate({ userId: param.userId }, { couponList }, { new: true })
 
   ctx.body = commons.jsonBack(1, userItems, "获取优惠券信息成功！");
+  commons.setUserData(param.userId)
 })
 
 
