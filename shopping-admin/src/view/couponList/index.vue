@@ -174,11 +174,10 @@
             min-width="180">
           </el-table-column>
           <el-table-column
-            prop="qrCode"
-            label="qrCode"
+            label="操作"
             min-width="100">
             <template slot-scope="scope">
-              <img :src="scope.row.qrCode" v-image>
+              <el-button type="text" size="small" @click="deleteUser(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -205,7 +204,8 @@
     createdCoupon,
     deleteCoupon,
     couponBindUser,
-    getCouponBindUser
+    getCouponBindUser,
+    delCouponBindUser,
   } from '@/api/request'
 
   export default {
@@ -350,6 +350,7 @@
         })
       },
       getbindUserModel(row) {
+        this.rowData = row
         var param = {
           couponId: row._id,
           page: 1,
@@ -366,6 +367,28 @@
           }
         }).catch(res => {
           this.$message.error("获取失败")
+        })
+      },
+      deleteUser(row) {
+        this.$confirm('此操作将永久删除该用户绑定, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var obj = {
+            couponId: this.rowData._id,
+            userId: row.userId,
+          }
+          delCouponBindUser(obj).then(res => {
+            if (res.code === 1) {
+              this.$message.success("操作成功！")
+              this.getbindUserModel(this.rowData)
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(res => {
+            this.$message.error("操作失败！")
+          })
         })
       },
 

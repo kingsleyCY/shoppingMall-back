@@ -47,7 +47,8 @@ router.post('/getCustomer', async (ctx) => {
   if (param.listType === "proxy") {
     obj.isProxy = 1
   } else if (param.listType === "recommend") {
-    obj.recommendId = param.id
+    var userItem = await userModel.findOne({ userId: param.id })
+    obj.recommendId = userItem.phoneNumber
   }
   if (param.phoneNumber) {
     const reg = new RegExp(param.phoneNumber, 'i') //不区分大小写

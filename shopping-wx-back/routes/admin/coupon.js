@@ -214,6 +214,37 @@ router.post('/getCouponBindUser', async (ctx) => {
   ctx.body = commons.jsonBack(1, userList, "获取成功");
 })
 
+/* 删除优惠券绑定用户 */
+/*
+* param: couponId、userId
+* */
+router.post('/delCouponBindUser', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['couponId', 'userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var couponItem = await couponModel.findOne({ _id: mongoose.Types.ObjectId(param.couponId) })
+  couponItem = JSON.parse(JSON.stringify(couponItem))
+  var userItem = await userModel.findOne({ userId: param.userId });
+  userItem = JSON.parse(JSON.stringify(userItem))
+  if (!couponItem || !userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券或用户信息"))
+  }
+
+  if (userItem.couponList.indexOf(param.couponId) >= 0 && couponItem.usageIds.indexOf(param.userId) >= 0) {
+    var couponList = userItem.couponList;
+    couponList.splice(couponList.indexOf(param.couponId), 1);
+    await userModel.findOneAndUpdate({ userId: param.userId }, { couponList }, { new: true });
+
+    var usageIds = couponItem.usageIds;
+    usageIds.splice(usageIds.indexOf(param.userId), 1);
+    await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, { usageIds });
+    ctx.body = commons.jsonBack(1, {}, "删除成功");
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该用户未绑定此优惠券"))
+  }
+})
+
 
 async function setAllUserCoupon(couponItem) {
   await new Promise((resolve, reject) => {

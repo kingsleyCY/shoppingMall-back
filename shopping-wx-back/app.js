@@ -42,7 +42,7 @@ app.use(async (ctx, next) => {
       ctx.body = baseCommon.jsonBack(err.code, err.data, err.mess);
     } else {
       commons.logger("err", err)
-      ctx.body = baseCommon.jsonBack(1009, {}, "服务器响应失败");
+      ctx.body = baseCommon.jsonBack(1009, {}, "服务器响应失败" + err);
     }
   });
 })
