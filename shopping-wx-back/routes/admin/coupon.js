@@ -181,7 +181,7 @@ router.post('/couponBindUser', async (ctx) => {
     }
     var usageIds = couponItem.usageIds.concat([userItem.userId]);
 
-    couponList.push(couponItem._id);
+    couponList.push(String(couponItem._id));
     await userModel.findOneAndUpdate(searchObj, { couponList }, { new: true })
     await couponModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(param.couponId) }, { usageIds })
     ctx.body = commons.jsonBack(1, {}, "绑定成功");

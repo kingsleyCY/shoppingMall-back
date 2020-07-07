@@ -129,6 +129,7 @@ router.post("/bindCouponByCode", async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   var couponItem = await couponModel.findOne({ lotteryCode: param.code })
+  couponItem = JSON.parse(JSON.stringify(couponItem))
   if (!couponItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此优惠券信息!"))
   }
@@ -138,13 +139,20 @@ router.post("/bindCouponByCode", async (ctx) => {
   if (bindUserItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "此优惠券已绑定用户!"))
   }
-  var userItem = await userModel.findOne({ userId: param.userId })
+  var userItem = await userModel.findOne({ userId: param.userId });
+  userItem = JSON.parse(JSON.stringify(userItem))
   if (!userItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户信息!"))
   }
-  var couponList = JSON.parse(JSON.stringify(userItem)).couponList;
-  couponList.push(couponItem._id)
+  var couponList = userItem.couponList;
+  couponList.push(String(couponItem._id))
   var userItems = await userModel.findOneAndUpdate({ userId: param.userId }, { couponList }, { new: true })
+
+  var usageIds = couponItem.usageIds.concat([userItem.userId]);
+  await couponModel.findOneAndUpdate({
+    _id: mongoose.Types.ObjectId(couponItem._id),
+    lotteryCode: param.code
+  }, { usageIds })
 
   ctx.body = commons.jsonBack(1, userItems, "获取优惠券信息成功！");
   commons.setUserData(param.userId)
