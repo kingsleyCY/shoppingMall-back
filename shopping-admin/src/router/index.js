@@ -81,6 +81,12 @@ const mainRouter = [
     tilte: '尺码集合',
     component: resolve => require(['@/view/sizeCollet'], resolve),
   },
+  {
+    path: 'agent',
+    name: 'agent',
+    tilte: '代理结构',
+    component: resolve => require(['@/view/agent'], resolve),
+  },
 ]
 
 

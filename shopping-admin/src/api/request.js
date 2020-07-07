@@ -39,7 +39,6 @@ export function loginAdmin(param) {
   })
 }
 
-
 /* 获取基本配置参数 */
 export function getCommodityList(param) {
   return instance({
@@ -100,17 +99,16 @@ export function bathExportCommodity(param) {
   return instance({
     url: '/admin/commodity/bathExportCommodity',
     method: 'post',
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: {"Content-Type": "multipart/form-data"},
     data: param
   })
 }
-
 
 export function commodityDetail(id) {
   return instance({
     url: '/admin/commodity/commodityDetail',
     method: 'GET',
-    params: { id }
+    params: {id}
   })
 }
 
@@ -121,6 +119,7 @@ export function deleCommodity(param) {
     data: param
   })
 }
+
 export function batchMoveCommdity(param) {
   return instance({
     url: '/admin/commodity/batchMoveCommdity',
@@ -401,6 +400,7 @@ export function addCollet(param) {
     data: param
   })
 }
+
 export function getCollet(param) {
   return instance({
     url: '/admin/sizeCollet/getCollet',
@@ -408,9 +408,34 @@ export function getCollet(param) {
     data: param
   })
 }
+
 export function delCollet(param) {
   return instance({
     url: '/admin/sizeCollet/delCollet',
+    method: 'post',
+    data: param
+  })
+}
+
+export function editAgent(param) {
+  return instance({
+    url: '/admin/agent/editAgent',
+    method: 'post',
+    data: param
+  })
+}
+
+export function getAgent(param) {
+  return instance({
+    url: '/admin/agent/getAgent',
+    method: 'get',
+    data: param
+  })
+}
+
+export function delAgent(param) {
+  return instance({
+    url: '/admin/agent/delAgent',
     method: 'post',
     data: param
   })

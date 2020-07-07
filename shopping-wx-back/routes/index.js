@@ -28,6 +28,7 @@ const adminAfterSales = require('./admin/afterSales');
 const adminSizeCollet = require('./admin/sizeCollet');
 const adminSuggestList = require('./admin/suggestList');
 const adminMessList = require('./admin/message');
+const adminAgent = require('./admin/agent');
 
 router.use('/admin/activity', adminActivity.routes(), adminActivity.allowedMethods());
 router.use('/admin/classify', adminClassify.routes(), adminClassify.allowedMethods());
@@ -39,5 +40,6 @@ router.use('/admin/afterSales', adminAfterSales.routes(), adminAfterSales.allowe
 router.use('/admin/sizeCollet', adminSizeCollet.routes(), adminSizeCollet.allowedMethods());
 router.use('/admin/suggest', adminSuggestList.routes(), adminSuggestList.allowedMethods());
 router.use('/admin/mess', adminMessList.routes(), adminMessList.allowedMethods());
+router.use('/admin/agent', adminAgent.routes(), adminAgent.allowedMethods());
 
 module.exports = router

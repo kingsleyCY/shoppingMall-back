@@ -181,32 +181,6 @@ router.post('/exportOrder', async (ctx) => {
       })
     })
   }
-  /*let enArr = ['created_time', 'time_end', 'out_trade_no', 'transaction_id', 'mess', 'size', 'original_fee', 'classifyName', 'commoditytitle', 'addressUserName', 'addressPhone', 'provinceName', 'cityName', 'countyName', 'detailInfo', 'userPhone', 'userId'];
-  let zhArr = ['订单创建时间', '支付时间', '订单号', '微信订单号', '备注', '尺码', '支付金额', '商品分类名称', '商品名称', '收件人', '地址预留号码', '省', '市', '区', '地址详情', '用户手机号', 'userId'];
-  let conf = {};
-  conf.name = "order";//表格名
-  let alldata = new Array();
-  for (let i = 0; i < list.length; i++) {
-    let arr = new Array();
-    for (let j = 0; j < enArr.length; j++) {
-      arr.push(exceldata[i][enArr[j]]);
-    }
-    alldata.push(arr);
-  }
-  // 决定列名和类型
-  conf.cols.map((v, i) => {
-    return {
-      caption: zhArr[i],
-      type: 'string',
-      width: 200
-    }
-  })
-  conf.rows = alldata; // 填充数据
-  let result = nodeExcel.execute(conf);
-  let data = new Buffer(result, 'binary');
-  ctx.set('Content-Type', 'application/vnd.openxmlformats');
-  ctx.set("Content-Disposition", "attachment; filename=" + "Report.xlsx");
-  ctx.body = data;*/
 })
 
 
