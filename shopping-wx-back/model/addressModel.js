@@ -9,7 +9,7 @@ var addressSchema = new mongoose.Schema({
   telNumber: Number, // 收货人手机号码
   id: String,
   userId: String, // 用户ID
-  // isDefault: { type: Number, default: 0 }
+  isDelete: { type: Number, default: 0 }
 }, { collection: "addressList", versionKey: false });
 var addressModel = db.model("addressList", addressSchema);
 
@@ -60,4 +60,4 @@ exports.updateAddress = async function (findObj, updateObj) {
   })
 }
 
-exports.model = addressModel
+exports.addressModel = addressModel

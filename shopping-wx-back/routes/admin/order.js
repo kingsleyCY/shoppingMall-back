@@ -2,7 +2,7 @@ const router = require('koa-router')();
 const { orderModel } = require('../../model/admin/orderModel');
 const { userModel } = require('../../model/userModel');
 const { shoppingModel } = require('../../model/commodityModel');
-const addressModel = require('../../model/addressModel');
+const { addressModel } = require('../../model/addressModel');
 
 /* 查询订单 */
 /*
@@ -43,7 +43,7 @@ router.post('/orderList', async (ctx) => {
     list[i].commodityDetail = detail
     var addreDetail = await commons.getRedis("addre-" + list[i].addressId);
     if (!addreDetail) {
-      addreDetail = await addressModel.model.findOne({ id: list[i].addressId })
+      addreDetail = await addressModel.findOne({ id: list[i].addressId })
     } else {
       addreDetail = JSON.parse(addreDetail)
     }
@@ -140,7 +140,7 @@ router.post('/exportOrder', async (ctx) => {
     exceldata[i].commodityDetail = detail
     var addreDetail = await commons.getRedis("addre-" + exceldata[i].addressId);
     if (!addreDetail) {
-      addreDetail = await addressModel.model.findOne({ id: exceldata[i].addressId })
+      addreDetail = await addressModel.findOne({ id: exceldata[i].addressId })
     } else {
       addreDetail = JSON.parse(addreDetail)
     }
