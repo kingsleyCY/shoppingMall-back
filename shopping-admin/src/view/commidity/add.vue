@@ -284,8 +284,6 @@
           param.id = this.editId
         }
         this.loading = true
-        console.log(this.ruleForm.classifyId);
-        return
         addCommodity(param).then(res => {
           this.loading = false
           if (res.code === 1) {

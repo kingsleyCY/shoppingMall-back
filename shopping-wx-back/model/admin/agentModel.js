@@ -25,7 +25,8 @@ exports.agentModel = agentModel
 /* agentModelData 说明 */
 /*
 {
-  num: 5,
-  price: 100,
+  min: 0,
+  max: 5,
+  price: 40,
 }
 * */

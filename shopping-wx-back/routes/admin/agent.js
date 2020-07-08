@@ -18,7 +18,8 @@ router.post('/editAgent', async (ctx) => {
     await agentModel.findOneAndUpdate({ id: param.id }, {
       title: param.title,
       update_time: Date.parse(new Date()),
-      agentModelData: param.agentModelData
+      agentModelData: param.agentModelData,
+      childProfit: param.childProfit,
     })
   } else {
     const list = await agentModel.find({ parentId: param.parentId || "0", id: { $ne: "-1" } }).sort({ "_id": -1 })
@@ -44,6 +45,8 @@ router.post('/editAgent', async (ctx) => {
       id: newId,
       parentId: param.parentId || "0",
       level: param.parentId ? parentItem.level + 1 : 1,
+      agentModelData: param.agentModelData,
+      childProfit: param.childProfit,
     })
   }
 
