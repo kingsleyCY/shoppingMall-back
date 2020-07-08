@@ -321,7 +321,7 @@
   .el-table {
     img {
       display: block;
-      width: 100%;
+      width: 80px;
     }
   }
 </style>

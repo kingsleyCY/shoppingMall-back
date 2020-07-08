@@ -51,23 +51,25 @@ router.post('/loginWx', async (ctx) => {
         phoneNumber: phoneNumber,
         // recommendId: (param.recommendId || "")
       }
-      if (param.recommendId) {
-        var recommenUser = await userModel.findOne({ phoneNumber: param.recommendId });
-        recommenUser ? user.recommendId = param.recommendId : "";
-      }
       var oldUser = await userModel.findOne({ openId: openid, phoneNumber })
       var userDeatil = null
       if (!oldUser) {
+        if (param.recommendId) {
+          var recommendId = await setRecommend(param.recommendId, phoneNumber)
+          if (recommendId) {
+            user.recommendId = recommendId
+          }
+        }
         userDeatil = await userModel.create(user)
       } else {
         userDeatil = oldUser
       }
-      const token = jwt.sign({
+      /*const token = jwt.sign({
         openId: openid,
         phoneNumber: phoneNumber,
         userId: userDeatil.userId
       }, commons.jwtScret);
-      ctx.res.setHeader('Authorization', token);
+      ctx.res.setHeader('Authorization', token);*/
       ctx.body = commons.jsonBack(1, userDeatil, "用户登陆成功！");
     } else {
       ctx.body = commons.jsonBack(1004, {}, "获取OpenID失败！");
@@ -157,6 +159,25 @@ router.post("/bindCouponByCode", async (ctx) => {
   ctx.body = commons.jsonBack(1, userItems, "获取优惠券信息成功！");
   commons.setUserData(param.userId)
 })
+
+
+/* 设置推荐人 代理级别 */
+/*
+* recommendId => 推荐人手机号
+* phoneNumber => 用户手机号
+* */
+async function setRecommend(recommendId) {
+  var recommenUser = await userModel.findOne({ phoneNumber: recommendId });
+  if (!recommenUser) {
+    return ""
+  }
+  if (recommenUser.agentId >= 3) {
+    var lastLevelUser = await userModel.findOne({ phoneNumber: recommenUser.recommendId });
+    return recommendId + "-" + (lastLevelUser ? lastLevelUser.phoneNumber : "")
+  } else {
+    return recommendId
+  }
+}
 
 
 module.exports = router

@@ -1,5 +1,5 @@
 var agentSchema = new mongoose.Schema({
-  id: String, // 1  1-1  1-1-1
+  id: Number, // 1  1-1  1-1-1
   created_time: Number, // 创建时间
   update_time: Number, // 更新时间
   title: { type: String, default: "" },

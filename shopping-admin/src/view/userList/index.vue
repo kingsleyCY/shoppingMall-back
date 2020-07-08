@@ -29,7 +29,7 @@
       </el-table-column>
       <el-table-column
         prop="recommendId"
-        label="推荐人ID"
+        label="推荐人手机号"
         min-width="180">
       </el-table-column>
       <el-table-column
@@ -266,7 +266,7 @@
   .el-table {
     img {
       display: block;
-      width: 100%;
+      width: 80px;
     }
   }
 </style>

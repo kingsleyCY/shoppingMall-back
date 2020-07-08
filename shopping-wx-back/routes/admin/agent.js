@@ -57,29 +57,7 @@ router.post('/editAgent', async (ctx) => {
 router.get('/getAgent', async (ctx) => {
   var list = await agentModel.find().sort({ sort: -1 })
   list = JSON.parse(JSON.stringify(list))
-  function jsonToTree(jsonData, id, pid) {
-    let result = [],
-      temp = {};
-    for (let i = 0; i < jsonData.length; i++) {
-      temp[jsonData[i][id]] = jsonData[i];
-    }
-    for (let j = 0; j < jsonData.length; j++) {
-      let currentElement = jsonData[j];
-      let tempCurrentElementParent = temp[currentElement[pid]];
-      if (tempCurrentElementParent) {
-        // 如果存在父元素
-        if (!tempCurrentElementParent["children"]) {
-          tempCurrentElementParent["children"] = [];
-        }
-        tempCurrentElementParent["children"].push(currentElement);
-      } else {
-        result.push(currentElement);
-      }
-    }
-    return result;
-  }
-  var tree = jsonToTree(list, "id", "parentId")
-  ctx.body = commons.jsonBack(1, tree, "获取成功");
+  ctx.body = commons.jsonBack(1, list, "获取成功");
 })
 
 /* 删除商品分类 */

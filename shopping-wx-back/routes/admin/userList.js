@@ -45,7 +45,7 @@ router.post('/getCustomer', async (ctx) => {
   }
   let obj = {}
   if (param.listType === "proxy") {
-    obj.isProxy = 1
+    obj.agentId = { $ne: 0 }
   } else if (param.listType === "recommend") {
     var userItem = await userModel.findOne({ userId: param.id })
     obj.recommendId = userItem.phoneNumber
@@ -81,7 +81,13 @@ router.post('/setQrcode', async (ctx) => {
   }
   var access_token = await getAccesstoken();
   var qrCode = await setQrcode(access_token.access_token, userItem.phoneNumber);
-  await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url, isProxy: 1 }, { new: true });
+  var agentId = 1;
+  if (userItem.recommendId) {
+    var parentUser = await userModel.findOne({ phoneNumber: userItem.recommendId })
+    agentId = parentUser.agentId + 1;
+    agentId >= 3 ? agentId = 3 : ""
+  }
+  await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url, agentId: agentId }, { new: true });
   ctx.body = commons.jsonBack(1, { url: qrCode.url }, "获取数据成功");
 })
 

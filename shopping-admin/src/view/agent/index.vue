@@ -1,35 +1,17 @@
 <template>
   <div class="box">
     <div class="left-tree">
-      <el-button size="mini" @click="addAgentMethods(0, 'add')">添加一级分类</el-button>
       <el-button size="mini" @click="getAgentMehtods">刷新</el-button>
-      <el-tree :data="treeData" :props="defaultProps" :expand-on-click-node="false" :default-expand-all="true">
-      <span class="custom-tree-node" slot-scope="{ node, data }">
-        <span class="left">
-          <span class="text">{{ data.title }}</span>
-        </span>
-        <span class="right">
-          <el-button
-            v-if="data.id !== '-1'"
-            type="text"
-            size="mini" @click="addAgentMethods(data, 'add')">
-            添加子节点
-          </el-button>
-          <el-button
-            v-if="data.id !== '-1'"
-            type="text"
-            size="mini" @click="addAgentMethods(data, 'edit')">
-            编辑
-          </el-button>
-          <el-button
-            v-if="data.id !== '-1'"
-            type="text"
-            size="mini" @click="delAgentMethods(data)">
-            删除
-          </el-button>
-        </span>
-      </span>
-      </el-tree>
+      <ul class="tree-list">
+        <li v-for="(item, index) in treeData">
+          <span class="text">{{ item.title }}</span>
+          <div>
+            <el-button type="text" size="mini"
+                       @click="addAgentMethods(item, 'edit')">编辑
+            </el-button>
+          </div>
+        </li>
+      </ul>
     </div>
     <div class="right-content">
       <p style="padding: 15px 0 15px 10px;font-size: 20px;font-weight: bold;border-bottom: 1px solid #717171">
@@ -50,6 +32,7 @@
               <i class="el-icon-circle-plus-outline" @click="addAgentItem" v-if="index === 0"></i>
             </li>
           </ul>
+          <p style="color: red">注：默认第一区间无法提取</p>
         </el-form-item>
         <el-form-item label="下线收益(￥)">
           <ul class="agentmodel-data">
@@ -115,6 +98,7 @@
         if (type === 'add') {
           this.isAdd = true;
           this.parentId = row === 0 ? row : row.id;
+          this.cancel()
         } else {
           this.isAdd = false;
           this.rowData = row;
@@ -127,7 +111,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          deleteClassify({ id }).then(res => {
+          delAgent({ id }).then(res => {
             if (res.code === 1) {
               this.$message.success("删除成功")
               this.getClassifyList()
@@ -156,7 +140,6 @@
         }
       },
       fillForm() {
-        console.log(this.rowData);
         this.form.title = this.rowData.title;
         this.form.agentModelData = this.rowData.agentModelData;
         this.form.childProfit = this.rowData.childProfit.map(v => {
@@ -164,6 +147,7 @@
             val: v
           }
         });
+        this.form.childProfit.length === 0 ? this.form.childProfit = [{ val: "" }] : ""
       },
       submitAgent() {
         if (!this.form.title || this.form.agentModelData.length <= 0 || this.form.childProfit.length <= 0) {
@@ -243,7 +227,7 @@
       validAgentLevel() {
         var arr = []
         for (let i = 0; i < this.form.childProfit.length; i++) {
-          arr.push(parseInt(this.form.childProfit[i]["val"]))
+          this.form.childProfit[i]["val"] ? arr.push(parseInt(this.form.childProfit[i]["val"])) : ""
         }
         return arr
       },
@@ -285,12 +269,21 @@
   }
   .box {
     .left-tree {
-      width: 550px;
+      width: 400px;
       height: 100%;
       border-right: 1px solid #bababa;
+      .tree-list {
+        list-style: none;
+        li {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 20px;
+        }
+      }
     }
     .right-content {
-      width: calc(100% - 550px);
+      width: calc(100% - 400px);
       height: 100%;
       .el-form {
         padding: 15px 20px;
