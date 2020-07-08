@@ -1,14 +1,11 @@
 <template>
   <div class="box">
     <div class="left-tree">
-      <el-button size="mini" @click="addAgentMethods('0', 'add')">添加一级分类</el-button>
+      <el-button size="mini" @click="addAgentMethods(0, 'add')">添加一级分类</el-button>
       <el-button size="mini" @click="getAgentMehtods">刷新</el-button>
       <el-tree :data="treeData" :props="defaultProps" :expand-on-click-node="false" :default-expand-all="true">
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span class="left">
-          <div class="img">
-            <img :src="data.logo || 'http://lioncc.oss-cn-beijing.aliyuncs.com/shop/config/1.png'" v-image>
-          </div>
           <span class="text">{{ data.title }}</span>
         </span>
         <span class="right">
@@ -44,10 +41,11 @@
         <el-form-item label="数量区间(双)">
           <ul v-for="(item, index) in form.agentModelData" :key="index" class="agentmodel-data">
             <li>
-              <el-input v-model="item.min" @keyup.native="validNumber($event)" class="number-input"></el-input>
-              <span class="tip">≤</span>
-              <el-input v-model="item.max" @keyup.native="validNumber($event)" class="number-input"></el-input>
-               单价：<el-input v-model="item.price" @keyup.native="validNumber($event)" class="number-input"></el-input>
+              <el-input v-model="item.min" class="number-input" type="number"></el-input>
+              <span class="tip">≤ 区间 <</span>
+              <el-input v-model="item.max" class="number-input" type="number"></el-input>
+              单价：
+              <el-input v-model="item.price" class="number-input" type="number"></el-input>
               <i class="el-icon-remove-outline" @click="delAgentItem(index)"></i>
               <i class="el-icon-circle-plus-outline" @click="addAgentItem" v-if="index === 0"></i>
             </li>
@@ -56,7 +54,7 @@
         <el-form-item label="下线收益(￥)">
           <ul class="agentmodel-data">
             <li v-for="(item, index) in form.childProfit" :key="index">
-              <el-input @keyup.native="validNumber($event)" v-model="item.val" class="number-input"></el-input>
+              <el-input v-model="item.val" class="number-input" type="number"></el-input>
               <i class="el-icon-remove-outline" @click="delAgentLevel(index)"></i>
               <i class="el-icon-circle-plus-outline" @click="addAgentLevel" v-if="index === 0"></i>
             </li>
@@ -85,7 +83,7 @@
         },
         isAdd: true,
         rowData: null,
-        parentId: "0",
+        parentId: 0,
         partIndex: 1,
         form: {
           title: "",
@@ -116,10 +114,11 @@
       addAgentMethods(row, type) {
         if (type === 'add') {
           this.isAdd = true;
-          this.parentId = row === '0' ? row : row.id;
+          this.parentId = row === 0 ? row : row.id;
         } else {
           this.isAdd = false;
           this.rowData = row;
+          this.fillForm()
         }
       },
       delAgentMethods(id) {
@@ -145,7 +144,8 @@
           agentModelData: [
             {
               min: 0,
-              max: 10,
+              max: 5,
+              price: 40,
             }
           ],
           childProfit: [
@@ -154,6 +154,16 @@
             }
           ]
         }
+      },
+      fillForm() {
+        console.log(this.rowData);
+        this.form.title = this.rowData.title;
+        this.form.agentModelData = this.rowData.agentModelData;
+        this.form.childProfit = this.rowData.childProfit.map(v => {
+          return {
+            val: v
+          }
+        });
       },
       submitAgent() {
         if (!this.form.title || this.form.agentModelData.length <= 0 || this.form.childProfit.length <= 0) {
@@ -194,8 +204,8 @@
         var last = this.form.agentModelData[this.form.agentModelData.length - 1];
         this.form.agentModelData.push({
           min: last.max,
-          max: last.max + 10,
-          price: last.price + 10,
+          max: Number(last.max) + 10,
+          price: Number(last.price) + 10,
         })
       },
       delAgentLevel(index) {
@@ -209,16 +219,33 @@
         this.form.childProfit.push({ val: 20 })
       },
       validAgentData() {
-
+        var flag = true;
+        for (let i = 0; i < this.form.agentModelData.length; i++) {
+          this.$set(this.form.agentModelData[i], "min", parseInt(this.form.agentModelData[i]["min"]))
+          this.$set(this.form.agentModelData[i], "max", parseInt(this.form.agentModelData[i]["max"]))
+          this.$set(this.form.agentModelData[i], "price", parseInt(this.form.agentModelData[i]["price"]))
+          if (Number(this.form.agentModelData[i]["min"]) >= Number(this.form.agentModelData[i]["max"])) {
+            flag = false
+          }
+          if (
+            (i < this.form.agentModelData.length - 1) &&
+            (Number(this.form.agentModelData[i]["max"]) !== Number(this.form.agentModelData[i + 1]["min"]))
+          ) {
+            flag = false
+          }
+        }
+        if (flag) {
+          return this.form.agentModelData
+        } else {
+          return flag
+        }
       },
       validAgentLevel() {
-
-      },
-      validNumber(e) {
-        let flag = new RegExp("^[1-9]([0-9])*$").test(e.target.value);
-        if (!flag) {
-          this.$message.info("请输入正整数");
+        var arr = []
+        for (let i = 0; i < this.form.childProfit.length; i++) {
+          arr.push(parseInt(this.form.childProfit[i]["val"]))
         }
+        return arr
       },
     }
   }
