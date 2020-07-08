@@ -45,7 +45,7 @@ router.post('/getCustomer', async (ctx) => {
   }
   let obj = {}
   if (param.listType === "proxy") {
-    obj.agentId = { $ne: 0 }
+    obj.agentId = { $in: [1, 2, 3] }
   } else if (param.listType === "recommend") {
     var userItem = await userModel.findOne({ userId: param.id })
     obj.recommendId = userItem.phoneNumber

@@ -12,7 +12,7 @@
       <el-table-column
         prop="date"
         label="日期"
-        min-width="180">
+        width="100">
         <template slot-scope="scope">
           {{timeTransfer(scope.row.created_time)}}
         </template>
@@ -36,6 +36,13 @@
         prop="integral"
         label="积分"
         min-width="180">
+      </el-table-column>
+      <el-table-column
+        label="最后活动时间"
+        width="100">
+        <template slot-scope="scope">
+          {{timeTransfer(scope.row.lastActTime)}}
+        </template>
       </el-table-column>
       <el-table-column
         prop="qrCode"
