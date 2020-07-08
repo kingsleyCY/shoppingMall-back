@@ -55,10 +55,7 @@ router.post('/loginWx', async (ctx) => {
       var userDeatil = null
       if (!oldUser) {
         if (param.recommendId) {
-          var recommendId = await setRecommend(param.recommendId, phoneNumber)
-          if (recommendId) {
-            user.recommendId = recommendId
-          }
+          user.recommendId = await setRecommend(param.recommendId)
         }
         userDeatil = await userModel.create(user)
       } else {
@@ -173,7 +170,7 @@ async function setRecommend(recommendId) {
   }
   if (recommenUser.agentId >= 3) {
     var lastLevelUser = await userModel.findOne({ phoneNumber: recommenUser.recommendId });
-    return recommendId + "-" + (lastLevelUser ? lastLevelUser.phoneNumber : "")
+    return lastLevelUser.phoneNumber
   } else {
     return recommendId
   }
