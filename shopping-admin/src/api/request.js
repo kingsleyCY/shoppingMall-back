@@ -177,6 +177,14 @@ export function getCustomer(param) {
   })
 }
 
+export function getProxy(param) {
+  return instance({
+    url: '/admin/userList/getProxy',
+    method: 'post',
+    data: param
+  })
+}
+
 export function setQrcode(param) {
   return instance({
     url: '/admin/userList/setQrcode',

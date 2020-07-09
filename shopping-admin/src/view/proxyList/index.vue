@@ -14,7 +14,7 @@
         label="日期"
         width="100">
         <template slot-scope="scope">
-          {{timeTransfer(scope.row.created_time)}}
+          {{common.timeTransfer(scope.row.created_time)}}
         </template>
       </el-table-column>
       <el-table-column
@@ -36,7 +36,7 @@
         label="最后活动时间"
         width="100">
         <template slot-scope="scope">
-          {{timeTransfer(scope.row.lastActTime)}}
+          {{common.timeTransfer(scope.row.lastActTime)}}
         </template>
       </el-table-column>
       <el-table-column
@@ -70,16 +70,33 @@
       size="60%"
       :visible.sync="drawer"
       :with-header="false" custom-class="auto-drawer">
-      <div>
+      <div style="height: 100%;padding: 15px;">
         <el-tabs v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="下线列表" name="first">
+            <el-form ref="form" :model="firstForm" label-width="80px" :inline="true" size="mini">
+              <el-form-item>
+                <el-select v-model="firstForm.agentLevel" @change="agentLevelChange">
+                  <el-option :label="item.title" :value="item.val" v-for="(item, index) in levelArr"
+                             :key="index" :disabled="setProxyDisabled(item)"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-select v-model="firstForm.agentType" :disabled="agentTypeDisabled">
+                  <el-option :label="item.title" :value="item.val" v-for="(item, index) in typeArr"
+                             :key="index"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="getRecommDetail">查询</el-button>
+              </el-form-item>
+            </el-form>
             <el-table :data="detailTable" border style="width: 100%">
               <el-table-column
                 prop="date"
                 label="日期"
                 min-width="180">
                 <template slot-scope="scope">
-                  {{timeTransfer(scope.row.created_time)}}
+                  {{common.timeTransfer(scope.row.created_time)}}
                 </template>
               </el-table-column>
               <el-table-column
@@ -88,9 +105,16 @@
                 min-width="180">
               </el-table-column>
               <el-table-column
-                prop="integral"
-                label="积分"
-                min-width="120">
+                prop="agentId"
+                label="级别"
+                min-width="100">
+              </el-table-column>
+              <el-table-column
+                label="最后活动时间"
+                width="100">
+                <template slot-scope="scope">
+                  {{common.timeTransfer(scope.row.lastActTime)}}
+                </template>
               </el-table-column>
               <el-table-column
                 prop="qrCode"
@@ -101,15 +125,6 @@
                 </template>
               </el-table-column>
             </el-table>
-            <el-pagination
-              @size-change="detailSizeChange"
-              @current-change="detailCurrentChange"
-              :current-page="detailPage.page"
-              :page-sizes="[10, 20, 40, 100]"
-              :page-size="detailPage.pageSize"
-              layout="total, sizes, prev, pager, next, jumper"
-              :total="detailPage.total">
-            </el-pagination>
           </el-tab-pane>
           <el-tab-pane label="流水查看" name="second">
             <el-table :data="orderTable" border style="width: 100%">
@@ -118,7 +133,7 @@
                 label="日期"
                 min-width="150">
                 <template slot-scope="scope">
-                  {{timeTransfer(scope.row.created_time)}}
+                  {{common.timeTransfer(scope.row.created_time)}}
                 </template>
               </el-table-column>
               <el-table-column
@@ -189,7 +204,7 @@
 </template>
 
 <script>
-  import { getCustomer, getProxyOrder } from "@/api/request"
+  import { getCustomer, getProxy, getProxyOrder } from "@/api/request"
 
   export default {
     name: "proxyList",
@@ -202,23 +217,54 @@
         detailTable: [],
         orderTable: [],
         pageData: {
-          page: 1,
-          pageSize: 10,
-          page: 1,
-        },
-        detailPage: {
-          page: 1,
           pageSize: 10,
           page: 1,
         },
         orderPage: {
-          page: 1,
           pageSize: 10,
           page: 1,
         },
         drawer: false,
         detailItem: null,
-        activeName: "first"
+        proxyLevel: 1,
+        agentTypeDisabled: false,
+        activeName: "first",
+        firstForm: {
+          agentLevel: 0,
+          agentType: 0,
+        },
+        levelArr: [
+          {
+            val: 0,
+            title: "全部"
+          },
+          {
+            val: 1,
+            title: "一级"
+          },
+          {
+            val: 2,
+            title: "二级"
+          },
+          {
+            val: 3,
+            title: "三级"
+          }
+        ],
+        typeArr: [
+          /*{
+            val: 0,
+            title: "全部"
+          },*/
+          {
+            val: 1,
+            title: "代理"
+          },
+          {
+            val: 2,
+            title: "用户"
+          }
+        ]
       }
     },
     mounted() {
@@ -254,15 +300,6 @@
         this.pageData.page = val
         this.getCustomerMethods()
       },
-      detailSizeChange(val) {
-        this.pageData.pageSize = val
-        this.pageData.page = 1
-        this.getCustomerMethods()
-      },
-      detailCurrentChange(val) {
-        this.pageData.page = val
-        this.getCustomerMethods()
-      },
       orderSizeChange(val) {
         this.orderPage.pageSize = val
         this.orderPage.page = 1
@@ -275,20 +312,25 @@
       toDetail(row) {
         this.drawer = true;
         this.detailItem = row
+        this.proxyLevel = row.agentId
         this.handleClick()
       },
+
       getRecommDetail() {
         let param = {
-          page: this.detailPage.page,
-          pageSize: this.detailPage.pageSize,
-          listType: "recommend",
-          id: this.detailItem.userId
+          agentLevel: this.firstForm.agentLevel,
+          agentType: this.firstForm.agentType,
+          agentId: this.detailItem.agentId,
+          phoneNumber: this.detailItem.phoneNumber
         }
-        getCustomer(param).then(res => {
-          this.detailTable = res.data.list;
-          this.detailPage.total = res.data.total;
+        getProxy(param).then(res => {
+          if (res.code === 1) {
+            this.detailTable = res.data;
+          } else {
+            this.detailTable = [];
+          }
         }).catch(res => {
-
+          this.detailTable = [];
         })
       },
       getOrderList() {
@@ -305,24 +347,35 @@
           this.orderPage.total = 0;
         })
       },
-      timeTransfer(data) {
-        function add0(m) {
-          return m < 10 ? '0' + m : m
-        }
-        var time = new Date(data);
-        var y = time.getFullYear();
-        var m = time.getMonth() + 1;
-        var d = time.getDate();
-        var h = time.getHours();
-        var mm = time.getMinutes();
-        var s = time.getSeconds();
-        return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
-      },
       handleClick() {
         if (this.activeName === "first") {
-          this.getRecommDetail()
+          this.getRecommDetail();
+          this.firstForm.agentLevel = this.proxyLevel
+          this.agentLevelChange()
         } else if (this.activeName === "second") {
           this.getOrderList()
+          this.orderPage = {
+            page: 1,
+            pageSize: 10
+          }
+        }
+      },
+      setProxyDisabled(item) {
+        if (item.val === 0) {
+          return false
+        }
+        if (item.val >= this.proxyLevel) {
+          return false
+        } else {
+          return true
+        }
+      },
+      agentLevelChange() {
+        if (this.firstForm.agentLevel === this.proxyLevel) {
+          this.firstForm.agentType = 2;
+          this.agentTypeDisabled = true
+        } else {
+          this.agentTypeDisabled = false
         }
       }
     }

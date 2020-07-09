@@ -21,7 +21,7 @@ router.post('/loginAdmin', async (ctx) => {
     const token = jwt.sign({
         username: param.username,
         password: param.password,
-      }, commons.jwtScret, { expiresIn: '1h' }
+      }, commons.jwtScret, { expiresIn: '3h' }
     )
     ctx.body = commons.jsonBack(1, { token }, "登录成功！");
   } else {
@@ -114,6 +114,23 @@ router.post('/getProxyOrder', async (ctx) => {
   }, "");
 })
 
+/* 获取代理列表 */
+/*
+* param: phoneNumber、agentId、agentLevel、agentType
+* */
+router.post('/getProxy', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['phoneNumber', 'agentId', 'agentLevel', 'agentType'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误1"))
+  }
+  const userItem = JSON.parse(JSON.stringify(await userModel.findOne({ phoneNumber: param.phoneNumber })))
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
+  }
+  var list = await getchildUser(userItem, param.agentLevel, param.agentType);
+  ctx.body = commons.jsonBack(1, list, "获取数据成功");
+})
+
 async function getAccesstoken() {
   var content = qs.stringify({
     appid: commons.wx_appid,
@@ -168,6 +185,162 @@ async function setQrcode(token, scene) {
     req.end();
   })
   return imgBuffer
+}
+
+async function getchildUser(userItem, agentLevel, agentType) {
+  var userList = JSON.parse(JSON.stringify(await userModel.find({}, {
+    userId: 1,
+    created_time: 1,
+    recommendId: 1,
+    phoneNumber: 1,
+    agentId: 1,
+  }).sort({ '_id': -1 })));
+  var phoneNumber = userItem.phoneNumber;
+  var list = []
+  if (userItem.agentId === 1) { // 一级代理
+    switch (agentLevel) { // 查询等级
+      case 0:
+        list = getAllUser(userItem.agentId)
+        break;
+      case 1:
+        list = getPeerNormalUser()
+        break;
+      case 2:
+        list = getChildUser()
+        break;
+      case 3:
+        list = getGrandUser()
+        break;
+    }
+  }
+  if (userItem.agentId === 2) { // 二级代理
+    switch (agentLevel) { // 查询等级
+      case 0:
+        list = getAllUser(userItem.agentId)
+        break;
+      case 2:
+        list = getPeerNormalUser()
+        break;
+      case 3:
+        list = getChildUser()
+        break;
+    }
+  }
+  if (userItem.agentId === 3) { // 三级代理
+    list = getPeerNormalUser()
+  }
+  return list
+
+  function getAllUser(agentId) {
+    var itemList = []
+    if (agentType === 2) {
+      itemList = userList.filter(v => {
+        return v.recommendId === phoneNumber && v.agentId === 0
+      })
+    }
+    var childProxyList = userList.filter(v => {
+      return v.recommendId === phoneNumber && v.agentId !== 0
+    })
+    for (let i = 0; i < childProxyList.length; i++) {
+      // 代理/用户
+      if (agentType === 1) {
+        itemList.push(childProxyList[i])
+      } else if (agentType === 2) {
+        var childNormaList = userList.filter(v => {
+          return v.recommendId === childProxyList[i].phoneNumber && v.agentId === 0
+        })
+        itemList = [...itemList, ...childNormaList]
+      }
+      if (agentId === 1) {
+        var grandProxyList = userList.filter(v => {
+          return v.recommendId === childProxyList[i].phoneNumber && v.agentId !== 0
+        })
+        for (let j = 0; j < grandProxyList.length; j++) {
+          if (agentType === 1) {
+            itemList.push(grandProxyList[j])
+          } else if (agentType === 2) {
+            var grandNormaList = userList.filter(v => {
+              return v.recommendId === grandProxyList[j].phoneNumber && v.agentId === 0
+            })
+            itemList = [...itemList, ...grandNormaList]
+          }
+        }
+      }
+    }
+    return itemList
+  }
+  function getPeerNormalUser() {
+    var itemList = userList.filter(v => {
+      return v.recommendId === phoneNumber && v.agentId === 0
+    })
+    return itemList
+  }
+  function getChildUser() {
+    var itemList = []
+    var childProxyList = userList.filter(v => {
+      return v.recommendId === phoneNumber && v.agentId !== 0
+    })
+    for (let i = 0; i < childProxyList.length; i++) {
+      if (agentType === 1) {
+        itemList.push(childProxyList[i])
+      } else if (agentType === 2) {
+        var childNormaList = userList.filter(v => {
+          return v.recommendId === childProxyList[i].phoneNumber && v.agentId === 0
+        })
+        itemList = [...itemList, ...childNormaList]
+      }
+    }
+    return itemList
+  }
+  function getGrandUser() {
+    var itemList = []
+    var childProxyList = userList.filter(v => {
+      return v.recommendId === phoneNumber && v.agentId !== 0
+    })
+    for (let i = 0; i < childProxyList.length; i++) {
+      var grandProxyList = userList.filter(v => {
+        return v.recommendId === childProxyList[i].phoneNumber && v.agentId !== 0
+      })
+      for (let j = 0; j < grandProxyList.length; j++) {
+        if (agentType === 1) {
+          itemList.push(grandProxyList[j])
+        } else if (agentType === 2) {
+          var grandNormaList = userList.filter(v => {
+            return v.recommendId === grandProxyList[j].phoneNumber && v.agentId === 0
+          })
+          itemList = [...itemList, ...grandNormaList]
+        }
+      }
+    }
+  }
+  /*let searchObj = { recommendId: phoneNumber }
+  searchObj = setAgentType(searchObj, agentType)
+  var childUserList = await userModel.find(searchObj).sort({ '_id': -1 })
+  var list = []
+  for (let i = 0; i < childUserList.length; i++) {
+    if (flag !== "grandson") {
+      list.push(childUserList[i]);
+    }
+    if (flag !== "child") {
+      let searchObj = { recommendId: childUserList[i].phoneNumber }
+      searchObj = setAgentType(searchObj, agentType)
+      let grandUserList = await userModel.find(searchObj).sort({ '_id': -1 })
+      list = [...list, ...grandUserList]
+    }
+  }*/
+
+  function setAgentType() {
+    if (agentType === 0) {
+      return { $in: [0, 1, 2, 3] }
+    } else if (agentType === 1) {
+      return { $in: [1, 2, 3] }
+    } else if (agentType === 2) {
+      return { $in: [0] }
+    } else {
+      return {}
+    }
+  }
+  return list
 }
 
 
