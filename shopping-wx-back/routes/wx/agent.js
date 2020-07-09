@@ -35,12 +35,12 @@ router.post('/getAgentDetail', async (ctx) => {
 
 /* 申请提取金额 */
 /*
-* params: userId、phoneNumber
+* params: userId、phoneNumber type
 *
 * */
 router.post('/applyExtract', async (ctx) => {
   var param = ctx.request.body
-  if (!commons.judgeParamExists(['userId', 'phoneNumber'], param)) {
+  if (!commons.judgeParamExists(['userId', 'phoneNumber', 'type'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   ctx.body = commons.jsonBack(1, {}, "申请成功，");
