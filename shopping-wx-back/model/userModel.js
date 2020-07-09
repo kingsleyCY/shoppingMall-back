@@ -6,7 +6,6 @@ var userSchema = new mongoose.Schema({
   defaultAddress: { type: String, default: '' },
   phoneNumber: { type: String, default: '' }, // 手机号
   qrCode: { type: String, default: '' }, // 推荐二维码地址
-  // isProxy: { type: Number, default: 0 }, // 是否为代理
   activityList: { type: Object, default: {} },
   integral: { type: Number, default: 0 }, // 积分
   wxUserInfo: { type: Object, default: {} },

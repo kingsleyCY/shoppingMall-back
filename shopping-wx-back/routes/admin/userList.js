@@ -196,6 +196,7 @@ async function getchildUser(userItem, agentLevel, agentType) {
     agentId: 1,
   }).sort({ '_id': -1 })));
   var phoneNumber = userItem.phoneNumber;
+  console.log(phoneNumber);
   var list = []
   if (userItem.agentId === 1) { // 一级代理
     switch (agentLevel) { // 查询等级
@@ -235,7 +236,7 @@ async function getchildUser(userItem, agentLevel, agentType) {
     var itemList = []
     if (agentType === 2) {
       itemList = userList.filter(v => {
-        return v.recommendId === phoneNumber && v.agentId === 0
+        return (v.recommendId) === phoneNumber && (v.agentId === 0)
       })
     }
     var childProxyList = userList.filter(v => {
@@ -271,21 +272,21 @@ async function getchildUser(userItem, agentLevel, agentType) {
   }
   function getPeerNormalUser() {
     var itemList = userList.filter(v => {
-      return v.recommendId === phoneNumber && v.agentId === 0
+      return (v.recommendId === phoneNumber) && (v.agentId === 0)
     })
     return itemList
   }
   function getChildUser() {
     var itemList = []
     var childProxyList = userList.filter(v => {
-      return v.recommendId === phoneNumber && v.agentId !== 0
+      return (v.recommendId === phoneNumber) && (v.agentId !== 0)
     })
     for (let i = 0; i < childProxyList.length; i++) {
       if (agentType === 1) {
         itemList.push(childProxyList[i])
       } else if (agentType === 2) {
         var childNormaList = userList.filter(v => {
-          return v.recommendId === childProxyList[i].phoneNumber && v.agentId === 0
+          return (v.recommendId === childProxyList[i].phoneNumber) && (v.agentId === 0)
         })
         itemList = [...itemList, ...childNormaList]
       }
@@ -295,39 +296,25 @@ async function getchildUser(userItem, agentLevel, agentType) {
   function getGrandUser() {
     var itemList = []
     var childProxyList = userList.filter(v => {
-      return v.recommendId === phoneNumber && v.agentId !== 0
+      return (v.recommendId === phoneNumber) && (v.agentId !== 0)
     })
     for (let i = 0; i < childProxyList.length; i++) {
       var grandProxyList = userList.filter(v => {
-        return v.recommendId === childProxyList[i].phoneNumber && v.agentId !== 0
+        return (v.recommendId === childProxyList[i].phoneNumber) && (v.agentId !== 0)
       })
       for (let j = 0; j < grandProxyList.length; j++) {
         if (agentType === 1) {
           itemList.push(grandProxyList[j])
         } else if (agentType === 2) {
           var grandNormaList = userList.filter(v => {
-            return v.recommendId === grandProxyList[j].phoneNumber && v.agentId === 0
+            return (v.recommendId === grandProxyList[j].phoneNumber) && (v.agentId === 0)
           })
           itemList = [...itemList, ...grandNormaList]
         }
       }
     }
+    return itemList
   }
-  /*let searchObj = { recommendId: phoneNumber }
-  searchObj = setAgentType(searchObj, agentType)
-  var childUserList = await userModel.find(searchObj).sort({ '_id': -1 })
-  var list = []
-  for (let i = 0; i < childUserList.length; i++) {
-    if (flag !== "grandson") {
-      list.push(childUserList[i]);
-    }
-    if (flag !== "child") {
-      let searchObj = { recommendId: childUserList[i].phoneNumber }
-      searchObj = setAgentType(searchObj, agentType)
-      let grandUserList = await userModel.find(searchObj).sort({ '_id': -1 })
-      list = [...list, ...grandUserList]
-    }
-  }*/
 
   function setAgentType() {
     if (agentType === 0) {

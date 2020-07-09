@@ -86,7 +86,7 @@ router.post('/getNewCommodity', async (ctx) => {
   var data = await baseConfigModel.findOne({ type: "commodity" });
   var list = [];
   if (data) {
-    const ids = data.newsList.slice(param.pageSize * (param.page - 1), param.pageSize + 1)
+    const ids = data.newsList.slice(param.pageSize * (param.page - 1), param.page * param.pageSize)
     for (let i = 0; i < ids.length; i++) {
       var shopItem = await commons.getRedis("shop-" + ids[i]);
       if (!shopItem) {
@@ -123,7 +123,7 @@ router.post('/getRebate', async (ctx) => {
   var data = await baseConfigModel.findOne({ type: "commodity" });
   var list = [];
   if (data) {
-    const ids = data.rebateList.slice(param.pageSize * (param.page - 1), param.pageSize + 1)
+    const ids = data.rebateList.slice(param.pageSize * (param.page - 1), param.page * param.pageSize)
     for (let i = 0; i < ids.length; i++) {
       var shopItem = await commons.getRedis("shop-" + ids[i]);
       if (!shopItem) {

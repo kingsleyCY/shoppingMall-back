@@ -24,7 +24,7 @@
       </el-table-column>
       <el-table-column
         prop="recommendId"
-        label="推荐人ID"
+        label="推荐人手机号"
         min-width="180">
       </el-table-column>
       <el-table-column
@@ -108,21 +108,6 @@
                 prop="agentId"
                 label="级别"
                 min-width="100">
-              </el-table-column>
-              <el-table-column
-                label="最后活动时间"
-                width="100">
-                <template slot-scope="scope">
-                  {{common.timeTransfer(scope.row.lastActTime)}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="qrCode"
-                label="qrCode"
-                min-width="100">
-                <template slot-scope="scope">
-                  <img :src="scope.row.qrCode" v-image>
-                </template>
               </el-table-column>
             </el-table>
           </el-tab-pane>
