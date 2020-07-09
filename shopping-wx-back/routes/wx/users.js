@@ -168,12 +168,7 @@ async function setRecommend(recommendId) {
   if (!recommenUser) {
     return ""
   }
-  if (recommenUser.agentId >= 3) {
-    var lastLevelUser = await userModel.findOne({ phoneNumber: recommenUser.recommendId });
-    return lastLevelUser.phoneNumber
-  } else {
-    return recommendId
-  }
+  return recommendId.phoneNumber
 }
 
 

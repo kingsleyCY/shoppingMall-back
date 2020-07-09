@@ -230,15 +230,15 @@
           },
           {
             val: 1,
-            title: "一级"
+            title: "一级A"
           },
           {
             val: 2,
-            title: "二级"
+            title: "二级B"
           },
           {
             val: 3,
-            title: "三级"
+            title: "三级C"
           }
         ],
         typeArr: [

@@ -11,7 +11,7 @@ var userSchema = new mongoose.Schema({
   wxUserInfo: { type: Object, default: {} },
   couponList: { type: Array, default: [] }, //优惠券信息
   lastActTime: { type: Number, default: '' }, // 最后活跃时间
-  agentId: { type: Number, default: 0 }, // 代理级别 0=普通用户
+  agentId: { type: Number, default: 0 }, // 代理结算级别 0=普通用户
   proxy_time: { type: Number, default: 0 },
 }, { collection: "userList", versionKey: false });
 var userModel = db.model("userList", userSchema);

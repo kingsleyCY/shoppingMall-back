@@ -88,7 +88,7 @@ router.post('/setQrcode', async (ctx) => {
   if (userItem.recommendId) {
     var parentUser = await userModel.findOne({ phoneNumber: userItem.recommendId })
     agentId = parentUser.agentId + 1;
-    agentId >= 3 ? agentId = 3 : ""
+    // agentId >= 3 ? agentId = 3 : ""
   }
   await userModel.findOneAndUpdate({ userId: param.id }, {
     qrCode: qrCode.url,
