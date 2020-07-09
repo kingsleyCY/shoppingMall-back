@@ -8,6 +8,7 @@ const users = require('./wx/users');
 const order = require('./wx/order');
 const afterSales = require('./wx/afterSales');
 const message = require('./wx/message');
+const agent = require('./wx/agent');
 
 router.use('/shop', activity.routes(), activity.allowedMethods());
 router.use('/shop', address.routes(), address.allowedMethods());
@@ -17,6 +18,7 @@ router.use('/shop', users.routes(), users.allowedMethods());
 router.use('/shop', order.routes(), order.allowedMethods());
 router.use('/shop', afterSales.routes(), afterSales.allowedMethods());
 router.use('/shop', message.routes(), message.allowedMethods());
+router.use('/shop', agent.routes(), agent.allowedMethods());
 
 const adminActivity = require('./admin/activity');
 const adminClassify = require('./admin/classify');
