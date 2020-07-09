@@ -240,7 +240,7 @@ var wx = {
       })
     }
   },
-  /* 修改订单orderSettlement */
+  /* 修改订单 orderSettlement */
   async changeOrderIntegral(orderItem) {
     var order = JSON.parse(JSON.stringify(orderItem))
     if (!order.orderSettlement || !order.orderSettlement.isIntegral) {
@@ -253,7 +253,7 @@ var wx = {
         await orderModel.findOneAndUpdate({
           userId: order.userId,
           out_trade_no: order.out_trade_no
-        }, { "orderSettlement.isIntegral": true })
+        }, { "orderSettlement.isIntegral": true, "orderSettlement.isOverOrder": true })
       }
     }
   }

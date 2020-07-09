@@ -12,6 +12,7 @@ var userSchema = new mongoose.Schema({
   couponList: { type: Array, default: [] }, //优惠券信息
   lastActTime: { type: Number, default: '' }, // 最后活跃时间
   agentId: { type: Number, default: 0 }, // 代理结算级别 0=普通用户
+  setAgentId: { type: Number, default: 1 }, // 代理结算级别 1=默认级别
   proxy_time: { type: Number, default: 0 },
 }, { collection: "userList", versionKey: false });
 var userModel = db.model("userList", userSchema);

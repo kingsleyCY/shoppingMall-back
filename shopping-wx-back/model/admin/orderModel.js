@@ -72,7 +72,9 @@ exports.orderModel = orderModel;
 * over 已完成
 * */
 
-/* orderSettlement说明 */
+/* orderSettlement 说明 */
 /*
 * isIntegral 是否加积分
+* isOverOrder 是否可算入结算类订单 （非退货）
+* isSetProxy 是否已结算给代理
 * */

@@ -199,9 +199,6 @@ router.post('/overOrder', async (ctx) => {
       applyAfterStatus: "over"
     }
     if (orderItem.orderStatus === "applyAfter" && orderItem.applyAfterStatus === "reMailing") {
-      /*var userItem = await userModel.findOne({ userId: orderItem.userId });
-      var integral = commons.add((userItem.integral || 0), (orderItem.total_fee / 100));
-      // newObj.integral = integral;*/
       await commons.changeOrderIntegral(orderItem);
     }
     var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, newObj, { new: true });

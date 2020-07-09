@@ -353,7 +353,7 @@ router.post("/getOrderList", async (ctx) => {
   commons.setUserData(param.userId)
 })
 
-/* 确认收货 */
+/* 确认收货-完成订单 */
 /*
 * param：out_trade_no、userId
 * */
