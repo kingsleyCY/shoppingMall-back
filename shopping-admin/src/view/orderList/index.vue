@@ -474,7 +474,7 @@
           } else {
             this.$message.error(res.mess);
           }
-        }).catch(reds => {
+        }).catch(res => {
           this.$message.error("操作失败")
         })
       },
