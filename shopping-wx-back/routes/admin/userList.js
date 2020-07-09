@@ -45,7 +45,7 @@ router.post('/getCustomer', async (ctx) => {
   }
   let obj = {}
   if (param.listType === "proxy") {
-    obj.agentId = { $in: [1, 2, 3] }
+    obj.agentId = { $ne: 0 }
   } else if (param.listType === "recommend") {
     var userItem = await userModel.findOne({ userId: param.id })
     obj.recommendId = userItem.phoneNumber
@@ -123,11 +123,11 @@ router.post('/getProxyOrder', async (ctx) => {
 
 /* 获取代理列表 */
 /*
-* param: phoneNumber、agentId、agentLevel、agentType
+* param: phoneNumber、agentLevel 0全部 1自己 2子集 3孙集、agentType 1=代理 2=用户
 * */
 router.post('/getProxy', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['phoneNumber', 'agentId', 'agentLevel', 'agentType'], param)) {
+  if (!commons.judgeParamExists(['phoneNumber', 'agentLevel', 'agentType'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误1"))
   }
   const userItem = JSON.parse(JSON.stringify(await userModel.findOne({ phoneNumber: param.phoneNumber })))
@@ -195,6 +195,10 @@ async function setQrcode(token, scene) {
 }
 
 async function getchildUser(userItem, agentLevel, agentType) {
+  /*
+    agentLevel 0全部 1自己 2子集 3孙集、
+    agentType 1=代理 2=用户
+  */
   var userList = JSON.parse(JSON.stringify(await userModel.find({}, {
     userId: 1,
     created_time: 1,
@@ -203,135 +207,44 @@ async function getchildUser(userItem, agentLevel, agentType) {
     agentId: 1,
   }).sort({ '_id': -1 })));
   var phoneNumber = userItem.phoneNumber;
-  console.log(phoneNumber);
   var list = []
-  if (userItem.agentId === 1) { // 一级代理
-    switch (agentLevel) { // 查询等级
-      case 0:
-        list = getAllUser(userItem.agentId)
-        break;
-      case 1:
-        list = getPeerNormalUser()
-        break;
-      case 2:
-        list = getChildUser()
-        break;
-      case 3:
-        list = getGrandUser()
-        break;
-    }
-  }
-  if (userItem.agentId === 2) { // 二级代理
-    switch (agentLevel) { // 查询等级
-      case 0:
-        list = getAllUser(userItem.agentId)
-        break;
-      case 2:
-        list = getPeerNormalUser()
-        break;
-      case 3:
-        list = getChildUser()
-        break;
-    }
-  }
-  if (userItem.agentId === 3) { // 三级代理
-    list = getPeerNormalUser()
-  }
-  return list
-
-  function getAllUser(agentId) {
-    var itemList = []
-    if (agentType === 2) {
-      itemList = userList.filter(v => {
-        return (v.recommendId) === phoneNumber && (v.agentId === 0)
-      })
-    }
-    var childProxyList = userList.filter(v => {
-      return v.recommendId === phoneNumber && v.agentId !== 0
+  if ((agentLevel === 1 || agentLevel === 0) && agentType === 2) { // A的用户
+    list = userList.filter(v => {
+      return (v.recommendId === phoneNumber) && (v.agentId === 0)
     })
-    for (let i = 0; i < childProxyList.length; i++) {
-      // 代理/用户
-      if (agentType === 1) {
-        itemList.push(childProxyList[i])
-      } else if (agentType === 2) {
-        var childNormaList = userList.filter(v => {
-          return v.recommendId === childProxyList[i].phoneNumber && v.agentId === 0
-        })
-        itemList = [...itemList, ...childNormaList]
+  }
+  if (agentLevel === 0 || agentLevel === 2 || agentLevel === 3) {
+    var childProxyList = userList.filter(v => {
+      return (v.recommendId === phoneNumber) && (v.agentId !== 0)
+    })
+    if (agentLevel === 0 || agentLevel === 2) { // B
+      if (agentType === 1) { // B代理
+        list = [...list, ...childProxyList]
+      } else { // B的用户
+        for (let i = 0; i < childProxyList.length; i++) {
+          let childNormalList = userList.filter(v => {
+            return (v.recommendId === childProxyList[i].phoneNumber) && (v.agentId === 0)
+          })
+          list = [...list, ...childNormalList]
+        }
       }
-      if (agentId === 1) {
-        var grandProxyList = userList.filter(v => {
-          return v.recommendId === childProxyList[i].phoneNumber && v.agentId !== 0
+    }
+    if (agentLevel === 0 || agentLevel === 3) { // C
+      for (let i = 0; i < childProxyList.length; i++) {
+        let grandProxyList = userList.filter(v => {
+          return (v.recommendId === childProxyList[i].phoneNumber) && (v.agentId !== 0)
         })
         for (let j = 0; j < grandProxyList.length; j++) {
-          if (agentType === 1) {
-            itemList.push(grandProxyList[j])
-          } else if (agentType === 2) {
-            var grandNormaList = userList.filter(v => {
+          if (agentType === 1) { // C代理
+            list = [...list, ...grandProxyList]
+          } else { // C的用户
+            let grandNormaList = userList.filter(v => {
               return v.recommendId === grandProxyList[j].phoneNumber && v.agentId === 0
             })
-            itemList = [...itemList, ...grandNormaList]
+            list = [...list, ...grandNormaList]
           }
         }
       }
-    }
-    return itemList
-  }
-  function getPeerNormalUser() {
-    var itemList = userList.filter(v => {
-      return (v.recommendId === phoneNumber) && (v.agentId === 0)
-    })
-    return itemList
-  }
-  function getChildUser() {
-    var itemList = []
-    var childProxyList = userList.filter(v => {
-      return (v.recommendId === phoneNumber) && (v.agentId !== 0)
-    })
-    for (let i = 0; i < childProxyList.length; i++) {
-      if (agentType === 1) {
-        itemList.push(childProxyList[i])
-      } else if (agentType === 2) {
-        var childNormaList = userList.filter(v => {
-          return (v.recommendId === childProxyList[i].phoneNumber) && (v.agentId === 0)
-        })
-        itemList = [...itemList, ...childNormaList]
-      }
-    }
-    return itemList
-  }
-  function getGrandUser() {
-    var itemList = []
-    var childProxyList = userList.filter(v => {
-      return (v.recommendId === phoneNumber) && (v.agentId !== 0)
-    })
-    for (let i = 0; i < childProxyList.length; i++) {
-      var grandProxyList = userList.filter(v => {
-        return (v.recommendId === childProxyList[i].phoneNumber) && (v.agentId !== 0)
-      })
-      for (let j = 0; j < grandProxyList.length; j++) {
-        if (agentType === 1) {
-          itemList.push(grandProxyList[j])
-        } else if (agentType === 2) {
-          var grandNormaList = userList.filter(v => {
-            return (v.recommendId === grandProxyList[j].phoneNumber) && (v.agentId === 0)
-          })
-          itemList = [...itemList, ...grandNormaList]
-        }
-      }
-    }
-    return itemList
-  }
-
-  function setAgentType() {
-    if (agentType === 0) {
-      return { $in: [0, 1, 2, 3] }
-    } else if (agentType === 1) {
-      return { $in: [1, 2, 3] }
-    } else if (agentType === 2) {
-      return { $in: [0] }
-    } else {
-      return {}
     }
   }
   return list

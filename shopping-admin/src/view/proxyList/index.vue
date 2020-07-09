@@ -77,7 +77,7 @@
               <el-form-item>
                 <el-select v-model="firstForm.agentLevel" @change="agentLevelChange">
                   <el-option :label="item.title" :value="item.val" v-for="(item, index) in levelArr"
-                             :key="index" :disabled="setProxyDisabled(item)"></el-option>
+                             :key="index"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
@@ -221,7 +221,7 @@
         activeName: "first",
         firstForm: {
           agentLevel: 0,
-          agentType: 0,
+          agentType: 1,
         },
         levelArr: [
           {
@@ -339,7 +339,8 @@
       },
       handleClick() {
         if (this.activeName === "first") {
-          this.firstForm.agentLevel = this.proxyLevel
+          this.firstForm.agentLevel = 0
+          this.firstForm.agentType = 1
           this.agentLevelChange()
           this.getRecommDetail();
         } else if (this.activeName === "second") {
@@ -350,18 +351,8 @@
           }
         }
       },
-      setProxyDisabled(item) {
-        if (item.val === 0) {
-          return false
-        }
-        if (item.val >= this.proxyLevel) {
-          return false
-        } else {
-          return true
-        }
-      },
       agentLevelChange() {
-        if (this.firstForm.agentLevel === this.proxyLevel) {
+        if (this.firstForm.agentLevel === 1) {
           this.firstForm.agentType = 2;
           this.agentTypeDisabled = true
         } else {
