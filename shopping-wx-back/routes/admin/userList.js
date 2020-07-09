@@ -79,6 +79,9 @@ router.post('/setQrcode', async (ctx) => {
   if (!userItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"));
   }
+  if (userItem.agentId !== 0) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "该用户非普通用户"));
+  }
   var access_token = await getAccesstoken();
   var qrCode = await setQrcode(access_token.access_token, userItem.phoneNumber);
   var agentId = 1;
@@ -87,7 +90,11 @@ router.post('/setQrcode', async (ctx) => {
     agentId = parentUser.agentId + 1;
     agentId >= 3 ? agentId = 3 : ""
   }
-  await userModel.findOneAndUpdate({ userId: param.id }, { qrCode: qrCode.url, agentId: agentId }, { new: true });
+  await userModel.findOneAndUpdate({ userId: param.id }, {
+    qrCode: qrCode.url,
+    agentId: agentId,
+    proxy_time: Date.parse(new Date())
+  }, { new: true });
   ctx.body = commons.jsonBack(1, { url: qrCode.url }, "获取数据成功");
 })
 

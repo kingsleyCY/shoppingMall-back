@@ -105,6 +105,11 @@
                 min-width="180">
               </el-table-column>
               <el-table-column
+                prop="recommendId"
+                label="推荐人手机号"
+                min-width="180">
+              </el-table-column>
+              <el-table-column
                 prop="agentId"
                 label="级别"
                 min-width="100">
@@ -334,9 +339,9 @@
       },
       handleClick() {
         if (this.activeName === "first") {
-          this.getRecommDetail();
           this.firstForm.agentLevel = this.proxyLevel
           this.agentLevelChange()
+          this.getRecommDetail();
         } else if (this.activeName === "second") {
           this.getOrderList()
           this.orderPage = {
