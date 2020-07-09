@@ -3,7 +3,7 @@ const { userModel } = require('../../model/userModel');
 const { shoppingModel } = require('../../model/commodityModel');
 const { orderModel } = require('../../model/admin/orderModel');
 const { couponModel } = require('../../model/admin/couponModel');
-const addressModel = require('../../model/addressModel');
+const { addressModel } = require('../../model/addressModel');
 const request = require('request');
 const xmlreader = require("xmlreader");
 
@@ -31,7 +31,7 @@ router.post("/payment", async (ctx) => {
 
   const userItem = await userModel.findOne({ userId: param.userId });
   const commodItem = await shoppingModel.findOne({ id: orderItem ? orderItem.commodityId : param.commodityId });
-  const addressItem = await addressModel.model.findOne({ id: param.addressId || orderItem.addressId });
+  const addressItem = await addressModel.findOne({ id: param.addressId || orderItem.addressId });
   if (!userItem || !commodItem || !addressItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "传递参数查询数据失败"))
   }
@@ -338,7 +338,7 @@ router.post("/getOrderList", async (ctx) => {
     list[i].commodityDetail = detail
     var addreDetail = await commons.getRedis("addre-" + list[i].addressId);
     if (!addreDetail) {
-      addreDetail = await addressModel.model.findOne({ id: list[i].addressId })
+      addreDetail = await addressModel.findOne({ id: list[i].addressId })
     } else {
       addreDetail = JSON.parse(addreDetail)
     }
