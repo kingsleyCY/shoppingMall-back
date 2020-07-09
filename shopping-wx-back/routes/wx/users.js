@@ -168,7 +168,7 @@ async function setRecommend(recommendId) {
   if (!recommenUser) {
     return ""
   }
-  return recommendId.phoneNumber
+  return recommenUser.phoneNumber
 }
 
 
