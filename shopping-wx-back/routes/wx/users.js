@@ -61,12 +61,12 @@ router.post('/loginWx', async (ctx) => {
       } else {
         userDeatil = oldUser
       }
-      /*const token = jwt.sign({
+      const token = jwt.sign({
         openId: openid,
         phoneNumber: phoneNumber,
         userId: userDeatil.userId
       }, commons.jwtScret);
-      ctx.res.setHeader('Authorization', token);*/
+      ctx.res.setHeader('Authorization', token);
       ctx.body = commons.jsonBack(1, userDeatil, "用户登陆成功！");
     } else {
       ctx.body = commons.jsonBack(1004, {}, "获取OpenID失败！");
