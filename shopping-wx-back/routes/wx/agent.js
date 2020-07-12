@@ -97,7 +97,6 @@ router.post('/getAgentDetail', async (ctx) => {
     var extenId = userItem.agentId;
     extenId > 3 ? extenId = 3 : "";
     const agentItem = agentList[extenId - 1];
-    console.log(agentItem);
     var agentLevel = 1;
     var agentModelData = null;
     var childProfit = agentItem.childProfit;
@@ -128,7 +127,7 @@ router.post('/getAgentDetail', async (ctx) => {
       grandOrderTotal: sureOrderListC.length, // 下下级代理完成订单数
       childExtract: childExtract, // 下级可提取金额
       type: "proxy", // proxy、extension
-      setting: true,
+      setting: false,
     }
   } else if (userItem.extenId) {
     let userlist = await userModel.find({ recommendId: userItem.phoneNumber })
