@@ -174,6 +174,7 @@ router.post('/searchCommodity', async (ctx) => {
   const reg = new RegExp(param.title, 'i') //不区分大小写
   var search = {
     isDelete: { $ne: 1 },
+    id: { $ne: "-1" },
     $or: [
       { title: { '$regex': reg } }
     ],
