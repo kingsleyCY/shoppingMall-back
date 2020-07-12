@@ -31,7 +31,8 @@ router.post('/loginAdmin', async (ctx) => {
 
 /* 获取用户列表 */
 /*
-* param: listType: null => 全部  proxy=>代理列表 extension=>推广  recommend=> 指定代理人下的列表(id)
+* param: listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表(id)
+* extension=>推广 extensioned=>指定推广人下的列表
 * opparam: page, pageSize, phoneNumber
 * */
 router.post('/getCustomer', async (ctx) => {
@@ -51,10 +52,13 @@ router.post('/getCustomer', async (ctx) => {
     obj.recommendId = userItem.phoneNumber
   } else if (param.listType === "extension") {
     obj.extenId = 1
+  } else if (param.listType === "extensioned") {
+    var userItem = await userModel.findOne({ userId: param.id })
+    obj.recommendId = userItem.phoneNumber
   } else {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  if (param.listType === "extension") {
+  if (param.listType === "extension" || param.listType === "extensioned") {
     const list = await userModel.find(obj).sort({ '_id': -1 })
     ctx.body = commons.jsonBack(1, {
       list,

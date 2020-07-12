@@ -53,6 +53,38 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-drawer
+      title="我是标题"
+      size="60%"
+      :visible.sync="drawer"
+      :with-header="false" custom-class="auto-drawer">
+      <div style="height: 100%;padding: 15px;">
+        <el-tabs v-model="activeName">
+          <el-tab-pane label="下线列表" name="first">
+            <el-table :data="detailTable" border style="width: 100%">
+              <el-table-column
+                prop="date"
+                label="日期"
+                min-width="180">
+                <template slot-scope="scope">
+                  {{common.timeTransfer(scope.row.created_time)}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="phoneNumber"
+                label="手机号"
+                min-width="180">
+              </el-table-column>
+              <el-table-column
+                prop="recommendId"
+                label="推荐人手机号"
+                min-width="180">
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -64,6 +96,10 @@
     data() {
       return {
         tableData: [],
+        detailTable: [],
+        activeName: "first",
+        drawer: false,
+        detailItem: null,
       }
     },
     mounted() {
@@ -89,6 +125,28 @@
         }).catch(res => {
           this.$message.error("获取数据失败")
           this.tableData = [];
+        })
+      },
+      toDetail(row) {
+        this.drawer = true;
+        this.detailItem = row
+        this.getRecommDetail()
+      },
+      getRecommDetail() {
+        let param = {
+          page: 1,
+          pageSize: 1,
+          listType: "extensioned",
+          id: this.detailItem.userId
+        }
+        getCustomer(param).then(res => {
+          if (res.code === 1) {
+            this.detailTable = res.data;
+          } else {
+            this.detailTable = [];
+          }
+        }).catch(res => {
+          this.detailTable = [];
         })
       },
     }
