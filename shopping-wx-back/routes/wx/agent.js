@@ -1,8 +1,7 @@
-const router = require('koa-router')()
-const https = require('https');
-const qs = require('querystring');
+const router = require('koa-router')();
 const { userModel } = require('../../model/userModel');
 const { orderModel } = require('../../model/admin/orderModel');
+const { agentModel } = require('../../model/admin/agentModel');
 
 /* 获取代理数据 */
 /*
@@ -94,13 +93,31 @@ router.post('/getAgentDetail', async (ctx) => {
     var sureOrderListC = orderListC.filter(v => {
       return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
     })
+    var agentList = JSON.parse(JSON.stringify(await agentModel.find().sort({ sort: -1 })));
+    var extenId = userItem.agentId;
+    extenId > 3 ? extenId = 3 : "";
+    const agentItem = agentList[extenId - 1];
+    console.log(agentItem);
+    var agentLevel = 1;
+    var agentModelData = null;
+    var childProfit = agentItem.childProfit;
+    for (let i = 0; i < agentItem.agentModelData.length; i++) {
+      if (sureOrderListA.length >= agentItem.agentModelData[i].min && sureOrderListA.length < agentItem.agentModelData[i].max) {
+        agentLevel = (i + 1);
+        agentModelData = agentItem.agentModelData[i];
+        break;
+      }
+    }
+    var selfExtract = sureOrderListA.length * agentModelData.price;
+    var childExtract = (childProfit[0] * sureOrderListB) + (childProfit[1] * sureOrderListC)
+
 
     obj = {
-      agentLevel: 1, // 代理级别
+      agentLevel: agentLevel, // 代理级别
       orderTotal: orderListA.length, // 下单数
       sureOrderTotal: sureOrderListA.length, // 确认订单数
       cancelOrderTotal: cancelOrderListA.length, // 取消订单数
-      selfExtract: 0, // 可提取金额
+      selfExtract: selfExtract, // 可提取金额
 
       selfNormal: normalUser.length, // 代理用户数
       childProxy: childProxyUser.length, // 下级代理数
@@ -109,7 +126,7 @@ router.post('/getAgentDetail', async (ctx) => {
       grandProxy: grandProxyUser.length, // 下下级代理数
       grandNormal: grandNormalUser.length, // 下下级代理用户数
       grandOrderTotal: sureOrderListC.length, // 下下级代理完成订单数
-      childExtract: 0, // 下级可提取金额
+      childExtract: childExtract, // 下级可提取金额
       type: "proxy", // proxy、extension
       setting: true,
     }
