@@ -108,9 +108,8 @@ router.post('/getAgentDetail', async (ctx) => {
       childOrderTotal: sureOrderListB.length, // 下级代理完成订单数
       grandProxy: grandProxyUser.length, // 下下级代理数
       grandNormal: grandNormalUser.length, // 下下级代理用户数
-      grandOrderTotal: 100, // 下下级代理完成订单数
+      grandOrderTotal: sureOrderListC.length, // 下下级代理完成订单数
       childExtract: 0, // 下级可提取金额
-      extensionNum: 0, // 推广人数
       type: "proxy", // proxy、extension
       setting: true,
     }
