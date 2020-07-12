@@ -21,9 +21,9 @@ router.post('/getAgentDetail', async (ctx) => {
   var obj = {}
   if (userItem.agentId) {
     // A-用户
-    var normalUser = userModel.find({ recommendId: userItem.phoneNumber, agentId: 0 });
+    var normalUser = await userModel.find({ recommendId: userItem.phoneNumber, agentId: 0 });
     // B-代理
-    var childProxyUser = userModel.find({ recommendId: userItem.phoneNumber, agentId: { $ne: 0 } });
+    var childProxyUser = await userModel.find({ recommendId: userItem.phoneNumber, agentId: { $ne: 0 } });
     // B-用户
     var childNormalUser = [];
     for (let i = 0; i < childProxyUser.length; i++) {
@@ -77,6 +77,7 @@ router.post('/getAgentDetail', async (ctx) => {
     })
 
 
+    console.log(childProxyUser);
     obj = {
       agentLevel: 1, // 代理级别
       orderTotal: orderListA.length, // 下单数
