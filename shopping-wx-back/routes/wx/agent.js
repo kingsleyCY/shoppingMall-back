@@ -42,6 +42,12 @@ router.post('/getAgentDetail', async (ctx) => {
       let list = await userModel.find({ recommendId: grandProxyUser[i].phoneNumber, agentId: 0 });
       grandNormalUser = [...grandNormalUser, ...list]
     }
+    // D-代理
+    var grandChildProxyUser = [];
+    for (let i = 0; i < grandProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: grandProxyUser[i].phoneNumber, agentId: { $ne: 0 } });
+      grandChildProxyUser = [...grandChildProxyUser, ...list]
+    }
 
     var orderListA = [] // A 订单(A-用户 + B-代理下单)
     for (let i = 0; i < normalUser.length; i++) {
@@ -61,7 +67,6 @@ router.post('/getAgentDetail', async (ctx) => {
       return ['refund', 'canceled'].indexOf(v.orderStatus) >= 0 && v.orderSettlement && v.orderSettlement.isOverOrder
     })
 
-
     var orderListB = [] // B 订单(B-用户 + C-代理下单)
     for (let i = 0; i < childNormalUser.length; i++) {
       let list = await orderModel.find({ userId: childNormalUser[i].userId });
@@ -71,13 +76,25 @@ router.post('/getAgentDetail', async (ctx) => {
       let list = await orderModel.find({ userId: grandProxyUser[i].userId });
       orderListB = [...orderListB, ...list]
     }
-    // B-用户 确认订单
+    // B 确认订单
     var sureOrderListB = orderListB.filter(v => {
       return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
     })
 
+    var orderListC = [] // C 订单(C-用户 + D-代理下单)
+    for (let i = 0; i < grandNormalUser.length; i++) {
+      let list = await orderModel.find({ userId: grandNormalUser[i].userId });
+      orderListC = [...orderListC, ...list]
+    }
+    for (let i = 0; i < grandChildProxyUser.length; i++) {
+      let list = await orderModel.find({ userId: grandChildProxyUser[i].userId });
+      orderListC = [...orderListC, ...list]
+    }
+    // C 确认订单
+    var sureOrderListC = orderListC.filter(v => {
+      return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
 
-    console.log(childProxyUser);
     obj = {
       agentLevel: 1, // 代理级别
       orderTotal: orderListA.length, // 下单数

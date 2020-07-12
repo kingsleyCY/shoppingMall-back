@@ -56,7 +56,7 @@ router.post('/getCustomer', async (ctx) => {
     var userItem = await userModel.findOne({ userId: param.id })
     obj.recommendId = userItem.phoneNumber
   } else {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+    // ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   if (param.listType === "extension" || param.listType === "extensioned") {
     const list = await userModel.find(obj).sort({ '_id': -1 })
