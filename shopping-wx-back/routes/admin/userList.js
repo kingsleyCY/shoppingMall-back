@@ -68,33 +68,38 @@ router.post('/getCustomer', async (ctx) => {
 
 /* 生成代理人二维码 */
 /*
-* param:id
+* param:id type(1代理、2推广)
 * */
 router.post('/setQrcode', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['id'], param)) {
+  if (!commons.judgeParamExists(['id', 'type'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
   }
   var userItem = await userModel.findOne({ userId: param.id })
   if (!userItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"));
   }
-  if (userItem.agentId !== 0) {
+  if (userItem.agentId !== 0 || userItem.extenId !== 0) {
     ctx.throw(200, commons.jsonBack(1003, {}, "该用户非普通用户"));
   }
   var access_token = await getAccesstoken();
   var qrCode = await setQrcode(access_token.access_token, userItem.phoneNumber);
-  var agentId = 1;
-  if (userItem.recommendId) {
-    var parentUser = await userModel.findOne({ phoneNumber: userItem.recommendId })
-    agentId = parentUser.agentId + 1;
-    // agentId >= 3 ? agentId = 3 : ""
+  var obj = { qrCode: qrCode.url }
+  if (param.type === 1) {
+    var agentId = 1;
+    if (userItem.recommendId) {
+      var parentUser = await userModel.findOne({ phoneNumber: userItem.recommendId })
+      agentId = parentUser.agentId + 1;
+    }
+    obj.agentId = agentId;
+    obj.proxy_time = Date.parse(new Date());
+  } else if (param.type === 2) {
+    obj.extenId = 1;
+    obj.exten_time = Date.parse(new Date());
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
   }
-  await userModel.findOneAndUpdate({ userId: param.id }, {
-    qrCode: qrCode.url,
-    agentId: agentId,
-    proxy_time: Date.parse(new Date())
-  }, { new: true });
+  await userModel.findOneAndUpdate({ userId: param.id }, obj, { new: true });
   ctx.body = commons.jsonBack(1, { url: qrCode.url }, "获取数据成功");
 })
 

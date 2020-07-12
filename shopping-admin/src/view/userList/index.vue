@@ -11,7 +11,8 @@
       </el-form>
     </div>
     <div class="search-content">
-      <el-table :data="tableData" border class="search-table" :height="tableHeight">
+      <el-table :data="tableData" border class="search-table"
+                :height="tableHeight" v-loading="loading">
         <el-table-column
           prop="date"
           label="日期"
@@ -55,8 +56,13 @@
           label="操作"
           min-width="120">
           <template slot-scope="scope">
-            <el-button v-if="!scope.row.qrCode" type="text" size="small" @click="setQrcode(scope.row.userId)">
-              生成二维码
+            <el-button v-if="!scope.row.qrCode" type="text" size="small"
+                       @click="setQrcode(scope.row.userId,1)">
+              生成代理
+            </el-button>
+            <el-button v-if="!scope.row.qrCode" type="text" size="small"
+                       @click="setQrcode(scope.row.userId,2)">
+              生成推广
             </el-button>
             <el-button type="text" size="small" @click="toDetail(scope.row)">查看详情</el-button>
           </template>
@@ -187,6 +193,7 @@
           pageSize: 10,
           page: 1,
         },
+        loading: false,
       }
     },
     mounted() {
@@ -208,11 +215,18 @@
         if (this.formInline.phoneNumber) {
           param.phoneNumber = this.formInline.phoneNumber
         }
+        this.loading = true
         getCustomer(param).then(res => {
-          this.tableData = res.data.list;
-          this.pageData.total = res.data.total;
+          this.loading = false
+          if (res.code === 1) {
+            this.tableData = res.data.list;
+            this.pageData.total = res.data.total;
+          } else {
+            this.tableData = []
+          }
         }).catch(res => {
-
+          this.loading = false
+          this.tableData = []
         })
       },
       handleSizeChange(val) {
@@ -224,16 +238,23 @@
         this.pageData.page = val
         this.getCustomerMethods()
       },
-      setQrcode(id) {
-        setQrcode({id}).then(res => {
-          if (res.code === 1) {
-            this.$message.success(res.mess)
-            this.getCustomerMethods()
-          } else {
-            this.$message.error(res.mess)
-          }
-        }).catch(res => {
-          this.$message.error("操作失败")
+      setQrcode(id, type) {
+        this.$confirm('确定生成二维码?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.loading = true
+          setQrcode({id, type}).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.getCustomerMethods()
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(res => {
+            this.$message.error("操作失败")
+          })
         })
       },
       toDetail(row) {

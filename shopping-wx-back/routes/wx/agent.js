@@ -18,83 +18,94 @@ router.post('/getAgentDetail', async (ctx) => {
   if (!userItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
   }
-  // A-用户
-  var normalUser = userModel.find({ recommendId: userItem.phoneNumber, agentId: 0 });
-  // B-代理
-  var childProxyUser = userModel.find({ recommendId: userItem.phoneNumber, agentId: { $ne: 0 } });
-  // B-用户
-  var childNormalUser = [];
-  for (let i = 0; i < childProxyUser.length; i++) {
-    let list = await userModel.find({ recommendId: childProxyUser[i].phoneNumber, agentId: 0 });
-    childNormalUser = [...childNormalUser, ...list]
-  }
-  // C-代理
-  var grandProxyUser = [];
-  for (let i = 0; i < childProxyUser.length; i++) {
-    let list = await userModel.find({ recommendId: childProxyUser[i].phoneNumber, agentId: { $ne: 0 } });
-    grandProxyUser = [...grandProxyUser, ...list]
-  }
-  // C-用户
-  var grandNormalUser = [];
-  for (let i = 0; i < grandProxyUser.length; i++) {
-    let list = await userModel.find({ recommendId: grandProxyUser[i].phoneNumber, agentId: 0 });
-    grandNormalUser = [...grandNormalUser, ...list]
-  }
+  var obj = {}
+  if (userItem.agentId) {
+    // A-用户
+    var normalUser = userModel.find({ recommendId: userItem.phoneNumber, agentId: 0 });
+    // B-代理
+    var childProxyUser = userModel.find({ recommendId: userItem.phoneNumber, agentId: { $ne: 0 } });
+    // B-用户
+    var childNormalUser = [];
+    for (let i = 0; i < childProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: childProxyUser[i].phoneNumber, agentId: 0 });
+      childNormalUser = [...childNormalUser, ...list]
+    }
+    // C-代理
+    var grandProxyUser = [];
+    for (let i = 0; i < childProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: childProxyUser[i].phoneNumber, agentId: { $ne: 0 } });
+      grandProxyUser = [...grandProxyUser, ...list]
+    }
+    // C-用户
+    var grandNormalUser = [];
+    for (let i = 0; i < grandProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: grandProxyUser[i].phoneNumber, agentId: 0 });
+      grandNormalUser = [...grandNormalUser, ...list]
+    }
 
-  var orderListA = [] // A 订单(A-用户 + B-代理下单)
-  for (let i = 0; i < normalUser.length; i++) {
-    let list = await orderModel.find({ userId: normalUser[i].userId });
-    orderListA = [...orderListA, ...list]
-  }
-  for (let i = 0; i < childProxyUser.length; i++) {
-    let list = await orderModel.find({ userId: childProxyUser[i].userId });
-    orderListA = [...orderListA, ...list]
-  }
-  // A-用户 确认订单
-  var sureOrderListA = orderListA.filter(v => {
-    return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
-  })
-  // A-用户 取消订单（canceled、refund）
-  var cancelOrderListA = orderListA.filter(v => {
-    return ['refund', 'canceled'].indexOf(v.orderStatus) >= 0 && v.orderSettlement && v.orderSettlement.isOverOrder
-  })
-
-
-  var orderListB = [] // B 订单(B-用户 + C-代理下单)
-  for (let i = 0; i < childNormalUser.length; i++) {
-    let list = await orderModel.find({ userId: childNormalUser[i].userId });
-    orderListB = [...orderListB, ...list]
-  }
-  for (let i = 0; i < grandProxyUser.length; i++) {
-    let list = await orderModel.find({ userId: grandProxyUser[i].userId });
-    orderListB = [...orderListB, ...list]
-  }
-  // B-用户 确认订单
-  var sureOrderListB = orderListB.filter(v => {
-    return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
-  })
+    var orderListA = [] // A 订单(A-用户 + B-代理下单)
+    for (let i = 0; i < normalUser.length; i++) {
+      let list = await orderModel.find({ userId: normalUser[i].userId });
+      orderListA = [...orderListA, ...list]
+    }
+    for (let i = 0; i < childProxyUser.length; i++) {
+      let list = await orderModel.find({ userId: childProxyUser[i].userId });
+      orderListA = [...orderListA, ...list]
+    }
+    // A-用户 确认订单
+    var sureOrderListA = orderListA.filter(v => {
+      return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
+    // A-用户 取消订单（canceled、refund）
+    var cancelOrderListA = orderListA.filter(v => {
+      return ['refund', 'canceled'].indexOf(v.orderStatus) >= 0 && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
 
 
-  var obj = {
-    agentLevel: 1, // 代理级别
-    orderTotal: orderListA.length, // 下单数
-    sureOrderTotal: sureOrderListA.length, // 确认订单数
-    cancelOrderTotal: cancelOrderListA.length, // 取消订单数
-    selfExtract: 0, // 可提取金额
+    var orderListB = [] // B 订单(B-用户 + C-代理下单)
+    for (let i = 0; i < childNormalUser.length; i++) {
+      let list = await orderModel.find({ userId: childNormalUser[i].userId });
+      orderListB = [...orderListB, ...list]
+    }
+    for (let i = 0; i < grandProxyUser.length; i++) {
+      let list = await orderModel.find({ userId: grandProxyUser[i].userId });
+      orderListB = [...orderListB, ...list]
+    }
+    // B-用户 确认订单
+    var sureOrderListB = orderListB.filter(v => {
+      return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
 
-    selfNormal: normalUser.length, // 代理用户数
-    childProxy: childProxyUser.length, // 下级代理数
-    childNormal: childNormalUser.length, // 下级代理用户数
-    childOrderTotal: sureOrderListB.length, // 下级代理完成订单数
-    grandProxy: grandProxyUser.length, // 下下级代理数
-    grandNormal: grandNormalUser.length, // 下下级代理用户数
-    grandOrderTotal: 100, // 下下级代理完成订单数
-    childExtract: 0, // 下级可提取金额
-    extensionNum: 0, // 推广人数
-    type: "proxy", // proxy、extension
-    setting: true,
+
+    obj = {
+      agentLevel: 1, // 代理级别
+      orderTotal: orderListA.length, // 下单数
+      sureOrderTotal: sureOrderListA.length, // 确认订单数
+      cancelOrderTotal: cancelOrderListA.length, // 取消订单数
+      selfExtract: 0, // 可提取金额
+
+      selfNormal: normalUser.length, // 代理用户数
+      childProxy: childProxyUser.length, // 下级代理数
+      childNormal: childNormalUser.length, // 下级代理用户数
+      childOrderTotal: sureOrderListB.length, // 下级代理完成订单数
+      grandProxy: grandProxyUser.length, // 下下级代理数
+      grandNormal: grandNormalUser.length, // 下下级代理用户数
+      grandOrderTotal: 100, // 下下级代理完成订单数
+      childExtract: 0, // 下级可提取金额
+      extensionNum: 0, // 推广人数
+      type: "proxy", // proxy、extension
+      setting: true,
+    }
+  } else if (userItem.extenId) {
+    let userlist = await userModel.find({ recommendId: userItem.phoneNumber })
+    obj = {
+      type: "extension",
+      extensionNum: userlist.length, // 推广人数
+      setting: false,
+    }
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "当前用户不是代理或推广"))
   }
-
   ctx.body = commons.jsonBack(1, obj, "获取数据成功");
 })
 
