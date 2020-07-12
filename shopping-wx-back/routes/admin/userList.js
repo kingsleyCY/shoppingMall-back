@@ -31,17 +31,17 @@ router.post('/loginAdmin', async (ctx) => {
 
 /* 获取用户列表 */
 /*
-* param: listType: null => 全部  proxy=>代理列表  recommend=> 指定代理人下的列表(id)
+* param: listType: null => 全部  proxy=>代理列表 extension=>推广  recommend=> 指定代理人下的列表(id)
 * opparam: page, pageSize, phoneNumber
 * */
 router.post('/getCustomer', async (ctx) => {
   var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
   var params = {
     page: param.page,
     pageSize: param.pageSize
-  }
-  if (!commons.judgeParamExists(['page', 'pageSize'], param)) {
-    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   let obj = {}
   if (param.listType === "proxy") {
@@ -49,21 +49,33 @@ router.post('/getCustomer', async (ctx) => {
   } else if (param.listType === "recommend") {
     var userItem = await userModel.findOne({ userId: param.id })
     obj.recommendId = userItem.phoneNumber
+  } else if (param.listType === "extension") {
+    obj.extenId = 1
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  if (param.phoneNumber) {
-    const reg = new RegExp(param.phoneNumber, 'i') //不区分大小写
-    obj['$or'] = [
-      { phoneNumber: { '$regex': reg } }
-    ]
+  if (param.listType === "extension") {
+    const list = await userModel.find(obj).sort({ '_id': -1 })
+    ctx.body = commons.jsonBack(1, {
+      list,
+      total: list.length
+    }, "获取数据成功");
+  } else {
+    if (param.phoneNumber) {
+      const reg = new RegExp(param.phoneNumber, 'i') //不区分大小写
+      obj['$or'] = [
+        { phoneNumber: { '$regex': reg } }
+      ]
+    }
+    const list = await userModel.find(obj).skip((params.page - 1) * params.pageSize).limit(Number(params.pageSize)).sort({ '_id': -1 })
+    const total = await userModel.find(obj)
+    ctx.body = commons.jsonBack(1, {
+      list,
+      total: total.length,
+      page: param.page,
+      pageSize: param.pageSize,
+    }, "获取数据成功");
   }
-  const list = await userModel.find(obj).skip((params.page - 1) * params.pageSize).limit(Number(params.pageSize)).sort({ '_id': -1 })
-  var total = await userModel.find(obj)
-  ctx.body = commons.jsonBack(1, {
-    list,
-    total: total.length,
-    page: param.page,
-    pageSize: param.pageSize,
-  }, "获取数据成功");
 })
 
 /* 生成代理人二维码 */

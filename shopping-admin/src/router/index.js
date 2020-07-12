@@ -40,6 +40,12 @@ const mainRouter = [
     component: resolve => require(['@/view/proxyList'], resolve),
   },
   {
+    path: 'extensionList',
+    name: 'extensionList',
+    tilte: '推广管理',
+    component: resolve => require(['@/view/extensionList'], resolve),
+  },
+  {
     path: 'userList',
     name: 'userList',
     tilte: '用户列表',
