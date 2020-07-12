@@ -90,7 +90,9 @@ router.post('/getAgentDetail', async (ctx) => {
     grandNormal: grandNormalUser.length, // 下下级代理用户数
     grandOrderTotal: 100, // 下下级代理完成订单数
     childExtract: 0, // 下级可提取金额
-    setting: true
+    extensionNum: 0, // 推广人数
+    type: "proxy", // proxy、extension
+    setting: true,
   }
 
   ctx.body = commons.jsonBack(1, obj, "获取数据成功");
