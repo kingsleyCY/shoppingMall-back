@@ -5,6 +5,7 @@ const https = require('https');
 const baseConfig = require('../../common/baseConfig');
 const router = require('koa-router')();
 const jwt = require('jsonwebtoken');
+const md5 =require("md5");
 const { userModel } = require('../../model/userModel');
 const { orderModel } = require('../../model/admin/orderModel');
 
@@ -17,10 +18,11 @@ router.post('/loginAdmin', async (ctx) => {
   if (!commons.judgeParamExists(['username', 'password'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  if (param.username === "admin" && param.password === "12345") {
+  console.log(md5(param.password));
+  if (param.username === "admin" && md5(param.password) === "5f3aa519b6cd442030506c2ce8e9d9e1") {
     const token = jwt.sign({
         username: param.username,
-        password: param.password,
+        password: md5(param.password),
       }, commons.jwtScret, { expiresIn: '3h' }
     )
     ctx.body = commons.jsonBack(1, { token }, "登录成功！");
