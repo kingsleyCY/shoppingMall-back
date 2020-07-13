@@ -16,6 +16,8 @@ ul, li, p {
 .image-box {
   padding-bottom: 0px !important;
   cursor: pointer;
+  width: 240px !important;
+  height: 280px !important;
   .el-message-box__header {
     display: none;
   }
@@ -24,10 +26,10 @@ ul, li, p {
   }
   .el-message-box__content {
     padding: 0 !important;
-    img {
+    canvas {
       display: block;
       width: 100%;
-      height: auto;
+      height: 100%;
     }
   }
 }
