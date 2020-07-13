@@ -19,9 +19,9 @@ router.post('/loginAdmin', async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   console.log(md5(param.password));
-  if (param.username === "admin" && md5(param.password) === "5f3aa519b6cd442030506c2ce8e9d9e1") {
+  if (md5(param.username) === "37ebf12861702553bb42b113beb671e9" && md5(param.password) === "ed788dc3b3f5a35aac92a493f48bcf53") {
     const token = jwt.sign({
-        username: param.username,
+        username: md5(param.username),
         password: md5(param.password),
       }, commons.jwtScret, { expiresIn: '3h' }
     )
