@@ -5,9 +5,10 @@ const https = require('https');
 const baseConfig = require('../../common/baseConfig');
 const router = require('koa-router')();
 const jwt = require('jsonwebtoken');
-const md5 =require("md5");
+const md5 = require("md5");
 const { userModel } = require('../../model/userModel');
 const { orderModel } = require('../../model/admin/orderModel');
+const { agentModel } = require('../../model/admin/agentModel');
 
 /* 登录 admin */
 /*
@@ -18,7 +19,6 @@ router.post('/loginAdmin', async (ctx) => {
   if (!commons.judgeParamExists(['username', 'password'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  console.log(md5(param.password));
   if (md5(param.username) === "37ebf12861702553bb42b113beb671e9" && md5(param.password) === "ed788dc3b3f5a35aac92a493f48bcf53") {
     const token = jwt.sign({
         username: md5(param.username),
@@ -123,25 +123,120 @@ router.post('/setQrcode', async (ctx) => {
 
 /* 查看代理人下订单 */
 /*
-* param:id、page、pageSize
+* param:userId
 * */
 router.post('/getProxyOrder', async (ctx) => {
-  var param = JSON.parse(JSON.stringify(ctx.request.body));
-  if (!commons.judgeParamExists(['id', 'page', 'pageSize'], param)) {
+  var param = ctx.request.body
+  if (!commons.judgeParamExists(['userId'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var proxyList = await userModel.find({ recommendId: param.id })
-  var list = proxyList.map(v => {
-    return v.userId
-  })
-  var orderList = await orderModel.find({ userId: { $in: list } }).skip((param.page - 1) * param.pageSize).limit(Number(param.pageSize)).sort({ '_id': -1 });
-  var total = await orderModel.find({ userId: { $in: list } })
-  ctx.body = commons.jsonBack(1, {
-    list: orderList,
-    total: total.length,
-    page: param.page,
-    pageSize: param.pageSize,
-  }, "");
+  var userItem = await userModel.findOne({ userId: param.userId })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
+  }
+  if (userItem.agentId) {
+    // A-用户
+    var normalUser = await userModel.find({ recommendId: userItem.phoneNumber, agentId: 0 });
+    // B-代理
+    var childProxyUser = await userModel.find({ recommendId: userItem.phoneNumber, agentId: { $ne: 0 } });
+    // B-用户
+    var childNormalUser = [];
+    for (let i = 0; i < childProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: childProxyUser[i].phoneNumber, agentId: 0 });
+      childNormalUser = [...childNormalUser, ...list]
+    }
+    // C-代理
+    var grandProxyUser = [];
+    for (let i = 0; i < childProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: childProxyUser[i].phoneNumber, agentId: { $ne: 0 } });
+      grandProxyUser = [...grandProxyUser, ...list]
+    }
+    // C-用户
+    var grandNormalUser = [];
+    for (let i = 0; i < grandProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: grandProxyUser[i].phoneNumber, agentId: 0 });
+      grandNormalUser = [...grandNormalUser, ...list]
+    }
+    // D-代理
+    var grandChildProxyUser = [];
+    for (let i = 0; i < grandProxyUser.length; i++) {
+      let list = await userModel.find({ recommendId: grandProxyUser[i].phoneNumber, agentId: { $ne: 0 } });
+      grandChildProxyUser = [...grandChildProxyUser, ...list]
+    }
+
+    var orderListA = [] // A 订单(A-用户 + B-代理下单)
+    for (let i = 0; i < normalUser.length; i++) {
+      let list = await orderModel.find({ userId: normalUser[i].userId });
+      orderListA = [...orderListA, ...list]
+    }
+    for (let i = 0; i < childProxyUser.length; i++) {
+      let list = await orderModel.find({ userId: childProxyUser[i].userId });
+      orderListA = [...orderListA, ...list]
+    }
+    // A-用户 确认订单
+    var sureOrderListA = orderListA.filter(v => {
+      return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
+    // A-用户 取消订单（canceled、refund）
+    var cancelOrderListA = orderListA.filter(v => {
+      return ['refund', 'canceled'].indexOf(v.orderStatus) >= 0 && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
+
+    var orderListB = [] // B 订单(B-用户 + C-代理下单)
+    for (let i = 0; i < childNormalUser.length; i++) {
+      let list = await orderModel.find({ userId: childNormalUser[i].userId });
+      orderListB = [...orderListB, ...list]
+    }
+    for (let i = 0; i < grandProxyUser.length; i++) {
+      let list = await orderModel.find({ userId: grandProxyUser[i].userId });
+      orderListB = [...orderListB, ...list]
+    }
+    // B 确认订单
+    var sureOrderListB = orderListB.filter(v => {
+      return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
+
+    var orderListC = [] // C 订单(C-用户 + D-代理下单)
+    for (let i = 0; i < grandNormalUser.length; i++) {
+      let list = await orderModel.find({ userId: grandNormalUser[i].userId });
+      orderListC = [...orderListC, ...list]
+    }
+    for (let i = 0; i < grandChildProxyUser.length; i++) {
+      let list = await orderModel.find({ userId: grandChildProxyUser[i].userId });
+      orderListC = [...orderListC, ...list]
+    }
+    // C 确认订单
+    var sureOrderListC = orderListC.filter(v => {
+      return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
+    })
+    var agentList = JSON.parse(JSON.stringify(await agentModel.find().sort({ sort: -1 })));
+    var extenId = userItem.agentId;
+    extenId > 3 ? extenId = 3 : "";
+    const agentItem = agentList[extenId - 1];
+    var agentLevel = 1;
+    var agentModelData = null;
+    var childProfit = agentItem.childProfit;
+    for (let i = 0; i < agentItem.agentModelData.length; i++) {
+      if (sureOrderListA.length >= agentItem.agentModelData[i].min && sureOrderListA.length < agentItem.agentModelData[i].max) {
+        agentLevel = (i + 1);
+        agentModelData = agentItem.agentModelData[i];
+        break;
+      }
+    }
+    var selfExtract = sureOrderListA.length * agentModelData.price;
+    var childExtract = (childProfit[0] * sureOrderListB) + (childProfit[1] * sureOrderListC)
+
+
+    var obj = {
+      agentLevel: agentLevel, // 代理级别
+      sureOrderListA: sureOrderListA, // 确认订单数
+      sureOrderListB: sureOrderListB, // 下级代理完成订单数
+      sureOrderListC: sureOrderListC, // 下下级代理完成订单数
+    }
+    ctx.body = commons.jsonBack(1, obj, "获取数据成功");
+  } else {
+    ctx.throw(200, commons.jsonBack(1003, {}, "此用户不是代理"))
+  }
 })
 
 /* 获取代理列表 */

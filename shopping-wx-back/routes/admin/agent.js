@@ -1,7 +1,7 @@
 const router = require('koa-router')();
 const { agentModel } = require('../../model/admin/agentModel');
 
-/* 添加、修改代理分类 */
+/* 获取代理数据 */
 /* param: title
  * optitle: id、parentId
  * */

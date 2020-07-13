@@ -117,6 +117,17 @@
             </el-table>
           </el-tab-pane>
           <el-tab-pane label="流水查看" name="second">
+            <el-form ref="form" :model="firstForm" label-width="80px" :inline="true" size="mini">
+              <el-form-item>
+                <el-select v-model="firstForm.agentLevel" @change="orderSelectChange">
+                  <el-option v-for="(item, index) in levelArr" :key="index"
+                             v-if="item.val !== 0" :label="item.title" :value="item.val"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="getOrderList">查询</el-button>
+              </el-form-item>
+            </el-form>
             <el-table :data="orderTable" border style="width: 100%">
               <el-table-column
                 prop="date"
@@ -131,9 +142,9 @@
                 label="状态"
                 width="80">
                 <template slot-scope="scope">
-          <span :class="[scope.row.orderStatus, 'orde-status']">
-            {{common.computedStatus(scope.row.orderStatus)}}
-          </span>
+                  <div :class="[scope.row.orderStatus, 'orde-status']">
+                    {{common.computedStatus(scope.row.orderStatus)}}
+                  </div>
                 </template>
               </el-table-column>
               <el-table-column
@@ -152,14 +163,21 @@
                 </template>
               </el-table-column>
               <el-table-column
+                label="手机号"
+                min-width="80">
+                <template slot-scope="scope">
+                  {{scope.row.phoneNumber}}
+                </template>
+              </el-table-column>
+              <!--<el-table-column
                 prop="total_fee"
                 label="商品详情"
                 min-width="150">
                 <template slot-scope="scope">
                   {{scope.row.commodityDetail.title}}
                 </template>
-              </el-table-column>
-              <el-table-column
+              </el-table-column>-->
+              <!--<el-table-column
                 prop="total_fee"
                 label="地址详情"
                 min-width="200">
@@ -170,22 +188,13 @@
                   {{scope.row.addressDetail.telNumber}}<br>
                   {{scope.row.addressDetail.userName}}
                 </template>
-              </el-table-column>
+              </el-table-column>-->
               <el-table-column
                 prop="mess"
                 label="备注"
                 min-width="150">
               </el-table-column>
             </el-table>
-            <el-pagination
-              @size-change="orderSizeChange"
-              @current-change="orderCurrentChange"
-              :current-page="orderPage.page"
-              :page-sizes="[10, 20, 40, 100]"
-              :page-size="orderPage.pageSize"
-              layout="total, sizes, prev, pager, next, jumper"
-              :total="orderPage.total">
-            </el-pagination>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -205,12 +214,9 @@
         },
         tableData: [],
         detailTable: [],
+        orderTotalDetail: {},
         orderTable: [],
         pageData: {
-          pageSize: 10,
-          page: 1,
-        },
-        orderPage: {
           pageSize: 10,
           page: 1,
         },
@@ -325,30 +331,35 @@
       },
       getOrderList() {
         let param = {
-          page: this.orderPage.page,
-          pageSize: this.orderPage.pageSize,
-          id: this.detailItem.userId
+          userId: this.detailItem.userId
         }
         getProxyOrder(param).then(res => {
-          this.orderTable = res.data.list;
-          this.orderPage.total = res.data.total;
+          this.orderTotalDetail = res.data;
+          this.firstForm.agentLevel = 1
+          this.orderSelectChange()
         }).catch(res => {
           this.orderTable = [];
           this.orderPage.total = 0;
         })
       },
+      orderSelectChange() {
+        if (this.firstForm.agentLevel === 1) {
+          this.orderTable = this.orderTotalDetail.sureOrderListA
+        } else if (this.firstForm.agentLevel === 2) {
+          this.orderTable = this.orderTotalDetail.sureOrderListB
+        } else if (this.firstForm.agentLevel === 3) {
+          this.orderTable = this.orderTotalDetail.sureOrderListC
+        }
+      },
       handleClick() {
         if (this.activeName === "first") {
           this.firstForm.agentLevel = 0
           this.firstForm.agentType = 1
-          this.agentLevelChange()
+          this.agentLevelChange();
           this.getRecommDetail();
         } else if (this.activeName === "second") {
-          this.getOrderList()
-          this.orderPage = {
-            page: 1,
-            pageSize: 10
-          }
+          this.firstForm.agentLevel = 0
+          this.getOrderList();
         }
       },
       agentLevelChange() {
