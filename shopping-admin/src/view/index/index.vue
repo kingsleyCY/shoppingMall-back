@@ -1,6 +1,6 @@
 <template>
   <div class="box">
-    <div class="left-nav">
+    <div :class="['left-nav', isPC?'':'mobile-client']">
       <el-menu
         default-active="2"
         class="el-menu-vertical-demo">
@@ -9,7 +9,7 @@
         </el-menu-item>
       </el-menu>
     </div>
-    <div class="right-content">
+    <div :class="['right-content', isPC?'':'mobile-client']">
       <router-view></router-view>
     </div>
   </div>
@@ -22,13 +22,31 @@
     name: "index",
     data() {
       return {
-        mainRouter
+        mainRouter,
+        isPC: true
       }
     },
     mounted() {
-
+      var flag = this.isPcMethods();
+      this.isPC = flag;
+      this.$store.commit('changeIsPc', flag);
     },
-    methods: {}
+    methods: {
+      isPcMethods() {
+        var userAgentInfo = navigator.userAgent;
+        var Agents = ["Android", "iPhone",
+          "SymbianOS", "Windows Phone",
+          "iPad", "iPod"];
+        var flag = true;
+        for (var v = 0; v < Agents.length; v++) {
+          if (userAgentInfo.indexOf(Agents[v]) > 0) {
+            flag = false;
+            break;
+          }
+        }
+        return flag;
+      }
+    }
   }
 </script>
 
@@ -42,8 +60,13 @@
     .left-nav {
       width: 200px;
       height: 100%;
+      &.mobile-client {
+        width: 90px;
+      }
       .el-menu {
         height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
         .el-menu-item {
           padding: 0 !important;
           width: 100%;
@@ -70,6 +93,9 @@
       overflow-y: auto;
       box-sizing: border-box;
       padding: 10px 15px;
+      &.mobile-client {
+        width: calc(100% - 90px);
+      }
     }
   }
 </style>

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import VueRouter from 'vue-router'
+import store from './store/index'
 import common from './assets/common'
 
 Vue.use(VueRouter)
@@ -53,5 +54,6 @@ Vue.directive("image", {
 
 new Vue({
   render: h => h(App),
-  router
+  router,
+  store
 }).$mount('#app')
