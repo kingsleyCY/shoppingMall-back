@@ -159,19 +159,12 @@ router.post('/getSingleDetail', async (ctx) => {
   if (!id) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
-  var shopItem = await commons.getRedis("shop-" + id);
-  if (!shopItem) {
-    shopItem = await shoppingModel.findOne({ id });
-    shopItem ? commons.setRedis("shop-" + shopItem.id, JSON.stringify(shopItem)) : ""
-  } else {
-    shopItem = JSON.parse(shopItem);
-  }
-  // var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
-  if (shopItem.isDelete === 1) {
+  var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
+  if (singleDetail.isDelete === 1) {
     ctx.throw(200, commons.jsonBack(1003, {}, "该商品已被删除"))
   }
-  shopItem = totalNum(shopItem)
-  ctx.body = commons.jsonBack(1, shopItem, "获取数据成功");
+  singleDetail = totalNum(singleDetail)
+  ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
 })
 
 /* 搜索商品 */
