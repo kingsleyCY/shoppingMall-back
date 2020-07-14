@@ -54,6 +54,7 @@ router.get('/getIndexData', async (ctx) => {
         var shopItem = await commons.getRedis("shop-" + data[keyList[key]][i]);
         if (!shopItem) {
           shopItem = await shoppingModel.findOne({ isDelete: { $ne: 1 }, id: data[keyList[key]][i] });
+          shopItem ? commons.setRedis("shop-" + shopItem.id, JSON.stringify(shopItem)) : ""
         } else {
           shopItem = JSON.parse(shopItem);
         }
@@ -90,7 +91,8 @@ router.post('/getNewCommodity', async (ctx) => {
     for (let i = 0; i < ids.length; i++) {
       var shopItem = await commons.getRedis("shop-" + ids[i]);
       if (!shopItem) {
-        shopItem = await shoppingModel.findOne({ id: ids[i] });
+        shopItem = await shoppingModel.findOne({ isDelete: { $ne: 1 }, id: ids[i] });
+        shopItem ? commons.setRedis("shop-" + shopItem.id, JSON.stringify(shopItem)) : ""
       } else {
         shopItem = JSON.parse(shopItem);
       }
@@ -127,7 +129,8 @@ router.post('/getRebate', async (ctx) => {
     for (let i = 0; i < ids.length; i++) {
       var shopItem = await commons.getRedis("shop-" + ids[i]);
       if (!shopItem) {
-        shopItem = await shoppingModel.findOne({ id: ids[i] });
+        shopItem = await shoppingModel.findOne({ isDelete: { $ne: 1 }, id: ids[i] });
+        shopItem ? commons.setRedis("shop-" + shopItem.id, JSON.stringify(shopItem)) : ""
       } else {
         shopItem = JSON.parse(shopItem);
       }
@@ -153,12 +156,20 @@ router.post('/getRebate', async (ctx) => {
 * */
 router.post('/getSingleDetail', async (ctx) => {
   const id = ctx.request.body.id
-  var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
-  if (singleDetail.isDelete === 1) {
+  if (!id) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var shopItem = await commons.getRedis("shop-" + id);
+  if (!shopItem) {
+    shopItem = await shoppingModel.findOne({ id });
+    shopItem ? commons.setRedis("shop-" + shopItem.id, JSON.stringify(shopItem)) : ""
+  }
+  // var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
+  if (shopItem.isDelete === 1) {
     ctx.throw(200, commons.jsonBack(1003, {}, "该商品已被删除"))
   }
-  singleDetail = totalNum(singleDetail)
-  ctx.body = commons.jsonBack(1, singleDetail, "获取数据成功");
+  shopItem = totalNum(shopItem)
+  ctx.body = commons.jsonBack(1, shopItem, "获取数据成功");
 })
 
 /* 搜索商品 */
