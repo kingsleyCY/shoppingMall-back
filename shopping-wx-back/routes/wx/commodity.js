@@ -163,6 +163,8 @@ router.post('/getSingleDetail', async (ctx) => {
   if (!shopItem) {
     shopItem = await shoppingModel.findOne({ id });
     shopItem ? commons.setRedis("shop-" + shopItem.id, JSON.stringify(shopItem)) : ""
+  } else {
+    shopItem = JSON.parse(shopItem);
   }
   // var singleDetail = await shoppingModel.findOneAndUpdate({ id }, { $inc: { consultNum: 1 } })
   if (shopItem.isDelete === 1) {
