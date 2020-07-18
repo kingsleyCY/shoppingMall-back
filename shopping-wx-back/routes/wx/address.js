@@ -12,7 +12,7 @@ router.post('/addAddress', async (ctx) => {
   if (!commons.judgeParamExists(['userName', 'provinceName', 'cityName', 'countyName', 'detailInfo', 'telNumber', 'userId'], param)) {
     ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   } else {
-    var count = await addressModel.countDocuments({ userId: param.userId })
+    var count = await addressModel.countDocuments({ userId: param.userId, isDelete: { $ne: 1 } })
     var userItem = await userModel.findOne({ userId: param.userId })
     if (count >= 10) {
       ctx.body = commons.jsonBack(1004, {}, "该用户添加地址数已超过10个！");
