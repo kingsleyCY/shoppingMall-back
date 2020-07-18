@@ -393,7 +393,7 @@ async function backCoupon(userId, orderItem) {
     let userItem = JSON.parse(JSON.stringify(await userModel.findOne({ userId })));
     let couponList = userItem.couponList;
     couponList.indexOf(orderItem.couponId) >= 0 ? "" : couponList.push(String(orderItem.couponId));
-    await userItem.findOneAndUpdate({ userId }, { couponList })
+    await userModel.findOneAndUpdate({ userId }, { couponList })
     logger.error("返还用户优惠券成功：" + userItem.phoneNumber + "," + String(orderItem.couponId))
   }
 }
