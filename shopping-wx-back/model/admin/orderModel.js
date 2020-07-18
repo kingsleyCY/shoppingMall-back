@@ -16,7 +16,7 @@ var orderSchema = new mongoose.Schema({
   refoundData: { type: Object, default: {} }, // 退款-微信参数
   mailOrder: { type: String, default: "" }, // 快递单号
   mailRemark: { type: String, default: "" }, // 快递备注
-  couponId: { type: String, default: "" },
+  couponId: { type: String, default: "" }, // 优惠券ID
   original_fee: { type: Number, default: "" }, // 原价(元)
   applyAfterDetail: { type: Object, default: {} }, // 售后详情
   applyAfterStatus: { type: String, default: "" }, // 申请售后状态

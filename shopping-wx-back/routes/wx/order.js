@@ -64,7 +64,7 @@ router.post("/payment", async (ctx) => {
           // 删除该用户指定优惠券可用性
           couponList.splice(couponList.indexOf(couponId), 1);
           await userModel.findOneAndUpdate({ userId: param.userId }, { couponList });
-          logger.error("删除用户优惠券成功：" + userModel.phoneNumber + "," + couponItem.title)
+          logger.error("删除用户优惠券成功：" + userItem.phoneNumber + "," + couponItem.title)
         }
       }
     } else if (orderItem) {
@@ -130,7 +130,7 @@ router.post("/payment", async (ctx) => {
     });
   })
   if (prepay_id) {
-//将预支付订单和其他信息一起签名后返回给前端
+    //将预支付订单和其他信息一起签名后返回给前端
     let package = "prepay_id=" + prepay_id;
     let signType = "MD5";
     let minisign = commons.paysignjsapimini(appid, nonce_str, package, signType, timestamp, mchkey);
@@ -259,13 +259,16 @@ router.post("/applyRefound", async (ctx) => {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
   }
   if (orderItem.orderStatus === "unpaid") {
+    /* 未支付 */
     await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, { orderStatus: "canceled" }, { new: true });
     await commons.pushOrderStatusLog(param.out_trade_no, "unpaid", "canceled", {
       created_time: Date.parse(new Date()),
     })
     ctx.body = commons.jsonBack(1, {}, "取消订单成功！");
-    commons.setUserData(param.userId)
+    commons.setUserData(param.userId);
+    backCoupon(param.userId, orderItem);
   } else if (orderItem.orderStatus === "undeliver") {
+    /* 已支付-未确认 */
     var res = await commons.applyRefound(param.out_trade_no, param.userId, "订单退款")
     if (typeof res === "string") {
       ctx.body = commons.jsonBack(1003, {}, res);
@@ -275,7 +278,8 @@ router.post("/applyRefound", async (ctx) => {
           created_time: Date.parse(new Date()),
         })
         ctx.body = commons.jsonBack(1, {}, "退款成功！");
-        commons.setUserData(param.userId)
+        commons.setUserData(param.userId);
+        backCoupon(param.userId, orderItem);
       } else {
         ctx.body = commons.jsonBack(1003, {}, "退款失败！");
       }
@@ -381,5 +385,17 @@ router.post("/sureReceipt", async (ctx) => {
     ctx.body = commons.jsonBack(1003, {}, "该订单状态错误！");
   }
 })
+
+
+/* 退还优惠券 */
+async function backCoupon(userId, orderItem) {
+  if (orderItem.couponId) {
+    let userItem = JSON.parse(JSON.stringify(await userModel.findOne({ userId })));
+    let couponList = userItem.couponList;
+    couponList.indexOf(orderItem.couponId) >= 0 ? "" : couponList.push(String(orderItem.couponId));
+    await userItem.findOneAndUpdate({ userId }, { couponList })
+    logger.error("返还用户优惠券成功：" + userItem.phoneNumber + "," + String(orderItem.couponId))
+  }
+}
 
 module.exports = router
