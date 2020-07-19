@@ -22,9 +22,9 @@ router.post('/getAgentDetail', async (ctx) => {
   if (userItem.agentId) {
     var agentDate = await getAgentdata(userItem);
     var agentList = JSON.parse(JSON.stringify(await agentModel.find().sort({ sort: -1 })));
-    var extenId = userItem.agentId;
-    extenId > 3 ? extenId = 3 : "";
-    const agentItem = agentList[extenId - 1];
+    var agentId = userItem.agentId;
+    agentId > 3 ? agentId = 3 : "";
+    const agentItem = agentList[agentId - 1];
     var agentLevel = 1;
     var agentModelData = null;
     var childProfit = agentItem.childProfit;
@@ -90,9 +90,9 @@ router.post('/applyExtract', async (ctx) => {
   }
   var agentDate = await getAgentdata(userItem);
   var agentList = JSON.parse(JSON.stringify(await agentModel.find().sort({ sort: -1 })));
-  var extenId = userItem.agentId;
-  extenId > 3 ? extenId = 3 : "";
-  const agentItem = agentList[extenId - 1];
+  var agentId = userItem.agentId;
+  agentId > 3 ? agentId = 3 : "";
+  const agentItem = agentList[agentId - 1];
   var agentLevel = 1;
   var agentModelData = null;
   var childProfit = agentItem.childProfit;

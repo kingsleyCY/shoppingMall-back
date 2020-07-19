@@ -239,13 +239,14 @@
         this.getCustomerMethods()
       },
       setQrcode(id, type) {
-        this.$confirm('确定生成二维码?', '提示', {
+        this.$confirm('确定生成' + (type === 1 ? "代理" : "推广") + '二维码?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           this.loading = true
           setQrcode({id, type}).then(res => {
+            this.loading = false
             if (res.code === 1) {
               this.$message.success(res.mess)
               this.getCustomerMethods()
@@ -253,8 +254,10 @@
               this.$message.error(res.mess)
             }
           }).catch(res => {
+            this.loading = false
             this.$message.error("操作失败")
           })
+        }).catch(res => {
         })
       },
       toDetail(row) {

@@ -15,7 +15,7 @@ var userSchema = new mongoose.Schema({
   setAgentId: { type: Number, default: 1 }, // 代理结算级别 1=默认级别
   proxy_time: { type: Number, default: 0 }, // 成为代理时间
 
-  extenId: { type: Number, default: '' }, // 是否为推广
+  extenId: { type: Number, default: 0 }, // 是否为推广
   exten_time: { type: Number, default: 0 }, // 成为推广时间
 
 }, { collection: "userList", versionKey: false });

@@ -97,7 +97,7 @@ router.post('/setQrcode', async (ctx) => {
   if (!userItem) {
     ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"));
   }
-  if (userItem.agentId !== 0 || userItem.extenId !== 0) {
+  if (userItem.agentId || userItem.extenId) {
     ctx.throw(200, commons.jsonBack(1003, {}, "该用户非普通用户"));
   }
   var access_token = await getAccesstoken();
@@ -210,9 +210,9 @@ router.post('/getProxyOrder', async (ctx) => {
       return v.orderStatus === "over" && v.orderSettlement && v.orderSettlement.isOverOrder
     })
     var agentList = JSON.parse(JSON.stringify(await agentModel.find().sort({ sort: -1 })));
-    var extenId = userItem.agentId;
-    extenId > 3 ? extenId = 3 : "";
-    const agentItem = agentList[extenId - 1];
+    var agentId = userItem.agentId;
+    agentId > 3 ? agentId = 3 : "";
+    const agentItem = agentList[agentId - 1];
     var agentLevel = 1;
     var agentModelData = null;
     var childProfit = agentItem.childProfit;
