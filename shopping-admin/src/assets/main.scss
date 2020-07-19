@@ -13,7 +13,7 @@ ul, li, p {
 * {
   box-sizing: border-box;
 }
-.image-box {
+.canvas-image-box {
   padding-bottom: 0px !important;
   cursor: pointer;
   width: 240px !important;
@@ -27,6 +27,26 @@ ul, li, p {
   .el-message-box__content {
     padding: 0 !important;
     canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+.image-box {
+  padding-bottom: 0px !important;
+  cursor: pointer;
+  max-width: 500px;
+  height: auto;
+  .el-message-box__header {
+    display: none;
+  }
+  .el-message-box__btns {
+    display: none;
+  }
+  .el-message-box__content {
+    padding: 0 !important;
+    img {
       display: block;
       width: 100%;
       height: 100%;
