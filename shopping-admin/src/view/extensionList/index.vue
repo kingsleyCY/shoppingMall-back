@@ -141,7 +141,7 @@
         }
         getCustomer(param).then(res => {
           if (res.code === 1) {
-            this.detailTable = res.data;
+            this.detailTable = res.datd.list;
           } else {
             this.detailTable = [];
           }
