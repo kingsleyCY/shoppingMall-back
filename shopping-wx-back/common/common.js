@@ -325,7 +325,7 @@ class baseCommon {
     const { userModel } = require('../model/userModel');
     let data = {}
     if (!obj) {
-      data.lastActTime = Date.parse(new Date())
+      data.lastActTime = Date.parse(new Date());
     } else {
       data = obj;
     }

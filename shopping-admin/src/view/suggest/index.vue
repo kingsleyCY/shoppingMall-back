@@ -6,7 +6,7 @@
         label="日期"
         min-width="180">
         <template slot-scope="scope">
-          {{timeTransfer(scope.row.created_time)}}
+          {{common.timeTransfer(scope.row.created_time)}}
         </template>
       </el-table-column>
       <el-table-column
@@ -86,20 +86,6 @@
       handleCurrentChange(val) {
         this.pageData.page = val
         this.getSuggestList()
-      },
-      timeTransfer(data) {
-        function add0(m) {
-          return m < 10 ? '0' + m : m
-        }
-
-        var time = new Date(data);
-        var y = time.getFullYear();
-        var m = time.getMonth() + 1;
-        var d = time.getDate();
-        var h = time.getHours();
-        var mm = time.getMinutes();
-        var s = time.getSeconds();
-        return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
       }
     }
   }

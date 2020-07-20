@@ -23,15 +23,15 @@
             label="创建时间"
             min-width="100">
             <template slot-scope="scope">
-              {{timeTransfer(scope.row.created_time)}}
+              {{common.timeTransfer(scope.row.created_time)}}
             </template>
           </el-table-column>
           <el-table-column
             label="活动时间"
             min-width="200">
             <template slot-scope="scope">
-              {{timeTransfer(scope.row.sTime)}}<br>
-              {{timeTransfer(scope.row.eTime)}}
+              {{common.timeTransfer(scope.row.sTime)}}<br>
+              {{common.timeTransfer(scope.row.eTime)}}
             </template>
           </el-table-column>
           <el-table-column
@@ -45,7 +45,7 @@
             label="结束时间"
             min-width="80">
             <template slot-scope="scope">
-              {{timeTransfer(scope.row.end_time)}}
+              {{common.timeTransfer(scope.row.end_time)}}
             </template>
           </el-table-column>
           <el-table-column
@@ -320,23 +320,6 @@
         }).catch(res => {
           this.$message.error("操作失败")
         })
-      },
-
-      timeTransfer(data) {
-        if (!data) {
-          return "--"
-        }
-        function add0(m) {
-          return m < 10 ? '0' + m : m
-        }
-        var time = new Date(data);
-        var y = time.getFullYear();
-        var m = time.getMonth() + 1;
-        var d = time.getDate();
-        var h = time.getHours();
-        var mm = time.getMinutes();
-        var s = time.getSeconds();
-        return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
       },
     }
   }

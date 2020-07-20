@@ -18,7 +18,7 @@
           label="日期"
           width="100">
           <template slot-scope="scope">
-            {{timeTransfer(scope.row.created_time)}}
+            {{common.timeTransfer(scope.row.created_time)}}
           </template>
         </el-table-column>
         <el-table-column
@@ -40,7 +40,7 @@
           label="最后活动时间"
           width="100">
           <template slot-scope="scope">
-            {{timeTransfer(scope.row.lastActTime)}}
+            {{common.timeTransfer(scope.row.lastActTime)}}
           </template>
         </el-table-column>
         <el-table-column
@@ -94,7 +94,7 @@
                 label="日期"
                 min-width="150">
                 <template slot-scope="scope">
-                  {{timeTransfer(scope.row.created_time)}}
+                  {{common.timeTransfer(scope.row.created_time)}}
                 </template>
               </el-table-column>
               <el-table-column
@@ -292,20 +292,6 @@
         this.orderPage.page = val
         this.getOrderList()
       },
-      timeTransfer(data) {
-        function add0(m) {
-          return m < 10 ? '0' + m : m
-        }
-
-        var time = new Date(data);
-        var y = time.getFullYear();
-        var m = time.getMonth() + 1;
-        var d = time.getDate();
-        var h = time.getHours();
-        var mm = time.getMinutes();
-        var s = time.getSeconds();
-        return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
-      }
     }
   }
 </script>

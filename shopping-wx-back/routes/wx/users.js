@@ -68,6 +68,7 @@ router.post('/loginWx', async (ctx) => {
       }, commons.jwtScret);
       ctx.res.setHeader('Authorization', token);
       ctx.body = commons.jsonBack(1, userDeatil, "用户登陆成功！");
+      commons.setUserData(userDeatil.userId)
     } else {
       ctx.body = commons.jsonBack(1004, {}, "获取OpenID失败！");
     }

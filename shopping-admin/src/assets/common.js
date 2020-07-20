@@ -49,6 +49,9 @@ class baseCommon {
   }
   /* 时间戳转换成时间格式 */
   timeTransfer(data, arr) {
+    if (!data) {
+      return "--"
+    }
     function add0(m) {
       return m < 10 ? '0' + m : m
     }
