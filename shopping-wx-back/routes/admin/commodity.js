@@ -268,7 +268,11 @@ router.post('/bathSetWartermark', async (ctx) => {
   const list = await shoppingModel.find({});
   var ids = []
   for (let i = 0; i < list.length; i++) {
-    let logo = (list[i].logo + commons.watermark)
+    let logo = list[i].logo;
+    let logoImgs = logo.split('?');
+    let logoFirst = logoImgs[0];
+    let logos = (logoFirst + commons.watermark);
+
     let imgList = list[i].imgList;
     imgList = JSON.parse(JSON.stringify(imgList))
     for (let j = 0; j < imgList.length; j++) {
@@ -278,7 +282,7 @@ router.post('/bathSetWartermark', async (ctx) => {
       imgList[j] = (first + commons.watermark)
     }
     await shoppingModel.findOneAndUpdate({ id: list[i].id }, {
-      logo,
+      logo: logos,
       imgList
     })
     ids.push(list[i].id)
