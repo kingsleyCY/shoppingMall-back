@@ -260,5 +260,32 @@ router.post('/bathSetPrice', async (ctx) => {
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 
+/* 统一修改商品图片水印 */
+/*
+* param：ids originPrice presentPrice overPrice
+* */
+router.post('/bathSetWartermark', async (ctx) => {
+  const list = await shoppingModel.find({});
+  var ids = []
+  for (let i = 0; i < list.length; i++) {
+    let logo = (list[i].logo + commons.watermark)
+    let imgList = list[i].imgList;
+    imgList = JSON.parse(JSON.stringify(imgList))
+    for (let j = 0; j < imgList.length; j++) {
+      let imgItem = imgList[j];
+      let imgs = imgItem.split('?');
+      let first = imgs[0]
+      imgList[j] = (first + commons.watermark)
+    }
+    await shoppingModel.findOneAndUpdate({ id: list[i].id }, {
+      logo,
+      imgList
+    })
+    ids.push(list[i].id)
+    console.log(list[i].id);
+  }
+  ctx.body = commons.jsonBack(1, { total: ids.length, ids }, "操作成功！");
+})
+
 
 module.exports = router
