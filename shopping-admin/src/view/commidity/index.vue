@@ -37,6 +37,7 @@
     <el-button type="primary" @click="openBathExport" size="mini">批量上传</el-button>
     <el-button type="primary" @click="batchMove" size="mini">批量移动</el-button>
     <el-button type="primary" @click="bathSetAdd" size="mini">批量设置增加量</el-button>
+    <el-button type="primary" @click="bathSetPriceModel" size="mini">批量设置价格</el-button>
     <el-button type="primary" @click="toSort" size="mini">排序</el-button>
     <el-button type="primary" @click="selectAll" size="mini">全选</el-button>
     <el-button type="primary" @click="reverseSelect" size="mini">反选</el-button>
@@ -133,6 +134,28 @@
         <el-button type="primary" @click="submitAddSet">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      title="批量设置价格"
+      :visible.sync="batchSetPriceVisible"
+      width="350px">
+      <div>
+        <el-form ref="form" label-width="80px" :model="bathPriceForm">
+          <el-form-item label="原价">
+            <el-input v-model="bathPriceForm.originPrice"></el-input>
+          </el-form-item>
+          <el-form-item label="优惠价">
+            <el-input v-model="bathPriceForm.presentPrice"></el-input>
+          </el-form-item>
+          <el-form-item label="实际价格">
+            <el-input v-model="bathPriceForm.overPrice"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="batchSetPriceVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitPriceSet">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -143,7 +166,8 @@
     getClassifyList,
     bathExportCommodity,
     batchMoveCommdity,
-    commodityAddition
+    commodityAddition,
+    bathSetPrice,
   } from '@/api/request'
 
   export default {
@@ -201,7 +225,13 @@
         batchSetAddForm: {
           addSaleNum: "",
           addConsultNum: "",
-        }
+        },
+        batchSetPriceVisible: false,
+        bathPriceForm: {
+          originPrice: "",
+          presentPrice: "",
+          overPrice: "",
+        },
       }
     },
     mounted() {
@@ -275,7 +305,7 @@
             cancelButtonText: '取消',
             type: 'warning'
           }).then(() => {
-            deleCommodity({ id: arr }).then(res => {
+            deleCommodity({id: arr}).then(res => {
               if (res.code === 1) {
                 this.$message.success(res.mess)
                 this.getList()
@@ -320,7 +350,7 @@
         }
       },
       submitBatchMove() {
-        var param = { ids: this.selectArr }
+        var param = {ids: this.selectArr}
         if (this.batchMoveValue.length > 0) {
           param.classifyId = this.batchMoveValue[this.batchMoveValue.length - 1]
         }
@@ -352,8 +382,8 @@
           }
         });
         this.selectArr = arr
-        if (arr.length < 0) {
-          this.$message.error("请选择")
+        if (arr.length <= 0) {
+          this.$message.info("请选择")
           return
         }
         this.batchSetAddVisible = true;
@@ -363,19 +393,59 @@
         }
       },
       submitAddSet() {
-        var param = { ids: this.selectArr }
+        var param = {ids: this.selectArr}
         this.batchSetAddForm.addSaleNum ? param.addSaleNum = this.batchSetAddForm.addSaleNum : "";
         this.batchSetAddForm.addConsultNum ? param.addConsultNum = this.batchSetAddForm.addConsultNum : "";
         commodityAddition(param).then(res => {
+          this.batchSetAddVisible = false;
           if (res.code === 1) {
             this.$message.success(res.mess)
-            this.batchSetAddVisible = false;
             this.getList()
           } else {
             this.$message.error(res.mess)
           }
         }).catch(res => {
+          this.batchSetAddVisible = false;
           this.$message.error("操作失败")
+        })
+      },
+      bathSetPriceModel() {
+        var arr = []
+        this.commodityList.forEach(v => {
+          if (v.checked) {
+            arr.push(v.id)
+          }
+        });
+        this.selectArr = arr;
+        if (arr.length <= 0) {
+          this.$message.info("请选择")
+          return
+        }
+        this.batchSetPriceVisible = true;
+        this.bathPrice = 0;
+      },
+      submitPriceSet() {
+        var param = {
+          ids: this.selectArr,
+          originPrice: this.bathPriceForm.originPrice,
+          presentPrice: this.bathPriceForm.presentPrice,
+          overPrice: this.bathPriceForm.overPrice,
+        }
+        if (!this.bathPriceForm.originPrice || !this.bathPriceForm.originPrice || !this.bathPriceForm.originPrice) {
+          this.$message.info("参数错误")
+          return
+        }
+        bathSetPrice(param).then(res => {
+          this.batchSetPriceVisible = false;
+          if (res.code === 1) {
+            this.$message.success(res.mess)
+            this.getList();
+          } else {
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+          this.batchSetPriceVisible = false;
+          this.$message.error("操作失败");
         })
       }
     }

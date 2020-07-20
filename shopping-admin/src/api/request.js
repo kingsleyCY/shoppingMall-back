@@ -169,6 +169,14 @@ export function commodityAddition(param) {
   })
 }
 
+export function bathSetPrice(param) {
+  return instance({
+    url: '/admin/commodity/bathSetPrice',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getCustomer(param) {
   return instance({
     url: '/admin/userList/getCustomer',

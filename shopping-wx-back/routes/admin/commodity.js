@@ -242,5 +242,23 @@ router.post('/commodityAddition', async (ctx) => {
   ctx.body = commons.jsonBack(1, {}, "操作成功！");
 })
 
+/* 修改商品价格 */
+/*
+* param：ids originPrice presentPrice overPrice
+* */
+router.post('/bathSetPrice', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['ids', 'originPrice', 'presentPrice', 'overPrice'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  await shoppingModel.updateMany({ id: { $in: param.ids } }, {
+    overPrice: param.price,
+    originPrice: param.originPrice,
+    presentPrice: param.presentPrice,
+    overPrice: param.overPrice,
+  });
+  ctx.body = commons.jsonBack(1, {}, "操作成功！");
+})
+
 
 module.exports = router
