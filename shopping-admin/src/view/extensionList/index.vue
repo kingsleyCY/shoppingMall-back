@@ -45,6 +45,14 @@
         </template>
       </el-table-column>
       <el-table-column
+        prop="qrCode"
+        label="qrCode"
+        min-width="100">
+        <template slot-scope="scope">
+          <img :src="common.addExtensionn(scope.row.qrCode,scope.row.phoneNumber)" v-image>
+        </template>
+      </el-table-column>
+      <el-table-column
         fixed="right"
         label="操作"
         width="120">

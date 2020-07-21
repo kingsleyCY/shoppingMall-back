@@ -78,5 +78,20 @@ class baseCommon {
       return ""
     }
   }
+  addExtensionn(qrCode, phoneNumber) {
+    let relativeSrc = qrCode.replace("http://lioncc.oss-cn-beijing.aliyuncs.com/", "");
+    relativeSrc += "?x-oss-process=image/resize,P_30";
+    relativeSrc = new Buffer(relativeSrc).toString('base64');
+    relativeSrc = relativeSrc.replace(/\//g, "_");
+    relativeSrc = relativeSrc.replace(/\+/g, "-");
+
+    let relativeNum = phoneNumber;
+    relativeNum = new Buffer(relativeNum).toString('base64');
+    relativeNum = relativeNum.replace(/\//g, "_");
+    relativeNum = relativeNum.replace(/\+/g, "-");
+
+    let src = ("https://lioncc.oss-cn-beijing.aliyuncs.com/shop/config/extension.png?x-oss-process=image/watermark,image_" + relativeSrc + ",g_sw,x_150,y_240/watermark,text_" + relativeNum + ",color_000000,size_18,g_sw,x_2,y_5")
+    return src
+  }
 }
 module.exports = new baseCommon()
