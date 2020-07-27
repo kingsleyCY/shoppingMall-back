@@ -69,6 +69,17 @@
       <div style="height: 100%;padding: 15px;">
         <el-tabs v-model="activeName">
           <el-tab-pane label="下线列表" name="first">
+            <div class="detail">
+              <span>
+                手机号：{{detailItem?detailItem.phoneNumber:""}}
+              </span>
+              <span>
+                总数：{{detailTable.length}}
+              </span>
+              <span>
+                活跃过用户数：{{notSameNum}}
+              </span>
+            </div>
             <el-table :data="detailTable" border style="width: 100%">
               <el-table-column
                 prop="date"
@@ -85,8 +96,13 @@
               </el-table-column>
               <el-table-column
                 prop="recommendId"
-                label="推荐人手机号"
+                label="最后活动时间"
                 min-width="180">
+                <template slot-scope="scope">
+                  <span :class="[scope.row.lastActTime === scope.row.created_time?'same':'not-same']">
+                    {{common.timeTransfer(scope.row.lastActTime)}}
+                  </span>
+                </template>
               </el-table-column>
             </el-table>
           </el-tab-pane>
@@ -108,6 +124,7 @@
         activeName: "first",
         drawer: false,
         detailItem: null,
+        notSameNum: 0,
       }
     },
     mounted() {
@@ -150,6 +167,13 @@
         getCustomer(param).then(res => {
           if (res.code === 1) {
             this.detailTable = res.data.list;
+            let notSameNum = 0;
+            this.detailTable.forEach(v => {
+              if (v.lastActTime !== v.created_time) {
+                ++notSameNum
+              }
+            })
+            this.notSameNum = notSameNum;
           } else {
             this.detailTable = [];
           }
@@ -167,5 +191,16 @@
       display: block;
       width: 80px;
     }
+    .not-same {
+      font-weight: bold;
+      color: black;
+    }
+  }
+  .detail {
+    padding-bottom: 10px;
+  }
+  .detail > span {
+    display: inline-block;
+    padding-right: 15px;
   }
 </style>

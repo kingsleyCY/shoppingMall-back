@@ -56,10 +56,18 @@ router.post('/getAgentDetail', async (ctx) => {
       setting: false,
     }
   } else if (userItem.extenId) {
-    let userlist = await userModel.find({ recommendId: userItem.phoneNumber })
+    let userlist = await userModel.find({ recommendId: userItem.phoneNumber });
+    let extenList = userlist.filter(v => {
+      return v.extenId === 1
+    });
+    let extensionList = [];
+    for (let i = 0; i < extenList.length; i++) {
+      let childextensionList = await userModel.find({ recommendId: extenList[i].phoneNumber });
+      extensionList = [...extensionList, ...childextensionList]
+    }
     obj = {
       type: "extension",
-      extensionNum: userlist.length, // 推广人数
+      extensionNum: userlist.length + extensionList.length, // 推广人数
       setting: false,
     }
   } else {
