@@ -57,17 +57,19 @@ router.post('/getAgentDetail', async (ctx) => {
     }
   } else if (userItem.extenId) {
     let userlist = await userModel.find({ recommendId: userItem.phoneNumber });
-    /*let extenList = userlist.filter(v => {
-      return v.extenId === 1
-    });
-    let extensionList = [];
-    for (let i = 0; i < extenList.length; i++) {
-      let childextensionList = await userModel.find({ recommendId: extenList[i].phoneNumber });
-      extensionList = [...extensionList, ...childextensionList]
-    }*/
+    userlist = JSON.parse(JSON.stringify(userlist));
+    let list = [];
+    userlist.forEach(v => {
+      let item = userlist.filter(vs => {
+        return vs.created_time === v.created_time
+      });
+      if (item.length === 1) {
+        list.unshift(v)
+      }
+    })
     obj = {
       type: "extension",
-      extensionNum: userlist.length, // 推广人数
+      extensionNum: list.length, // 推广人数
       setting: false,
     }
   } else {
@@ -140,6 +142,25 @@ router.post('/applyExtract', async (ctx) => {
   }
   var extractItem = await extractModel.create(extractObj)
   ctx.body = commons.jsonBack(1, extractItem, "申请成功!");
+})
+
+/* 结算之前用户 */
+/*
+* params: userId price
+*
+* */
+router.post('/setExtenClose', async (ctx) => {
+  var param = ctx.request.body;
+  if (!commons.judgeParamExists(['userId', 'price'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var userItem = await userModel.findOne({ userId: param.userId })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"))
+  }
+
+
+  ctx.body = commons.jsonBack(1, {}, "申请成功!");
 })
 
 async function getAgentdata(userItem) {

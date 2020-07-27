@@ -61,7 +61,27 @@ router.post('/getCustomer', async (ctx) => {
     // ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
   if (param.listType === "extension" || param.listType === "extensioned") {
-    const list = await userModel.find(obj).sort({ '_id': -1 })
+    let userlist = await userModel.find(obj).sort({ '_id': -1 });
+    userlist = JSON.parse(JSON.stringify(userlist));
+    let list = [];
+    userlist.forEach(v => {
+      let item = userlist.filter(vs => {
+        return vs.created_time === v.created_time
+      });
+      if (item.length === 1) {
+        list.unshift(v)
+      }
+    })
+    /*let list = [];
+    userlist.forEach(v => {
+      let item = list.filter(vs => {
+        return vs.created_time === v.created_time
+      })[0];
+      if (!item) {
+        list.unshift(v)
+      }
+    })*/
+
     ctx.body = commons.jsonBack(1, {
       list,
       total: list.length

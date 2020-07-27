@@ -19,8 +19,15 @@ var userSchema = new mongoose.Schema({
   exten_time: { type: Number, default: 0 }, // 成为推广时间
 
   mark: { type: String, default: "" }, // 备注
-
+  userSettlement: { type: Object, default: {} }, // 用户结算信息
 }, { collection: "userList", versionKey: false });
 var userModel = db.model("userList", userSchema);
 
 exports.userModel = userModel
+
+/* userSettlement说明 */
+/*
+* extenStatus true/false 推广被结算
+*
+*
+* */

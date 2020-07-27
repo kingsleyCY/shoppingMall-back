@@ -3,7 +3,7 @@
     <div class="search-header">
       <el-form :inline="true" :model="formInline" class="demo-form-inline" size="mini">
         <el-form-item label="手机号">
-          <el-input clearable v-model="formInline.phoneNumber" placeholder="手机号"></el-input>
+          <el-input clearable v-model="formInline.phoneNumber" placeholder="手机号" @keyup.enter.native="onSubmit"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSubmit">查询</el-button>
