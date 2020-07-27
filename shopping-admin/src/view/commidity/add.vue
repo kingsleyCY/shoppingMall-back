@@ -127,8 +127,8 @@
           canMoveBox: true,
           autoCrop: true,
           // 只有自动截图开启 宽度高度才生效
-          autoCropWidth: 375,
-          autoCropHeight: 234,
+          autoCropWidth: 375 * 1.3,
+          autoCropHeight: 234 * 1.3,
           /*autoCropWidth: 750,
           autoCropHeight: 468,*/
           centerBox: true,
@@ -170,9 +170,8 @@
     created() {
       this.client = new OSS({
         region: "oss-cn-beijing",
-        accessKeyId: "LTAItgsu4ay1NGxG",
-        accessKeySecret: "jghqG85XZnvMs0u2vvgejo7DLuGV2b",
-        // stsToken: oss_obj.SecurityToken,
+        accessKeyId: this.common.accessKeyId,
+        accessKeySecret: this.common.accessKeySecret,
         bucket: "lioncc",
       });
       this.getClassifyList();

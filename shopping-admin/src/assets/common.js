@@ -1,3 +1,5 @@
+var appData = require('../data.json')//加载本地数据文件
+
 class baseCommon {
   constructor() {
     this.orderStatusArr = [
@@ -45,7 +47,10 @@ class baseCommon {
         label: "申请售后",
         value: "applyAfter"
       }
-    ]
+    ];
+    for (let key in appData) {
+      this[key] = appData[key]
+    }
   }
   /* 时间戳转换成时间格式 */
   timeTransfer(data, arr) {
