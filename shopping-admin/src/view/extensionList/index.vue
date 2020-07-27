@@ -17,12 +17,17 @@
       <el-table-column
         prop="phoneNumber"
         label="手机号"
-        min-width="180">
+        min-width="150">
+      </el-table-column>
+      <el-table-column
+        prop="mark"
+        label="备注"
+        min-width="150">
       </el-table-column>
       <el-table-column
         prop="recommendId"
         label="推荐人手机号"
-        min-width="180">
+        min-width="150">
       </el-table-column>
       <el-table-column
         prop="agentId"

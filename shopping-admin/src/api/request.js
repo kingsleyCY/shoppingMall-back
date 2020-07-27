@@ -193,6 +193,14 @@ export function getProxy(param) {
   })
 }
 
+export function setMark(param) {
+  return instance({
+    url: '/admin/userList/setMark',
+    method: 'post',
+    data: param
+  })
+}
+
 export function setQrcode(param) {
   return instance({
     url: '/admin/userList/setQrcode',

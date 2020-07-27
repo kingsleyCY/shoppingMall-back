@@ -24,12 +24,17 @@
         <el-table-column
           prop="phoneNumber"
           label="手机号"
-          min-width="180">
+          min-width="150">
+        </el-table-column>
+        <el-table-column
+          prop="mark"
+          label="备注"
+          min-width="150">
         </el-table-column>
         <el-table-column
           prop="recommendId"
           label="推荐人手机号"
-          min-width="180">
+          min-width="150">
         </el-table-column>
         <el-table-column
           prop="integral"
@@ -64,6 +69,7 @@
                        @click="setQrcode(scope.row.userId,2)">
               生成推广
             </el-button>
+            <el-button type="text" size="small" @click="openSetMarkModel(scope.row)">修改备注</el-button>
             <el-button type="text" size="small" @click="toDetail(scope.row)">查看详情</el-button>
           </template>
         </el-table-column>
@@ -164,11 +170,23 @@
         </div>
       </div>
     </el-drawer>
+    <el-dialog
+      title="提示"
+      :visible.sync="markVisible"
+      width="30%">
+      <div>
+        <el-input v-model="markInput" placeholder="请输入备注"></el-input>
+      </div>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="markVisible = false">取 消</el-button>
+    <el-button type="primary" @click="submitMark">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { getCustomer, setQrcode, getOrderList } from "@/api/request"
+  import { getCustomer, setQrcode, getOrderList, setMark } from "@/api/request"
 
   export default {
     name: "userList",
@@ -194,6 +212,8 @@
           page: 1,
         },
         loading: false,
+        markVisible: false,
+        markInput: "",
       }
     },
     mounted() {
@@ -245,7 +265,7 @@
           type: 'warning'
         }).then(() => {
           this.loading = true
-          setQrcode({id, type}).then(res => {
+          setQrcode({ id, type }).then(res => {
             this.loading = false
             if (res.code === 1) {
               this.$message.success(res.mess)
@@ -292,6 +312,29 @@
         this.orderPage.page = val
         this.getOrderList()
       },
+      openSetMarkModel(row) {
+        this.markVisible = true;
+        this.detailItem = row;
+        this.markInput = row.mark || "";
+      },
+      submitMark() {
+        let param = {
+          userId: this.detailItem.userId,
+          mark: this.markInput,
+        }
+        setMark(param).then(res => {
+          this.markVisible = false;
+          if (res.code === 1) {
+            this.$message.success("操作成功！")
+            this.getCustomerMethods();
+          } else {
+            this.$message.error(res.msg)
+          }
+        }).catch(res => {
+          this.markVisible = false;
+          this.$message.error("操作失败")
+        })
+      }
     }
   }
 </script>

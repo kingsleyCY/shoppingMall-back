@@ -256,6 +256,20 @@ router.post('/getProxy', async (ctx) => {
   ctx.body = commons.jsonBack(1, list, "获取数据成功");
 })
 
+/* 修改用户备注 */
+/*
+* param: userId、mark
+* */
+router.post('/setMark', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['userId', 'mark'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  let userItem = await userModel.findOneAndUpdate({ userId: param.userId }, { mark: param.mark }, { new: true });
+
+  ctx.body = commons.jsonBack(1, userItem, "获取数据成功");
+})
+
 async function getAccesstoken() {
   var content = qs.stringify({
     appid: commons.wx_appid,

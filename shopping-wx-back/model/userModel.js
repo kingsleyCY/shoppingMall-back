@@ -18,6 +18,8 @@ var userSchema = new mongoose.Schema({
   extenId: { type: Number, default: 0 }, // 是否为推广
   exten_time: { type: Number, default: 0 }, // 成为推广时间
 
+  mark: { type: String, default: "" }, // 备注
+
 }, { collection: "userList", versionKey: false });
 var userModel = db.model("userList", userSchema);
 
