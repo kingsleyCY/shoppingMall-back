@@ -64,27 +64,38 @@ router.post('/getCustomer', async (ctx) => {
     let userlist = await userModel.find(obj).sort({ '_id': -1 });
     userlist = JSON.parse(JSON.stringify(userlist));
     let list = [];
-    userlist.forEach(v => {
-      let item = userlist.filter(vs => {
-        return vs.created_time === v.created_time
-      });
-      if (item.length === 1) {
-        list.unshift(v)
+
+    if (param.listType === "extension") {
+      list = userlist;
+      for (let i = 0; i < list.length; i++) {
+        let childList = await userModel.find({ recommendId: list[i].phoneNumber }).sort({ '_id': -1 });
+        childList = JSON.parse(JSON.stringify(childList));
+        let reCildList = []
+        childList.forEach(v => {
+          let item = childList.filter(vs => {
+            return vs.created_time === v.created_time
+          });
+          if (item.length === 1) {
+            reCildList.push(v)
+          }
+        })
+        list[i].childExtenNum = reCildList.length;
       }
-    })
-    /*let list = [];
-    userlist.forEach(v => {
-      let item = list.filter(vs => {
-        return vs.created_time === v.created_time
-      })[0];
-      if (!item) {
-        list.unshift(v)
-      }
-    })*/
+    } else if (param.listType === "extensioned") {
+      userlist.forEach(v => {
+        let item = userlist.filter(vs => {
+          return vs.created_time === v.created_time
+        });
+        if (item.length === 1) {
+          list.push(v)
+        }
+      })
+    }
 
     ctx.body = commons.jsonBack(1, {
       list,
-      total: list.length
+      total: list.length,
+      allTotal: userlist.length
     }, "获取数据成功");
   } else {
     if (param.phoneNumber) {

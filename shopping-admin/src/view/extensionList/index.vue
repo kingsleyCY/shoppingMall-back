@@ -30,9 +30,9 @@
         min-width="150">
       </el-table-column>
       <el-table-column
-        prop="agentId"
-        label="级别"
-        min-width="100">
+        prop="childExtenNum"
+        label="推广人数"
+        min-width="80">
       </el-table-column>
       <el-table-column
         label="最后活动时间"
@@ -79,10 +79,13 @@
                 手机号：{{detailItem?detailItem.phoneNumber:""}}
               </span>
               <span>
-                总数：{{detailTable.length}}
+                实际总数：{{detailTable.length}}
               </span>
               <span>
                 活跃过用户数：{{notSameNum}}
+              </span>
+              <span>
+                总数：{{allTotal}}
               </span>
             </div>
             <el-table :data="detailTable" border style="width: 100%">
@@ -130,6 +133,7 @@
         drawer: false,
         detailItem: null,
         notSameNum: 0,
+        allTotal: 0,
       }
     },
     mounted() {
@@ -172,6 +176,7 @@
         getCustomer(param).then(res => {
           if (res.code === 1) {
             this.detailTable = res.data.list;
+            this.allTotal = res.data.allTotal;
             let notSameNum = 0;
             this.detailTable.forEach(v => {
               if (v.lastActTime !== v.created_time) {

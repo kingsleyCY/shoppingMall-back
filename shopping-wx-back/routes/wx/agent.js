@@ -64,7 +64,7 @@ router.post('/getAgentDetail', async (ctx) => {
         return vs.created_time === v.created_time
       });
       if (item.length === 1) {
-        list.unshift(v)
+        list.push(v)
       }
     })
     obj = {
