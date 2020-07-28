@@ -63,7 +63,7 @@ router.post('/getAgentDetail', async (ctx) => {
       let item = userlist.filter(vs => {
         return vs.created_time === v.created_time
       });
-      if (item.length === 1) {
+      if (item.length === 1 && (!item.userSettlement || !item.userSettlement.extenStatus)) {
         list.push(v)
       }
     })

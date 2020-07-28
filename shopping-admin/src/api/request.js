@@ -217,6 +217,22 @@ export function getProxyOrder(param) {
   })
 }
 
+export function closeExtened(param) {
+  return instance({
+    url: '/admin/userList/closeExtened',
+    method: 'post',
+    data: param
+  })
+}
+
+export function closeExtenedLog(param) {
+  return instance({
+    url: '/admin/userList/closeExtenedLog',
+    method: 'post',
+    data: param
+  })
+}
+
 export function creatActivity(param) {
   return instance({
     url: '/admin/activity/creatActivity',

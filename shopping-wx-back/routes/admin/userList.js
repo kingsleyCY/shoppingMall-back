@@ -53,51 +53,60 @@ router.post('/getCustomer', async (ctx) => {
   } else if (param.listType === "recommend") {
     var userItem = await userModel.findOne({ userId: param.id })
     obj.recommendId = userItem.phoneNumber
-  } else if (param.listType === "extension") {
-    obj.extenId = 1
-  } else if (param.listType === "extensioned") {
-    var userItem = await userModel.findOne({ userId: param.id })
-    obj.recommendId = userItem.phoneNumber
   } else {
-    // ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
   }
+  /*else if (param.listType === "extension") {
+      obj.extenId = 1
+    } else if (param.listType === "extensioned") {
+       var userItem = await userModel.findOne({ userId: param.id })
+       obj.recommendId = userItem.phoneNumber;
+     } */
   if (param.listType === "extension" || param.listType === "extensioned") {
-    let userlist = await userModel.find(obj).sort({ '_id': -1 });
-    userlist = JSON.parse(JSON.stringify(userlist));
     let list = [];
-
     if (param.listType === "extension") {
-      list = userlist;
+      let userlist = await userModel.find({ extenId: 1 }).sort({ exten_time: -1 });
+      list = JSON.parse(JSON.stringify(userlist));
       for (let i = 0; i < list.length; i++) {
-        let childList = await userModel.find({ recommendId: list[i].phoneNumber }).sort({ '_id': -1 });
+        let childList = await userModel.find({
+          recommendId: list[i].phoneNumber,
+          "userSettlement.extenStatus": { '$ne': true }
+        }).sort({ '_id': -1 });
         childList = JSON.parse(JSON.stringify(childList));
         let reCildList = []
         childList.forEach(v => {
           let item = childList.filter(vs => {
             return vs.created_time === v.created_time
           });
-          if (item.length === 1) {
+          if (item.length === 1 && (!item.userSettlement || !item.userSettlement.extenStatus)) {
             reCildList.push(v)
           }
         })
         list[i].childExtenNum = reCildList.length;
       }
+      ctx.body = commons.jsonBack(1, {
+        list,
+        total: list.length
+      }, "获取数据成功");
     } else if (param.listType === "extensioned") {
+      let userItem = await userModel.findOne({ userId: param.id })
+      let userlist = await userModel.find({
+        recommendId: userItem.phoneNumber,
+        "userSettlement.extenStatus": { '$ne': true }
+      }).sort({ '_id': -1 });
       userlist.forEach(v => {
         let item = userlist.filter(vs => {
           return vs.created_time === v.created_time
         });
-        if (item.length === 1) {
+        if (item.length === 1 && (!item.userSettlement || !item.userSettlement.extenStatus)) {
           list.push(v)
         }
       })
+      ctx.body = commons.jsonBack(1, {
+        list,
+        total: list.length,
+        allTotal: userlist.length
+      }, "获取数据成功");
     }
-
-    ctx.body = commons.jsonBack(1, {
-      list,
-      total: list.length,
-      allTotal: userlist.length
-    }, "获取数据成功");
   } else {
     if (param.phoneNumber) {
       const reg = new RegExp(param.phoneNumber, 'i') //不区分大小写
@@ -361,6 +370,24 @@ router.post('/closeExtened', async (ctx) => {
     notcloselist: notcloselist
   })
   ctx.body = commons.jsonBack(1, item, "获取数据成功");
+})
+
+/* 推广结算记录 */
+/*
+* param: userId
+* */
+router.post('/closeExtenedLog', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
+  }
+  var userItem = await userModel.findOne({ userId: param.userId })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"));
+  }
+  let logList = await extenCloseModel.find({ userId: param.userId });
+
+  ctx.body = commons.jsonBack(1, logList, "获取数据成功");
 })
 
 async function getAccesstoken() {

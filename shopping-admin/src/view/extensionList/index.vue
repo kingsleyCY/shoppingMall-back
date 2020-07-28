@@ -11,7 +11,7 @@
         label="日期"
         width="100">
         <template slot-scope="scope">
-          {{common.timeTransfer(scope.row.created_time)}}
+          {{common.timeTransfer(scope.row.exten_time)}}
         </template>
       </el-table-column>
       <el-table-column
@@ -63,6 +63,7 @@
         width="120">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="toDetail(scope.row)">查看详情</el-button>
+          <el-button type="text" size="small" @click="closeExtenMethods(scope.row)">结算</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -72,7 +73,7 @@
       :visible.sync="drawer"
       :with-header="false" custom-class="auto-drawer">
       <div style="height: 100%;padding: 15px;">
-        <el-tabs v-model="activeName">
+        <el-tabs v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="下线列表" name="first">
             <div class="detail">
               <span>
@@ -114,6 +115,36 @@
               </el-table-column>
             </el-table>
           </el-tab-pane>
+          <el-tab-pane label="提款记录" name="second">
+            <el-table :data="logTable" border style="width: 100%">
+              <el-table-column
+                prop="date"
+                label="日期"
+                min-width="180">
+                <template slot-scope="scope">
+                  {{common.timeTransfer(scope.row.created_time)}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="closeNum"
+                label="结算人数"
+                min-width="180">
+              </el-table-column>
+              <el-table-column
+                prop="notcloseNum"
+                label="未结算人数"
+                min-width="180">
+              </el-table-column>
+              <!--<el-table-column
+                label="结算手机号"
+                min-width="180">
+                <template slot-scope="scope">
+                  {{scope.row.closelist.join("、")}}
+                </template>
+              </el-table-column>-->
+
+            </el-table>
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-drawer>
@@ -121,7 +152,7 @@
 </template>
 
 <script>
-  import { getCustomer } from "@/api/request"
+  import { getCustomer, closeExtened, closeExtenedLog } from "@/api/request"
 
   export default {
     name: "proxyList",
@@ -129,6 +160,7 @@
       return {
         tableData: [],
         detailTable: [],
+        logTable: [],
         activeName: "first",
         drawer: false,
         detailItem: null,
@@ -161,10 +193,40 @@
           this.tableData = [];
         })
       },
+      closeExtenMethods(row) {
+        this.$confirm('确认清算当前推广', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          closeExtened({
+            userId: row.userId
+          }).then(res => {
+            if (res.code === 1) {
+              this.$message.success("操作成功！")
+              this.getCustomerMethods()
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(res => {
+            this.$message.error("操作失败！")
+          })
+        }).catch(() => {
+
+        });
+      },
       toDetail(row) {
         this.drawer = true;
-        this.detailItem = row
-        this.getRecommDetail()
+        this.detailItem = row;
+        this.activeName = "first";
+        this.getRecommDetail();
+      },
+      handleClick() {
+        if (this.activeName === "first") {
+          this.getRecommDetail()
+        } else if (this.activeName = "second") {
+          this.getCloseExtenLog()
+        }
       },
       getRecommDetail() {
         let param = {
@@ -184,6 +246,20 @@
               }
             })
             this.notSameNum = notSameNum;
+          } else {
+            this.detailTable = [];
+          }
+        }).catch(res => {
+          this.detailTable = [];
+        })
+      },
+      getCloseExtenLog() {
+        let param = {
+          userId: this.detailItem.userId
+        }
+        closeExtenedLog(param).then(res => {
+          if (res.code === 1) {
+            this.logTable = res.data;
           } else {
             this.detailTable = [];
           }
