@@ -9,6 +9,7 @@ const md5 = require("md5");
 const { userModel } = require('../../model/userModel');
 const { orderModel } = require('../../model/admin/orderModel');
 const { agentModel } = require('../../model/admin/agentModel');
+const { extenCloseModel } = require('../../model/admin/extenCloseModel');
 
 /* 登录 admin */
 /*
@@ -299,6 +300,67 @@ router.post('/setMark', async (ctx) => {
   let userItem = await userModel.findOneAndUpdate({ userId: param.userId }, { mark: param.mark }, { new: true });
 
   ctx.body = commons.jsonBack(1, userItem, "获取数据成功");
+})
+
+/* 结算推广 */
+/*
+* param: userId
+* */
+router.post('/closeExtened', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['userId'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"));
+  }
+  var userItem = await userModel.findOne({ userId: param.userId })
+  if (!userItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到此用户"));
+  }
+  let userlist = await userModel.find({ recommendId: userItem.phoneNumber });
+  userlist = JSON.parse(JSON.stringify(userlist));
+  let notCloseList = userlist.filter(v => {
+    return !v.userSettlement || !v.userSettlement.extenStatus
+  });
+  if (notCloseList.length === 0) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "此用户无代理可结算！"));
+  }
+  let canCloseList = [];
+  let cantCloseList = [];
+  notCloseList.forEach(v => {
+    let item = notCloseList.filter(vs => {
+      return vs.created_time === v.created_time
+    });
+    if (item.length === 1) {
+      canCloseList.push(v)
+    } else {
+      cantCloseList.push(v)
+    }
+  });
+  let closelist = [];
+  for (let i = 0; i < canCloseList.length; i++) {
+    await userModel.findOneAndUpdate({ phoneNumber: canCloseList[i].phoneNumber }, {
+      "userSettlement.extenStatus": true
+    }, { new: true });
+    closelist.push(canCloseList[i].phoneNumber);
+  }
+  let notcloselist = [];
+  for (let i = 0; i < cantCloseList.length; i++) {
+    await userModel.findOneAndUpdate({ phoneNumber: cantCloseList[i].phoneNumber }, {
+      "userSettlement.extenStatus": true
+    }, { new: true });
+    notcloselist.push(cantCloseList[i].phoneNumber);
+  }
+
+  let item = await extenCloseModel.create({
+    created_time: Date.parse(new Date()),
+    id: commons.generateIds(),
+    userId: param.userId,
+    price: param.price || 1.5,
+    closeNum: canCloseList.length,
+    closelist: closelist,
+    notcloseNum: cantCloseList.length,
+    notcloselist: notcloselist
+  })
+  ctx.body = commons.jsonBack(1, item, "获取数据成功");
 })
 
 async function getAccesstoken() {
