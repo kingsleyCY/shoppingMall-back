@@ -346,7 +346,7 @@ router.post('/closeExtened', async (ctx) => {
   });
   let closelist = [];
   for (let i = 0; i < canCloseList.length; i++) {
-    await userModel.findOneAndUpdate({ phoneNumber: canCloseList[i].phoneNumber }, {
+    let item = await userModel.findOneAndUpdate({ phoneNumber: canCloseList[i].phoneNumber }, {
       "userSettlement.extenStatus": true
     }, { new: true });
     closelist.push(canCloseList[i].phoneNumber);
