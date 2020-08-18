@@ -451,7 +451,7 @@
           if (res.code === 1) {
             this.$message.success(res.mess);
             var obj = {
-              created_time: common.timeTransfer(row.created_time),
+              created_time: this.common.timeTransfer(row.created_time),
               time_end: row.time_end.slice(0, 4) + "-" + row.time_end.slice(4, 6) + "-" + row.time_end.slice(6, 8) + " " + row.time_end.slice(8, 10) + ":" + row.time_end.slice(10, 12) + ":" + row.time_end.slice(12, 14),
               out_trade_no: row.out_trade_no,
               transaction_id: row.transaction_id,
@@ -607,6 +607,7 @@
         })
       },
       tableToExcel(jsonData, name) {
+        console.log(jsonData);
         //要导出的json数据
         //列标题，逗号隔开，每一个逗号就是隔开一个单元格
         let zhArr = ['订单创建时间', '支付时间', '订单号', '微信订单号', '备注', '尺码', '支付金额', '商品分类名称', '商品名称', '收件人', '地址预留号码', '省', '市', '区', '地址详情', '用户手机号', 'userId'];
