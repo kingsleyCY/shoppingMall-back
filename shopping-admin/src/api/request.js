@@ -305,6 +305,14 @@ export function exportOrder(param) {
   })
 }
 
+export function overOrders(param) {
+  return instance({
+    url: '/admin/order/overOrder',
+    method: 'post',
+    data: param
+  })
+}
+
 export function getCounponList(param) {
   return instance({
     url: '/admin/coupon/getCounponList',

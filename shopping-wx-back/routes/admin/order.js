@@ -183,5 +183,32 @@ router.post('/exportOrder', async (ctx) => {
   }
 })
 
+/* 完成订单 delivered => over */
+/* param: out_trade_no
+ * */
+router.post('/overOrder', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['out_trade_no'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no })
+  if (!orderItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
+  }
+  if (orderItem.orderStatus !== "delivered") {
+    ctx.throw(200, commons.jsonBack(1003, {}, "当前订单不是发货状态"))
+  }
+
+  var orderItems = await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, { orderStatus: "over" }, { new: true });
+  if (!orderItems) {
+    ctx.body = commons.jsonBack(1003, {}, "更新数据失败！");
+  } else {
+    await commons.pushOrderStatusLog(param.out_trade_no, orderItem.orderStatus, "over", {
+      created_time: Date.parse(new Date()),
+    })
+    ctx.body = commons.jsonBack(1, orderItems, "完成订单成功！");
+  }
+})
+
 
 module.exports = router

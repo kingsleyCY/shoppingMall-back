@@ -217,6 +217,12 @@
                        @click="overOrderMethods(scope.row)">
               完成订单
             </el-button>
+            <!--完成订单-->
+            <el-button type="text" size="small"
+                       v-if="scope.row.orderStatus==='delivered'"
+                       @click="overOrdersMethods(scope.row)">
+              完成订单
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -296,7 +302,7 @@
     getOrderList, checkOrderToBus,
     setMail, afterSalesSetMail,
     applyRefound, setExchangeMail,
-    overOrder, applyAfter, exportOrder
+    overOrder, applyAfter, exportOrder, overOrders
   } from "@/api/request"
 
   export default {
@@ -557,6 +563,27 @@
             remark: "完成订单"
           }
           overOrder(param).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.getOrderList();
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(reds => {
+            this.$message.error("操作失败")
+          })
+        })
+      },
+      overOrdersMethods(row) {
+        this.$confirm('确认完成此订单, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var param = {
+            out_trade_no: row.out_trade_no
+          }
+          overOrders(param).then(res => {
             if (res.code === 1) {
               this.$message.success(res.mess)
               this.getOrderList();
