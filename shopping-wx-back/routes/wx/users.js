@@ -115,7 +115,13 @@ router.post("/getCounponList", async (ctx) => {
   }
   var counponList = await couponModel.find({ _id: { $in: userItem.couponList } });
 
-  ctx.body = commons.jsonBack(1, counponList, "获取优惠券信息成功！");
+  var newTime = Date.parse(new Date());
+
+  var nowCounpon = counponList.filter(v => {
+    return !v.timeRange.eTime || (v.timeRange && v.timeRange.eTime && v.timeRange.eTime > newTime)
+  });
+
+  ctx.body = commons.jsonBack(1, nowCounpon, "获取优惠券信息成功！");
   commons.setUserData(param.userId)
 })
 
