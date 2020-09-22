@@ -185,8 +185,8 @@
             } else {
               this.$message.error(res.mess)
             }
-          })
-        })
+          }).catch(res => {})
+        }).catch(res => {})
       },
       submitClassify() {
         if (!this.form.input) {
@@ -206,7 +206,7 @@
             } else {
               this.$message.error(res.mess)
             }
-          })
+          }).catch(res => {})
         } else {
           editClassify({
             title: this.form.input,
@@ -220,13 +220,13 @@
             } else {
               this.$message.error(res.mess)
             }
-          })
+          }).catch(res => {})
         }
       },
       getClassifyList() {
         getClassifyList().then(res => {
           this.treeData = res.data
-        })
+        }).catch(res => {})
       },
       uploadImg(e, num) {
         var that = this;
@@ -273,8 +273,8 @@
               } else {
                 that.$message.error(res.mess)
               }
-            })
-          })
+            }).catch(res => {})
+          }).catch(res => {})
         })
       },
     }

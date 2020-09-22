@@ -75,7 +75,7 @@
             getCommodityList(param).then(res => {
               this.commodityList = res.data.list
               resolve()
-            })
+            }).catch(res => {})
           })
         }
         await new Promise((resolve, reject) => {
@@ -93,7 +93,7 @@
               })
             }
             resolve()
-          })
+          }).catch(res => {})
         })
         this.handleClick()
       },
@@ -161,7 +161,7 @@
           } else {
             this.$message.error(res.mess)
           }
-        })
+        }).catch(res => {})
       }
     }
   }

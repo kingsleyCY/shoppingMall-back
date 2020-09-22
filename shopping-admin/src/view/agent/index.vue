@@ -92,7 +92,7 @@
       getAgentMehtods() {
         getAgent().then(res => {
           this.treeData = res.data
-        })
+        }).catch(res => {})
       },
       addAgentMethods(row, type) {
         if (type === 'add') {
@@ -118,7 +118,7 @@
             } else {
               this.$message.error(res.mess)
             }
-          })
+          }).catch(res => {})
         })
       },
       cancel() {

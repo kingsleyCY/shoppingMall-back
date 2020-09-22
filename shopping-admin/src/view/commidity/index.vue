@@ -269,7 +269,7 @@
       getClassifyList() {
         getClassifyList().then(res => {
           this.treeData = res.data
-        })
+        }).catch(res => {})
       },
       handleSizeChange(val) {
         this.pageData.pageSize = val
@@ -312,8 +312,8 @@
               } else {
                 this.$message.error(res.mess)
               }
-            })
-          })
+            }).catch(res => {})
+          }).catch(res => {})
         } else {
           this.$message.info("请选择")
         }
@@ -331,7 +331,7 @@
         param.append("file", this.bathFile.raw);
         bathExportCommodity(param).then(res => {
           console.log(res);
-        })
+        }).catch(res => {})
       },
 
       batchMove() {
@@ -362,7 +362,7 @@
           } else {
             this.$message.error(res.mess)
           }
-        })
+        }).catch(res => {})
       },
       selectAll() {
         this.commodityList.forEach(item => {

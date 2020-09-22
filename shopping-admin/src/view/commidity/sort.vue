@@ -93,7 +93,7 @@
       getClassifyList() {
         getClassifyList().then(res => {
           this.treeData = res.data;
-        })
+        }).catch(res => {})
       },
       submitSort() {
         this.$confirm('此操作将保存当前排序, 是否继续?', '提示', {
@@ -128,7 +128,7 @@
             this.loading = false
             this.$message.error("操作失败")
           })
-        })
+        }).catch(res => {})
       }
     },
     components: {

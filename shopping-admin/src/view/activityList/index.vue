@@ -285,7 +285,7 @@
           }).catch(res => {
 
           })
-        })
+        }).catch(res => {})
       },
       overActivity(row) {
         overActivity({id: row.id}).then(res => {

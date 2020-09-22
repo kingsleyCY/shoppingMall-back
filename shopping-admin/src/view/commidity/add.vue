@@ -186,20 +186,20 @@
           } else {
             this.$message.error(res.mess)
           }
-        })
+        }).catch(res => {})
       }
     },
     methods: {
       getClassifyList() {
         getClassifyList().then(res => {
           this.treeData = res.data
-        })
+        }).catch(res => {})
       },
       getSizeCollet() {
         getCollet().then(res => {
           this.sizeColletArr = res.data.model
           this.sizeArr = res.data.arr
-        })
+        }).catch(res => {})
       },
       openImgModel(flag) {
         this.dialogVisible = true
@@ -249,7 +249,7 @@
               that.ruleForm.imgList.push(res.url)
             }
             that.beforeClose()
-          })
+          }).catch(res => {})
         })
       },
       deleLogo() {
@@ -294,7 +294,7 @@
             this.loading = false
             this.$message.error(res.mess)
           }
-        })
+        }).catch(res => {})
       },
       cancel() {
         this.$router.push("/admin_html/commidity")

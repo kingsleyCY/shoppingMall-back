@@ -518,7 +518,7 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        })
+        }).catch(res => {})
       },
       openApplyRefoundModel(row) {
         this.refounddialogVisible = true;
@@ -550,7 +550,7 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        })
+        }).catch(res => {})
       },
       overOrderMethods(row) {
         this.$confirm('确认完成此订单, 是否继续?', '提示', {
@@ -572,7 +572,7 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        })
+        }).catch(res => {})
       },
       overOrdersMethods(row) {
         this.$confirm('确认完成此订单, 是否继续?', '提示', {
@@ -593,7 +593,7 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        })
+        }).catch(res => {})
       },
       formSearch() {
         this.pageData.page = 1
