@@ -87,6 +87,41 @@ router.post('/checkOrderToBus', async (ctx) => {
   }
 })
 
+/* 取消订单 undeliver/deliver => canceledOver */
+/* param: out_trade_no、cancelMark
+ * */
+router.post('/canceledOver', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['out_trade_no', 'cancelMark'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  var orderItem = await orderModel.findOne({ out_trade_no: param.out_trade_no })
+  if (!orderItem) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "未查询到订单"))
+  }
+  if (orderItem.orderStatus !== "undeliver" && orderItem.orderStatus !== "deliver") {
+    ctx.throw(200, commons.jsonBack(1003, {}, "当前订单不是待发货状态"))
+  }
+  var res = await commons.applyRefound(param.out_trade_no, orderItem.userId, "订单退款");
+  if (typeof res === "string") {
+    ctx.body = commons.jsonBack(1003, {}, res);
+  } else {
+    if (res.out_refund_no) {
+      await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no }, {
+        cancelMark: param.cancelMark,
+      }, { new: true });
+      await commons.pushOrderStatusLog(param.out_trade_no, orderItem.orderStatus, "refund", {
+        created_time: Date.parse(new Date()),
+      });
+      ctx.body = commons.jsonBack(1, {}, "退款成功！");
+      commons.setUserData(orderItem.userId);
+      backCoupon(orderItem.userId, orderItem);
+    } else {
+      ctx.body = commons.jsonBack(1003, {}, "退款失败！");
+    }
+  }
+})
+
 /* 订单录入快递号 deliver => delivered */
 /* param: out_trade_no、mailOrder、mailRemark
  * */
@@ -210,5 +245,15 @@ router.post('/overOrder', async (ctx) => {
   }
 })
 
+/* 退还优惠券 */
+async function backCoupon(userId, orderItem) {
+  if (orderItem.couponId) {
+    let userItem = JSON.parse(JSON.stringify(await userModel.findOne({ userId })));
+    let couponList = userItem.couponList;
+    couponList.indexOf(orderItem.couponId) >= 0 ? "" : couponList.push(String(orderItem.couponId));
+    await userModel.findOneAndUpdate({ userId }, { couponList })
+    logger.error("返还用户优惠券成功：" + userItem.phoneNumber + "," + String(orderItem.couponId))
+  }
+}
 
 module.exports = router

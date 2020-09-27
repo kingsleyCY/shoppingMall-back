@@ -179,6 +179,11 @@
         <el-table-column fixed="right" label="操作" width="150">
           <template slot-scope="scope">
             <!-- 已收到订单信息联系卖方 -->
+            <el-button type="text" size="small" @click="canncelOrder(scope.row)"
+                       v-if="scope.row.orderStatus === 'undeliver' || scope.row.orderStatus === 'deliver'">
+              取消订单
+            </el-button>
+            <!-- 已收到订单信息联系卖方 -->
             <el-button type="text" size="small" v-if="scope.row.orderStatus==='undeliver'"
                        @click="checkOrderToBus(scope.row)">
               确认订单
@@ -236,7 +241,18 @@
         :total="pageData.total">
       </el-pagination>
     </div>
-    <el-dialog title="物流信息" :visible.sync="maildialogVisible" width="30%">
+    <el-dialog title="取消订单" :visible.sync="canncelVisible" width="30%">
+      <el-form ref="cancelForm" :model="cancelForm" label-width="100px">
+        <el-form-item label="取消订单备注">
+          <el-input v-model.trim="cancelForm.mark"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="canncelVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitCancel">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="物流信息" :visible.sync="maildialogVisible" width="40%">
       <el-form ref="form" :model="mailForm" label-width="80px">
         <el-form-item label="快递单号">
           <el-input v-model.trim="mailForm.mailOrder"></el-input>
@@ -302,7 +318,7 @@
     getOrderList, checkOrderToBus,
     setMail, afterSalesSetMail,
     applyRefound, setExchangeMail,
-    overOrder, applyAfter, exportOrder, overOrders
+    overOrder, applyAfter, exportOrder, overOrders, canceledOver
   } from "@/api/request"
 
   export default {
@@ -316,6 +332,10 @@
           page: 1,
           pageSize: 10,
           total: 0,
+        },
+        canncelVisible: false,
+        cancelForm: {
+          mark: ""
         },
         maildialogVisible: false,
         mailType: "",
@@ -449,6 +469,32 @@
           })
         }
       },
+      canncelOrder(row) {
+        this.cancelForm.mark = "";
+        this.canncelVisible = true;
+        this.checkedItem = row;
+      },
+      submitCancel() {
+        if (!this.cancelForm.mark) {
+          this.$message.error("请填写取消备注")
+          return
+        }
+        canceledOver({
+          out_trade_no: this.checkedItem.out_trade_no,
+          cancelMark: this.cancelForm.mark,
+        }).then(res => {
+          if (res.code === 1) {
+            this.$message.success(res.mess)
+            this.cancelForm.mark = "";
+            this.canncelVisible = false;
+            this.getOrderList();
+          } else {
+            this.$message.error(res.mess)
+          }
+        }).catch(res => {
+          this.$message.error("操作失败")
+        })
+      },
       checkOrderToBus(row) {
         let parm = {
           out_trade_no: row.out_trade_no
@@ -518,7 +564,8 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        }).catch(res => {})
+        }).catch(res => {
+        })
       },
       openApplyRefoundModel(row) {
         this.refounddialogVisible = true;
@@ -550,7 +597,8 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        }).catch(res => {})
+        }).catch(res => {
+        })
       },
       overOrderMethods(row) {
         this.$confirm('确认完成此订单, 是否继续?', '提示', {
@@ -572,7 +620,8 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        }).catch(res => {})
+        }).catch(res => {
+        })
       },
       overOrdersMethods(row) {
         this.$confirm('确认完成此订单, 是否继续?', '提示', {
@@ -593,7 +642,8 @@
           }).catch(reds => {
             this.$message.error("操作失败")
           })
-        }).catch(res => {})
+        }).catch(res => {
+        })
       },
       formSearch() {
         this.pageData.page = 1

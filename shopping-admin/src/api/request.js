@@ -289,6 +289,14 @@ export function checkOrderToBus(param) {
   })
 }
 
+export function canceledOver(param) {
+  return instance({
+    url: '/admin/order/canceledOver',
+    method: 'post',
+    data: param
+  })
+}
+
 export function setMail(param) {
   return instance({
     url: '/admin/order/setMail',
