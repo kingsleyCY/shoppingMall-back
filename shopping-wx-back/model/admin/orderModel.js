@@ -41,6 +41,7 @@ exports.orderModel = orderModel;
 * unrefund 退款失败
 * canceled 取消订单（未付款）
 * applyAfter 申请售后
+* delete 已删除
 * */
 
 /* 金额说明 */

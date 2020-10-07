@@ -17,7 +17,8 @@ router.post('/orderList', async (ctx) => {
   }
   let search = {}
   param.userId ? search.userId = param.userId : "";
-  param.orderStatus ? search.orderStatus = param.orderStatus : "";
+  // param.orderStatus ? search.orderStatus = param.orderStatus : "";
+  param.orderStatus ? search.orderStatus = param.orderStatus : search.orderStatus = { $ne: "delete" };
   param.orderId ? search.out_trade_no = param.orderId : "";
   param.createStime && param.createEtime ? search.created_time = {
     $gte: param.createStime,
@@ -243,6 +244,20 @@ router.post('/overOrder', async (ctx) => {
     })
     ctx.body = commons.jsonBack(1, orderItems, "完成订单成功！");
   }
+})
+
+/* 删除订单 * => delete */
+/* param: out_trade_no[]
+ * */
+router.post('/delOrders', async (ctx) => {
+  var param = JSON.parse(JSON.stringify(ctx.request.body));
+  if (!commons.judgeParamExists(['out_trade_no'], param)) {
+    ctx.throw(200, commons.jsonBack(1003, {}, "参数传递错误"))
+  }
+  for (let i = 0; i < param.out_trade_no.length; i++) {
+    await orderModel.findOneAndUpdate({ out_trade_no: param.out_trade_no[i] }, { orderStatus: "delete" })
+  }
+  ctx.body = commons.jsonBack(1, {}, "删除订单成功！");
 })
 
 /* 退还优惠券 */

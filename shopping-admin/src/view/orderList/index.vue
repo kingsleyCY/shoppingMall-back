@@ -11,6 +11,7 @@
         <el-button type="primary" @click="openMoreSearch" size="mini">更多查询条件</el-button>
         <el-button type="primary" @click="formSearch" size="mini">查询</el-button>
         <el-button type="primary" @click="openExportModel" size="mini">导出表格</el-button>
+        <el-button type="primary" @click="delOrderSubmit" size="mini">删除选中</el-button>
         <el-popover
           placement="right"
           width="600"
@@ -61,7 +62,11 @@
     </div>
     <div class="search-content">
       <el-table
-        :data="orderList" border class="search-table" ref="searchTable" :height="tableHeight" v-loading="loading">
+        :data="orderList" border class="search-table" ref="searchTable" :height="tableHeight" v-loading="loading" @selection-change="handleSelectionChange">
+        <el-table-column
+          type="selection"
+          width="55">
+        </el-table-column>
         <el-table-column
           prop="out_trade_no"
           label="订单ID"
@@ -318,7 +323,7 @@
     getOrderList, checkOrderToBus,
     setMail, afterSalesSetMail,
     applyRefound, setExchangeMail,
-    overOrder, applyAfter, exportOrder, overOrders, canceledOver
+    overOrder, applyAfter, exportOrder, overOrders, canceledOver, delOrders
   } from "@/api/request"
 
   export default {
@@ -365,7 +370,8 @@
         exportForm: {
           orderStatus: "",
           checked: true
-        }
+        },
+        multipleSelection: []
       }
     },
     mounted() {
@@ -708,6 +714,36 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      delOrderSubmit() {
+        this.$confirm('此操作将永久删除该订单, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          console.log(this.multipleSelection);
+          var out_trade_no = this.multipleSelection.map(v => {
+            return v.out_trade_no
+          })
+          var param = {
+            out_trade_no: out_trade_no
+          }
+          delOrders(param).then(res => {
+            if (res.code === 1) {
+              this.$message.success(res.mess)
+              this.pageData.page = 1
+              this.getOrderList()
+            } else {
+              this.$message.error(res.mess)
+            }
+          }).catch(res => {
+            this.$message.error("操作失败")
+          })
+        }).catch(() => {
+        });
       }
     },
     computed: {
