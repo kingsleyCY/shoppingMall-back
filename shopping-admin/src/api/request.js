@@ -6,7 +6,7 @@ var instance
 if (axios) {
   instance = axios.create({
     baseURL: process.env.NODE_ENV === "development" ? "" : "http://119.3.189.240:3000",
-    timeout: 15000
+    timeout: 30000
   });
 }
 instance.interceptors.request.use(config => {
